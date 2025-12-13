@@ -1,0 +1,132 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='banner_action' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+           	
+            if( "insert_banner".equals(cmd) ) 
+            {
+            	executeSQL(cmd, connection, input, output);
+                executeSQL("getIdentity", connection, input, output);
+                
+               
+            }           
+
+            if( "update_banner".equals(cmd) || "delete_banner".equals(cmd) ) 
+            {
+                executeSQL(cmd, connection, input, output);
+                output.put("seq_no", input.get("seq_no"));
+            }    
+
+			if( ("insert_banner".equals(cmd) || "update_banner".equals(cmd)) && input.getCount("file_nm") > 0) 
+            {
+                DataSet fileInfo = new DataSet();                
+                
+                for (int i = 0, ic = input.getCount("file_nm"); i < ic; i++) {
+	                fileInfo.put("file_nm", input.getText("file_nm", i), i);
+	                fileInfo.put("file_path", input.getText("file_path", i), i);
+	                fileInfo.put("file_size", input.getText("file_size", i), i);
+	                fileInfo.put("ext_nm", input.getText("ext_nm", i), i);
+	                fileInfo.put("user_file_nm", input.getText("user_file_nm", i), i);
+	                fileInfo.put("attach_div_cd", input.getText("attach_div_cd"), i);
+	                fileInfo.put("data_no", output.getText("seq_no"), i);
+	                
+	                if (input.getText("file_no").length() > 0 )
+	                   fileInfo.put("cmd", "update", i);
+	                else
+	                   fileInfo.put("cmd", "create", i);
+	            } 
+                executeTxBL("/common/Attach", fileInfo, output); 
+            } 
+  
+
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="insert_banner">
+            <query>
+                <![CDATA[
+                    insert into tb_kabm_banner ( banner_div, use_yn, title, link, reg_ddtm, reg_emp_cd) 
+                    values
+                    (?, ?, ?, ?, getdate(), ?)                     
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>banner_div, use_yn, title, link, reg_emp_cd</setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+
+        <sql id="getIdentity">
+            <query>
+                <![CDATA[
+                    SELECT @@IDENTITY AS 'seq_no'                
+                ]]>
+            </query>
+            <mapping>
+                <setProperty></setProperty>
+                <getProperty>seq_no</getProperty>
+            </mapping>
+        </sql>
+
+
+        <sql id="update_banner">
+            <query>
+                <![CDATA[
+                    update tb_kabm_banner  set banner_div=?, use_yn=?, title=?, link=?, reg_emp_cd=? where seq_no=?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>banner_div, use_yn, title, link, reg_emp_cd,seq_no </setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="delete_banner">
+            <query>
+                <![CDATA[
+                    delete from tb_kabm_banner where seq_no=?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>seq_no </setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+
+        
+
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">   
+            <field name='seq_no'        type='string' size=''/>
+            <field name='banner_div'    type='string' size=''/>
+            <field name='use_yn'        type='string' size=''/>
+            <field name='title'         type='string' size=''/>
+            <field name='link'          type='string' size=''/>             
+            <field name='reg_emp_cd'    type='string' size=''/>
+        </block>
+    </input>
+    
+    <output>
+       <block id='banner_list' name='banner_list' 	repeat=''>
+        	<field name='seq_no' 		type='string' size=''/>
+			<field name='banner_div' 	type='string' size=''/>
+			<field name='use_yn' 		type='string' size=''/>
+			<field name='title' 		type='string' size=''/>
+			<field name='link' 			type='string' size=''/>	
+			<field name='reg_ddtm' 		type='string' size=''/>
+			<field name='reg_emp_cd' 	type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

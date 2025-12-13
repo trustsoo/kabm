@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.page import="lgdacom.XPayClient.XPayClient"/>
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:directive.include file="/edu/payment/paycommon.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[   
+
+/******************************************************************************** 
+ * Program ID		: 결제
+ * FileName		    : paymentCtrl.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+ 	public void getPaymentList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			input.put("cmd", "GET_PAYMENT_LIST");
+			DataSet output = interact.execute( "/payment/PaymentMgr" , input);
+			for(int idx = 0 ; idx < output.getCount("lecture_seq_no"); idx++){
+
+				try
+				{
+					String lgd_tid = output.getText("lgd_tid",idx);
+					if(lgd_tid == null || lgd_tid.isEmpty()) continue;
+					String lgd_authkey = GetAuthData(LGD_MID, lgd_tid, LGD_MERTKEY);
+					output.put("lgd_authkey", lgd_authkey, idx);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			
+			String[] blockNames = new String[] { "property","payment_info" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+
+ 	public void getPaymentPrchsInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			input.put("cmd", "GET_PAYMENT_PRCHS_INFO");
+			DataSet output = interact.execute( "/payment/PaymentMgr" , input);
+			
+			String[] blockNames = new String[] { "payment_info" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+
+ 	public void getPaymentOffline(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			input.put("cmd", "GET_PAYMENT_OFFLIST");
+			DataSet output = interact.execute( "/payment/PaymentMgr" , input);
+			
+			String[] blockNames = new String[] { "property","payment_off" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	
+	public void createBanking(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "INSERT_BANKING");			
+			DataSet output = interact.execute( "/payment/BankingMgr" , input);
+			
+			String result = getXMLFormat("");
+			responseXML(result, resp);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));
+			String message = ex.getMessage();
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, message, ""), resp);
+		}
+	}
+	
+	public void modifyBanking(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "UPDATE_BANKING");			
+			DataSet output = interact.execute( "/payment/BankingMgr" , input);
+			
+			String result = getXMLFormat("");
+			responseXML(result, resp);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));
+			String message = ex.getMessage();
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, message, ""), resp);
+		}
+	}
+	
+	public void downBill(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			input.put("cmd", "GET_PAYMENT_INFO");
+			executeBL( "/payment/PaymentMgr" , input,output);
+			String issue_dt = output.getText("issue_dt");
+			String lgd_paydate = output.getText("last_modify_dt");
+			if(lgd_paydate != null && !"".equals(lgd_paydate))
+				issue_dt = lgd_paydate;
+			String[] issue_arr = issue_dt.split("-");
+			System.out.println( issue_dt+ ":" +issue_arr.length );
+			if( issue_arr.length == 3)
+			{
+				output.put("yyyy", issue_arr[0]);
+				output.put("mm", issue_arr[1]);
+				output.put("dd", issue_arr[2]);
+			}
+			output.put("no", input.getText("user_lecture_seq_no"));
+			output.put("user_nm", output.getText("user_nm"));
+			output.put("am_ko" , stramt(output.getText("lgd_amount")));
+			output.put("am_no", HtmlFormat.formatInt(output.getText("lgd_amount")));
+			String saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_95 , output);
+			
+			File file = new File(saved_file);
+			
+			Logger.debug.println(output);
+			Logger.debug.println(file.getAbsolutePath());
+			
+			if(file.exists())
+				sendFileStream("한국건물위생관리협회_교육결제_영수증"+issue_dt+".pdf", (int)file.length(), file, resp, req);
+			else
+				resp.sendError(resp.SC_NOT_FOUND);
+			
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void downOfflineBill(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			input.put("cmd", "GET_PAYMENT_OFFLINE_INFO");
+			executeBL( "/payment/PaymentMgr" , input,output);
+			String issue_dt = output.getText("ydate");
+			String[] issue_arr = issue_dt.split("-");
+			System.out.println( issue_dt+ ":" +issue_arr.length );
+			if( issue_arr.length == 3)
+			{
+				output.put("yyyy", issue_arr[0]);
+				output.put("mm", issue_arr[1]);
+				output.put("dd", issue_arr[2]);
+			}
+			
+			output.put("no", "J-"+input.getText("user_offline_seq_no"));
+			output.put("user_nm", output.getText("user_nm"));
+			output.put("am_ko" , stramt(output.getText("amount")));
+			output.put("am_no", HtmlFormat.formatInt(output.getText("amount")));
+			String saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_95 , output);
+			
+			File file = new File(saved_file);
+			
+			Logger.debug.println(output);
+			Logger.debug.println(file.getAbsolutePath());
+			
+			if(file.exists())
+				sendFileStream("한국건물위생관리협회_교육결제_영수증"+issue_dt+".pdf", (int)file.length(), file, resp, req);
+			else
+				resp.sendError(resp.SC_NOT_FOUND);
+			
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void doDeliveryModify(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			DataSet output = new DataSet();
+			input.put("cmd", "MODIFY_MEMBER_DELIVERY");
+			output = interact.execute( "/member/MemberMgr" , input);
+			
+			input.put("cmd", "MODIFY_PAYMENT_DELIVERY");
+			output = interact.execute( "/payment/PaymentMgr" , input);
+			
+			String data = "{\"user_id\":\""+output.getText("user_id")+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public String stramt(String amt)
+	{
+		String tmpamt ="";
+		amt = "000000000000" + amt;
+		int j=0;
+		for(int i=amt.length();i>0;i--) {
+			j++;
+			if (!amt.substring(i-1,i).equals("0")) {
+			if (j%4==2) tmpamt ="십"+tmpamt;
+			if (j%4==3) tmpamt ="백"+tmpamt;
+			if (j>1 && (j%4)==0) tmpamt ="천"+tmpamt;
+			}
+			if (j==5 && Integer.parseInt(amt.substring(amt.length()-8,amt.length()-4))>0) tmpamt ="만"+tmpamt;
+			if (j==9 && Integer.parseInt(amt.substring(amt.length()-12,amt.length()-8))>0) tmpamt ="억"+tmpamt;
+			if (j==13 && Integer.parseInt(amt.substring(amt.length()-16,amt.length()-12))>0) tmpamt ="조"+tmpamt;
+			if (amt.substring(i-1,i).equals("1")) tmpamt ="일"+tmpamt;
+			if (amt.substring(i-1,i).equals("2")) tmpamt ="이"+tmpamt;
+			if (amt.substring(i-1,i).equals("3")) tmpamt ="삼"+tmpamt;
+			if (amt.substring(i-1,i).equals("4")) tmpamt ="사"+tmpamt;
+			if (amt.substring(i-1,i).equals("5")) tmpamt ="오"+tmpamt;
+			if (amt.substring(i-1,i).equals("6")) tmpamt ="육"+tmpamt;
+			if (amt.substring(i-1,i).equals("7")) tmpamt ="칠"+tmpamt;
+			if (amt.substring(i-1,i).equals("8")) tmpamt ="팔"+tmpamt;
+			if (amt.substring(i-1,i).equals("9")) tmpamt ="구"+tmpamt;
+		}
+	
+		return tmpamt;
+	}
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	      
+	    private final String ORG_LIST_PAGE = "/common/_org_list.jsp";
+	    private final String DEPT_LIST_PAGE = "/common/_dept_list.jsp";     
+	    private final String SCHOOL_SEARCH_PAGE = "/common/_school_search.jsp";
+	    private final String SMS_CONTENTS_PAGE = "/common/_sms_contents_view.jsp";
+	    private final String EMAIL_CONTENTS_PAGE = "/common/_email_contents_view.jsp";
+	    private final String PAGE_INCLUDE_PAGE = "/common/_page_include.jsp";
+	    private final String JSP_ADDR_PAGE = "/common/_addr_list.jsp";
+	    private final String JSP_JUSO_PAGE = "/common/jusoPopup.jsp";
+	    private final String PASSWORD_CHANGE_PAGE = "/common/_password_change.jsp"; 
+	    private final String JSP_OFFLINE_EDU_LIST = "/common/_offline_edu_list.jsp";
+	    private static final String JSP_CORP_LIST= "_company_list.jsp";
+	    private static final String JSP_MEMCORP_LIST= "_memcorp_list.jsp";
+		
+		public void viewCorpList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			bind(req, input);
+			
+			try
+			{	
+				if( "".equals(input.getText("page_no")))
+					input.put("page_no" , "1");
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_CORP_LIST);
+				
+			} catch(Exception ex)
+			{	
+				Logger.warn.println(Utility.getStackTrace(ex));	
+			}
+		}
+		
+		public void viewMemCorpList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			bind(req, input);
+			
+			try
+			{	
+				if( "".equals(input.getText("page_no")))
+					input.put("page_no" , "1");
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_MEMCORP_LIST);
+				
+			} catch(Exception ex)
+			{	
+				Logger.warn.println(Utility.getStackTrace(ex));	
+			}
+		}
+			    
+	    public void postSearch( HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{				
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_JUSO_PAGE);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void addrList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{				
+				if("".equals(input.getText("rows"))) input.put("rows", SitePropertyManager.getString("ROW_PER_PAGE"));
+				if("".equals(input.getText("page"))) input.put("page", "1");
+				
+				input.put("row_per_page", input.getText("rows"));
+				input.put("cur_pg", input.getText("page"));
+				
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_ADDR_PAGE);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void orgList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{				
+				req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+				view.setViewPage(ORG_LIST_PAGE);
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void deptList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{				
+				req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+				view.setViewPage(DEPT_LIST_PAGE);
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    
+	    public void smsContents(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{				
+				req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+				req.setAttribute("input", input);
+				view.setViewPage(SMS_CONTENTS_PAGE);
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void emailContents(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{				
+				req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+				req.setAttribute("input", input);
+				view.setViewPage(EMAIL_CONTENTS_PAGE);
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+		public void page_include(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				//req.setAttribute("templet-bypass", "true");
+				//req.setAttribute("templet", "no-apply");
+				req.setAttribute("input", input);
+				req.setAttribute("output", output);
+				view.setViewPage(PAGE_INCLUDE_PAGE);
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+		
+		public void getPasswordChange(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{				
+				req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+				req.setAttribute("input", input);
+				view.setViewPage(PASSWORD_CHANGE_PAGE);
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+		
+		public void offlineEduList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			bind(req, input);
+			
+			try
+			{	
+				DataSet output = interact.execute("/common/jiinfo_all", input);	
+
+				req.setAttribute("output_count" ,  output.getCount("jicode") - 1);
+				req.setAttribute("output" 		,  output.toList());
+				
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_OFFLINE_EDU_LIST);
+				
+			} catch(Exception ex)
+			{	
+				Logger.warn.println(Utility.getStackTrace(ex));	
+			}
+		}
+	    
+	]]>
+	</jsp:declaration>
+</jsp:root>

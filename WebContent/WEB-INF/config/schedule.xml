@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='euc-kr'?>
+<hts>
+
+    <!--
+                SchedulerTask 를 extend한 class만 등록 주기는 sec(초), min(분), hour(시) 이다.
+
+                syntex)
+                 [ date [ {startDay-endDay} | every n[y|m|w|d]]  | [on [[SU][MO][TU][WE][TH][FR][SA]]] ]
+                 [ time [startTime-endTime] | [every n[h|m|s]] | [at time1,time2,time3] ]
+
+                date {시작날짜-끝날짜} on {요일} time
+
+                script="date 2001/9/27-2001/12/20 on MOTUTHFRSA time 10:00:00-22:07:00 every 30s"
+                script="date on SUMOTUWETHFR time 00:00:00-23:59:59 at 08:50:00"
+    -->
+    <scheduler>
+
+		<task name="StatCollector"
+              script="date on MOTUWETHFR time 00:00:00-23:59:59 at 06:00:00"
+              class="com.kabm.schedule.StatSchedule">
+        </task>
+		
+    </scheduler>
+
+</hts>
+

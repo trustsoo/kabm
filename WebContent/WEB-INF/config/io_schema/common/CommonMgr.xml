@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="CommonMgr">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			
+			if(cmd.equals("GET_CORP_LIST"))
+            {
+				String srch_text = input.getText("title");
+	            
+	            StringBuffer addWhere = new StringBuffer();
+		                 
+	            if ( srch_text!=null && !srch_text.equals("") )
+	            {
+	                addWhere.append("AND company like '%" + srch_text + "%' ");
+	            }
+	            
+	            String search_gbn_hcode = input.getText("search_gbn_hcode");
+			
+				if( "20".equals(search_gbn_hcode))
+					addWhere.append(" AND hcode in ('10','20','30') " );
+				else if( !"".equals(search_gbn_hcode))
+					addWhere.append(" AND hcode = '" + search_gbn_hcode + "'" );
+				
+			
+	            input.put("addWhere", addWhere.toString() );
+	        }    
+			
+			executeSQL(cmd, connection, input, output);
+			]]>
+
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		
+		<sql id="GET_CORP_LIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					corp_nm, corp_reg_no,cp_code,ill_no, cpost, cp_addr, cp_jibun,rprstt_kr,cptel,cpfax,
+					(select top (1) BASE_NAME from TB_APC_BASE_CODE where BASE_CODE = a.hcode and GROUP_CODE = '21' ) as hname,
+					(select top (1) JISANAME from TB_APC_COMPANY_SUB where ji_code = a.ji_code ) as jiname,
+					email,rp_hp,mb_no,
+					tot_cnt
+				FROM
+				(	
+					select 
+						company corp_nm, bsns_no corp_reg_no,cp_code,ill_no,hcode,ji_code,cptel,cpfax,
+						cpost, cp_addr, cp_jibun,rprstt_kr,email,rp_hp,
+						replace(replace(mb_no , '제', '' ), '호', '') mb_no,
+						ROW_NUMBER() over( order by a.kname asc) rnum,
+						COUNT(a.bsns_no) over() tot_cnt
+					from tb_mb_master a
+					where company is not null
+                    and company != ''
+                    and scode = '10'
+					$addWhere
+				)a
+				where rnum > (?-1)*?		
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>page_no,rnum</setProperty>
+				<getProperty>
+					corp_nm, corp_reg_no,cp_code,ill_no, cpost, cp_addr, cp_jibun,rprstt_kr,cptel,cpfax, hname,jiname,email,rp_hp, mb_no,tot_cnt
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_SYS_DATE">
+			<query>
+			<![CDATA[
+				SELECT 
+					start_dd,
+					end_dd,
+					std_yyyy,
+					dbo.formatDateTime(GETDATE(),'yyyyMMdd') to_day,
+					std_end_dd
+				FROM TB_CYBER_SYSTEM
+				WHERE active_yn = 'Y'
+				and cast( start_dd + ' 00:00:00' as datetime) <= getdate()
+				and cast( end_dd + ' 23:59:59' as datetime) >= getdate()
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>
+					start_dd,end_dd,std_yyyy,to_day,std_end_dd
+				</getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+
+	<input> 
+		<block name="arg" repeat="1">
+			<field name="rnum"  type="int"      size="" default="20"/>
+            <field name="page_no"     type="int"      size="" default="1"/>
+            <field name="addWhere"      type="string"   size="" />
+		</block>
+	</input>
+
+	<output>
+		<block repeat=''>
+			<field name='rnum'          type='int'      size=''/>      
+            <field name='tot_cnt'       type='int'      size=''/>      
+            
+			<field name="corp_nm" 		type="string"	size="" />	
+			<field name="corp_reg_no" 		type="string"	size="" />
+			
+			<field name="start_dd" 		type="string"	size="" />
+			<field name="end_dd" 		type="string"	size="" />
+			<field name="std_yyyy" 		type="string"	size="" />
+			<field name="to_day" 		type="string"	size="" />
+			<field name="std_end_dd" 	type="string"	size="" />
+		</block>
+		<block name="corp_info" id="corp_info" repeat='9999999'>
+			<field name='tot_cnt'       type='int'      size=''/>
+			<field name="corp_nm" 		type="string"	size="" />	
+			<field name="corp_reg_no" 		type="string"	size="" />
+			<field name='cp_code' 		type='String'	size=''/>
+			<field name='ill_no' 		type='String'	size=''/>
+			<field name='hname' 		type='String'	size=''/>
+			<field name='jiname' 		type='String'	size=''/>
+			<field name='cptel' 		type='String'	size=''/>
+			<field name='cpfax' 		type='String'	size=''/>
+			
+			<field name='cpost' 		type='String'	size=''/>
+			<field name='cp_addr' 		type='String'	size=''/>
+			<field name='cp_jibun' 		type='String'	size=''/>
+			<field name='rprstt_kr' 		type='String'	size=''/>
+			<field name='email' 		type='String'	size=''/>
+			<field name='rp_hp' 		type='String'	size=''/>
+			<field name="mb_no" 		type="string"	size="" />
+		</block>	
+		
+	</output>
+</transaction>

@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="LectureMgr">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			
+			executeSQL(cmd, connection, input, output);
+			
+			
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="GET_LECTURE_CODE_LIST">
+			<query>
+			<![CDATA[
+				select 
+					a.lecture_seq_no,
+					title,
+					amount,
+					summary,
+					dbo.formatDateTime(reg_dt,'yyyy.mm.dd') reg_dt,
+                    s.std_yyyy,
+                    s.start_dd,
+                    s.end_dd,
+                    s.std_end_dd,
+                    case when ( cast( s.end_dd + ' 19:59:59' as datetime) - getdate()  ) > 0 then
+					(case when ( getdate() -cast( s.start_dd + ' 00:00:00' as datetime) ) < 0 then
+					'Y' else 'N' end) else 'Y' end as teminate_yn,
+					a.lecture_div
+				from tb_cyber_lecture a , tb_cyber_system s
+				where 1=1
+				--and a.use_yn = 'Y'
+                and a.lecture_seq_no = s.lecture_seq_no
+				and s.active_yn = 'Y'
+				order by lecture_seq_no
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>
+					lecture_seq_no,title,amount,summary,reg_dt,std_yyyy,start_dd,end_dd,std_end_dd,teminate_yn,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_LECTURE_DETAIL">
+			<query>
+			<![CDATA[
+				select 
+					a.lecture_seq_no,
+					title,
+					amount,
+					summary,
+					dbo.formatDateTime(reg_dt,'yyyy.mm.dd') reg_dt,
+					dbo.formatDateTime(cast( s.end_dd + ' 23:59:59' as datetime),'yyyy.mm.dd') end_dd,
+					(case when ( cast( s.end_dd + ' 20:59:59' as datetime) - getdate()  ) > 0 then 'N' else 'Y' end) as time_over,
+					a.lecture_div
+				from tb_cyber_lecture a, tb_cyber_system s
+				where a.LECTURE_SEQ_NO = s.LECTURE_SEQ_NO
+				--and a.use_yn = 'Y'
+				and a.lecture_seq_no = ?
+				and s.active_yn = 'Y'
+			]]>
+			</query>
+			<mapping>
+				<setProperty>lecture_seq_no</setProperty>
+				<getProperty>
+					lecture_seq_no,title,amount,summary,reg_dt,end_dd,time_over,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_LECTURE_LIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					lecture_seq_no,
+					title,
+					amount,
+					summary,
+					dbo.formatDateTime(reg_dt,'yyyy.mm.dd') reg_dt,
+					tot_cnt,
+                    std_yyyy,start_dd,end_dd,std_end_dd,
+                    lecture_div
+				FROM
+				(	
+					select 
+						a.lecture_seq_no,
+						title,
+						amount,
+						summary,
+						reg_dt,
+						ROW_NUMBER() over( order by a.reg_dt desc) rnum,
+						COUNT(a.lecture_seq_no) over() tot_cnt,
+						s.std_yyyy,
+						s.start_dd,
+						s.end_dd,
+						s.std_end_dd,
+						a.lecture_div
+					from tb_cyber_lecture a, tb_cyber_system s
+					where 1=1
+					--and a.use_yn = 'Y'
+					and a.lecture_seq_no = s.lecture_seq_no
+					and s.active_yn = 'Y'
+					
+				)a	
+				where a.rnum > (?-1)*?	
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>page_no,rnum</setProperty>
+				<getProperty>
+					lecture_seq_no,title,amount,summary,reg_dt,tot_cnt,std_yyyy,start_dd,end_dd,std_end_dd,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_USER_LECTURE_DETAIL">
+			<query>
+			<![CDATA[
+				select 
+						x.lecture_seq_no,
+						x.title,
+						x.amount,
+						x.summary,
+						x.reg_dt,
+						x.status,
+						x.status_nm,
+						x.user_lecture_seq_no,
+						x.user_lecture_start_dt,
+						x.user_lecture_end_dt,
+						datediff( ss ,  getdate() , x.user_lecture_end_dt ) diff,
+						case when ( cast( x.user_lecture_end_dt as datetime) - getdate()  ) < 0 then
+					'Y' else 'N' end as end_yn,
+					(select count(class_no) from tb_cyber_user_class t where t.user_lecture_seq_no = x.user_lecture_seq_no ) class_cnt,
+					(select min(user_class_seq_no) from tb_cyber_user_class t where t.user_lecture_seq_no = x.user_lecture_seq_no ) user_class_seq_no,
+					x.std_yyyy,
+					x.end_dd,
+					x.std_end_dd,
+					x.lecture_div
+				from( 
+				select 
+						c.lecture_seq_no,
+						c.title,
+						c.amount,
+						c.summary,
+						dbo.formatDateTime(c.reg_dt,'yyyy.mm.dd') reg_dt,
+						a.status,
+						s.std_yyyy,
+						s.end_dd,
+						s.std_end_dd,
+						case a.status when '00' then '수강전' 
+					            when '01' then '수강중' 
+					            when '02' then '평가중'
+					            when '03' then '완료'
+					            when '09' then '실격' 
+						else '삭제' END AS status_nm,
+						a.user_lecture_seq_no,
+						dbo.formatDateTime( (case a.status when '00' then getdate() else a.user_lecture_start_dt end),'yyyy.mm.dd HH:MI') user_lecture_start_dt,
+						dbo.formatDateTime( case when (cast(s.std_end_dd as int) - cast( dbo.formatDateTime( (case a.status when '00' then getdate() else a.user_lecture_start_dt end)+(13 + ISNULL(a.extend_cnt,0) * 13 ) ,'yyyymmdd') as int)) < 0 
+						then  s.std_end_dd + ' 23:59:59'
+						else  (case a.status when '00' then getdate() else a.user_lecture_start_dt end)+(13 + ISNULL(a.extend_cnt,0) * 13 ) end ,'yyyy.mm.dd HH:MI') as user_lecture_end_dt,
+						c.lecture_div						
+					from TB_CYBER_USER_LECTURE a
+					LEFT JOIN TB_CYBER_SYSTEM s
+                    ON a.lecture_seq_no = s.lecture_seq_no
+                    AND a.std_yyyy = s.std_yyyy
+					,TB_CYBER_LECTURE c
+					WHERE a.lecture_seq_no = c.lecture_seq_no
+					AND a.status <> '99'
+					--AND c.use_yn = 'Y'
+				    AND a.user_lecture_seq_no = ?
+				) x
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					lecture_seq_no,title,amount,summary,reg_dt,status,status_nm,user_lecture_seq_no,
+					user_lecture_start_dt,user_lecture_end_dt,diff,end_yn,class_cnt,user_class_seq_no,
+					std_yyyy,end_dd,std_end_dd,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="getOfflineEdu">
+			<query>
+			   <![CDATA[
+					SELECT top(1) a.brd_mng_no, a.brd_no, ttl, cntnt, 
+							(CASE WHEN (SELECT count(*) FROM tb_kabm_attach_file WHERE data_no = a.brd_no and attach_div_cd ='attach_div_03') > 0 
+									THEN 'Y' 
+									ELSE 'N' END) AS is_exist_file,
+							CONVERT(VARCHAR(10),a.reg_ddtm, 120) as reg_dt,
+					        (SELECT emp_nm FROM tb_kabm_emp WHERE emp_cd= a.reg_emp_cd) as emp_nm
+					FROM tb_kabm_board a
+					WHERE a.brd_mng_no = ?
+					AND a.del_yn = 'N'
+				 	ORDER BY a.reg_ddtm desc
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no</setProperty>
+				<getProperty>brd_mng_no, brd_no, ttl, cntnt, is_exist_file, reg_dt, emp_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_CURR_USER_LECTURE">
+			<query>
+			<![CDATA[
+				
+					select top 1
+						a.user_lecture_seq_no,
+						a.lecture_seq_no,
+						c.lecture_div
+					from TB_CYBER_USER_LECTURE a 
+					LEFT JOIN TB_CYBER_LECTURE c 
+					ON a.lecture_seq_no = c.lecture_seq_no
+					LEFT JOIN ( select user_lecture_seq_no , min( t.study_start_dt) start_dt , max( t.estimate_end_dt ) end_dt 
+					            from TB_CYBER_USER_CLASS t where status <> '9'
+					            group by user_lecture_seq_no) d
+					ON a.user_lecture_seq_no = d.user_lecture_seq_no
+                    LEFT JOIN TB_CYBER_USER_CLASS e
+                    ON a.curr_class_no = e.user_class_seq_no
+					LEFT JOIN TB_CYBER_SYSTEM s
+                    ON a.lecture_seq_no = s.lecture_seq_no
+                    AND a.std_yyyy = s.std_yyyy
+					WHERE a.user_seq_no = ?
+					AND a.status = '02'
+					ORDER BY start_dt desc
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no</setProperty>
+				<getProperty>
+					user_lecture_seq_no, lecture_seq_no, lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+	</processor-info>
+
+	<input>
+		<block name="arg" repeat="1">			
+			<field name="rnum"  type="int"      size="" default="20"/>
+            <field name="page_no"     type="int"      size="" default="1"/>
+            <field name="addWhere"      type="string"   size="" />
+            <field name="lecture_seq_no"      type="int"   size="" />
+            <field name="user_lecture_seq_no"      type="int"   size="" />
+            <field name="user_seq_no"      type="int"   size="" />
+            
+            <field name="brd_mng_no"      type="int"   size="" />
+		</block>
+	</input>
+
+	<output>
+		<block repeat=''>
+			<field name='rnum'          type='int'      size=''/>      
+            <field name='tot_cnt'       type='int'      size=''/>      
+            
+            <field name="user_lecture_seq_no" type="string"	size="" />	
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name="title" 		type="string"	size="" />
+			<field name="amount" 		type="string"	size="" />
+			<field name='summary' 		type='String'	size=''/>
+			<field name='reg_dt' 		type='String'	size=''/>
+			<field name='time_over' 		type='String'	size=''/>
+			<field name='end_dd' 		type='String'	size=''/>
+			<field name='lecture_div' 		type='String'	size=''/>
+			
+		</block>
+		<block id="property" name="property" repeat="1">
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+        
+		<block name="lecture_info" id="lecture_info" repeat='9999999'>
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name="title" 		type="string"	size="" />
+			<field name="amount" 		type="string"	size="" />
+			<field name='summary' 		type='String'	size=''/>
+			<field name='reg_dt' 		type='String'	size=''/>
+			<field name='tot_cnt'       type='int'      size=''/>  
+			<field name='status' 		type='String'	size=''/>
+			<field name='status_nm' 		type='String'	size=''/>
+			<field name='user_lecture_seq_no' 		type='String'	size=''/>  
+			<field name='std_yyyy' 		type='String'	size=''/> 
+			<field name='start_dd' 		type='String'	size=''/> 
+			<field name='end_dd' 		type='String'	size=''/> 
+			<field name='std_end_dd' 		type='String'	size=''/> 
+			<field name='user_lecture_start_dt' 		type='String'	size=''/> 
+			<field name='user_lecture_end_dt' 		type='String'	size=''/> 
+			<field name='diff' 		type='int'	size=''/> 
+			<field name='end_yn' 		type='String'	size=''/>
+			<field name='class_cnt' 		type='String'	size=''/>  
+			<field name='user_class_seq_no' 		type='String'	size=''/>   
+			<field name='teminate_yn' 		type='String'	size=''/>
+			
+			<field name='std_yyyy' 		type='String'	size=''/>
+			<field name='end_dd' 		type='String'	size=''/>
+			<field name='std_end_dd' 		type='String'	size=''/>
+			<field name='lecture_div' 		type='String'	size=''/>
+		</block>
+		
+		<block id='offline_edu' name='offline_edu' repeat='1'>
+			<field name='brd_no' type='String'	size=''/>
+			<field name='ttl' type='string'	size=''/>
+			<field name='cntnt' type='string'	size=''/>
+			<field name='is_exist_file' type='string'	size=''/>
+			<field name='reg_dt' type='string'/>
+			<field name='emp_nm' type='string'/>
+			<field name='brd_mng_no' type='string'	size='' />
+		</block>
+	</output>
+</transaction>

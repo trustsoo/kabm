@@ -1,0 +1,269 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='StatBatch' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+	<property name="sqlLogMode" value="bind"/>
+	<property name="isPrint" value="Y"/>
+	
+		<script language="java" import="">
+		<![CDATA[
+				
+			String cmd = input.getText("cmd");	
+			
+			if("excuteStatView".equals(cmd))
+			{
+				executeSQL("excuteStatViewDel", connection, input, output);
+				executeSQL(cmd, connection, input, output);
+			}else if("excuteStatMenu".equals(cmd))
+			{
+				executeSQL("excuteStatMenuDel", connection, input, output);
+				executeSQL(cmd, connection, input, output);
+			}else if("excuteStatPotal".equals(cmd))
+			{
+				executeSQL("excuteStatPotalDel", connection, input, output);
+				executeSQL(cmd, connection, input, output);
+			}else{	
+				executeSQL(cmd, connection, input, output);
+			}
+			
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="excuteStatViewDel">
+			<query>
+			   <![CDATA[
+			   		delete from tb_kabm_stat_view where yyyy = ? and  mm = ? and dd = ? 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>yyyy, mm , dd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="excuteStatView">
+			<query>
+			   <![CDATA[
+			   		insert into tb_kabm_stat_view
+					(yyyy, mm, dd, hh, uv, pv )
+					
+					select a.yyyy, a.mm, a.dd, a.hh, b.uv, a.pv
+					from
+					(
+						select 
+						DATEPART(yy,reg_dt) yyyy,
+								DATEPART(mm,reg_dt) mm,
+								DATEPART(dd,reg_dt) dd,
+								DATEPART(hour,reg_dt) hh,
+						sum(1) pv
+						from tb_kabm_admin_log a
+						where dbo.formatDateTime( reg_dt, 'yyyymmdd') = ?
+						group by DATEPART(yy,reg_dt),
+								DATEPART(mm,reg_dt),
+								DATEPART(dd,reg_dt),
+								DATEPART(hour,reg_dt)
+					) a
+					left outer join 
+					(
+						select t.yyyy, t.mm, t.dd , t.hh , sum(1) uv
+						from (
+							select 
+								DATEPART(yy,reg_dt) yyyy,
+								DATEPART(mm,reg_dt) mm,
+								DATEPART(dd,reg_dt) dd,
+								DATEPART(hour,reg_dt) hh
+							from tb_kabm_admin_log a
+							where dbo.formatDateTime( reg_dt, 'yyyymmdd') = ?
+							group by DATEPART(yy,reg_dt),
+								DATEPART(mm,reg_dt),
+								DATEPART(dd,reg_dt),
+								DATEPART(hour,reg_dt),
+							user_id
+						) t
+						group by yyyy, mm, dd, hh
+					) b
+					on a.yyyy = b.yyyy
+					and a.mm = b.mm
+					and a.dd = b.dd
+					and a.hh = b.hh
+				]]>
+			</query>
+			<mapping>
+				<setProperty>work_date,work_date</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="excuteStatMenuDel">
+			<query>
+			   <![CDATA[
+			   		delete from tb_kabm_stat_menu where yyyy = ? and mm = ? and dd = ? 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>yyyy, mm , dd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="excuteStatMenu">
+			<query>
+			   <![CDATA[
+			   		insert into tb_kabm_stat_menu
+					(yyyy, mm, dd, hh, uv, pv, menu_id )
+					
+					select a.yyyy, a.mm, a.dd, a.hh, b.uv, a.pv, a.menu_id
+					from
+					(
+						select 
+						DATEPART(yy,reg_dt) yyyy,
+								DATEPART(mm,reg_dt) mm,
+								DATEPART(dd,reg_dt) dd,
+								DATEPART(hour,reg_dt) hh,
+						menu_id,
+						sum(1) pv
+						from tb_kabm_admin_log a
+						where dbo.formatDateTime( reg_dt, 'yyyymmdd') = ?
+						and menu_id is not null
+						group by DATEPART(yy,reg_dt),
+								DATEPART(mm,reg_dt),
+								DATEPART(dd,reg_dt),
+								DATEPART(hour,reg_dt),
+						menu_id
+					) a
+					left outer join 
+					(
+						select t.yyyy, t.mm, t.dd , t.hh, t.menu_id , sum(1) uv
+						from (
+							select 
+								DATEPART(yy,reg_dt) yyyy,
+								DATEPART(mm,reg_dt) mm,
+								DATEPART(dd,reg_dt) dd,
+								DATEPART(hour,reg_dt) hh,
+								menu_id
+							from tb_kabm_admin_log a
+							where dbo.formatDateTime( reg_dt, 'yyyymmdd') = ?
+							and menu_id is not null
+							group by DATEPART(yy,reg_dt),
+								DATEPART(mm,reg_dt),
+								DATEPART(dd,reg_dt),
+								DATEPART(hour,reg_dt),
+							menu_id,user_id
+						) t
+						group by yyyy, mm, dd, hh, menu_id
+					) b
+					on a.yyyy = b.yyyy
+					and a.mm = b.mm
+					and a.dd = b.dd
+					and a.hh = b.hh
+					and a.menu_id = b.menu_id
+				]]>
+			</query>
+			<mapping>
+				<setProperty>work_date,work_date</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="excuteStatPotalDel">
+			<query>
+			   <![CDATA[
+			   		delete from tb_kabm_stat_potal where yyyy = ? and mm = ? and dd = ? 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>yyyy, mm , dd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="excuteStatPotal">
+			<query>
+			   <![CDATA[
+			   		insert into tb_kabm_stat_potal
+					(yyyy, mm, dd, hh, uv, pv, potal_cd )
+					
+					select a.yyyy, a.mm, a.dd, a.hh, b.uv, a.pv, a.etc1
+					from
+					(
+						select 
+						DATEPART(yy,reg_dt) yyyy,
+								DATEPART(mm,reg_dt) mm,
+								DATEPART(dd,reg_dt) dd,
+								DATEPART(hour,reg_dt) hh,
+						etc1,
+						sum(1) pv
+						from tb_kabm_admin_log a
+						where dbo.formatDateTime( reg_dt, 'yyyymmdd') = ?
+						and etc1 is not null
+						group by DATEPART(yy,reg_dt),
+								DATEPART(mm,reg_dt),
+								DATEPART(dd,reg_dt),
+								DATEPART(hour,reg_dt),
+						etc1
+					) a
+					left outer join 
+					(
+						select t.yyyy, t.mm, t.dd , t.hh, t.etc1 , sum(1) uv
+						from (
+							select 
+								DATEPART(yy,reg_dt) yyyy,
+								DATEPART(mm,reg_dt) mm,
+								DATEPART(dd,reg_dt) dd,
+								DATEPART(hour,reg_dt) hh,
+								etc1
+							from tb_kabm_admin_log a
+							where dbo.formatDateTime( reg_dt, 'yyyymmdd') = ?
+							and etc1 is not null
+							group by DATEPART(yy,reg_dt),
+								DATEPART(mm,reg_dt),
+								DATEPART(dd,reg_dt),
+								DATEPART(hour,reg_dt),
+							etc1,user_id
+						) t
+						group by yyyy, mm, dd, hh, etc1
+					) b
+					on a.yyyy = b.yyyy
+					and a.mm = b.mm
+					and a.dd = b.dd
+					and a.hh = b.hh
+					and a.etc1 = b.etc1
+				]]>
+			</query>
+			<mapping>
+				<setProperty>work_date,work_date</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="excuteStatDel">
+			<query>
+			   <![CDATA[
+			   		delete from tb_kabm_admin_log 
+			   		where dbo.formatDateTime( reg_dt - 30 , 'yyyymmdd') <= ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>work_date</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		</processor-info>
+	
+	
+	<input>
+		<block name="arg" repeat="1">		
+			<field name='work_date' type='String'	size=''/>
+			<field name='yyyy' type='string'	size=''/>
+			<field name='mm' type='string'	size=''/>
+			<field name='dd' type='string'	size=''/>
+		</block>
+	</input>
+	
+	<output> 
+		
+	</output>
+	
+</transaction>

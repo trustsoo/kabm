@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+	public void getBoardList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		 	throws ServletException, IOException, Exception 
+		 {
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			
+			req.setAttribute("templet-bypass", "true");
+			String queryCmd = "boardList";
+			try {
+
+				input.put("cmd", queryCmd);
+				output = interact.execute("/community/boardMgr", input);
+				String[] blockNames = new String[] { "board_list" };
+			
+				output.put(
+						jdf.framework.logic.transform.TransFormConstant.GRID_TYPE,
+						input.getText("grid_type"));
+
+				String result = getJQGridXML(output, blockNames);
+				responseXML(result, resp);
+			} catch (Exception ex) {
+				responseXML(
+						getXMLFormat(
+								HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+								ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	
+	public void saveBoard(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			req.setAttribute("templet-bypass", "true");
+			try
+			{			
+				if("add".equals(input.getText("oper")))
+				{
+					input.put("cmd", "saveBoard");
+				} else if("edit".equals(input.getText("oper")))
+				{
+					input.put("cmd", "saveBoard");
+				} else if("del".equals(input.getText("oper")))
+				{
+					input.put("cmd", "dropBoard");
+				}	
+				interact.execute("/community/boardMgr", input);
+				String result = getXMLFormat("");			
+				responseXML(result, resp);
+			} catch(Exception ex)
+			{
+				String message = null;
+				String code = null;
+				if(ex instanceof jdf.framework.core.data.ResourceException)
+				{
+					jdf.framework.core.data.ResourceException sqlex = (jdf.framework.core.data.ResourceException)ex;
+					
+					if(sqlex.getErrorCode() == 1)
+					{
+						jdf.framework.core.Message msg= new jdf.framework.core.MessageBox();
+						message = msg.getMessage(UserAgentUtil.getUserLanguage(req),"ORA", "00001");
+						code = ResResultConstant.RESULT_NOT_ACCEPTABLE;
+					} else if(sqlex.getErrorCode() == 20406)
+					{
+						jdf.framework.core.Message msg= new jdf.framework.core.MessageBox();
+						message = msg.getMessage(UserAgentUtil.getUserLanguage(req),"ORA", "20406");
+						code = ResResultConstant.RESULT_NOT_ACCEPTABLE;
+					} else
+					{
+						message = ex.getMessage();
+						code = HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR;
+					}
+				} else
+				{
+					message = ex.getMessage();
+					code = HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR;
+				}			
+				
+				responseXML(getXMLFormat(code, message, ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	public void getBoardDetail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		 	throws ServletException, IOException, Exception 
+		 {
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			
+			req.setAttribute("templet-bypass", "true");
+			
+			try {
+
+				input.put("cmd", "getBoardDetail");
+				output = interact.execute("/community/boardMgr", input);
+				String[] blockNames = new String[] { "brd_mng_detail"};
+
+				String result = getJson(output, blockNames);
+				responseJson(result, resp);
+			} catch (Exception ex) {
+				responseJson(
+						getJsonFormat(
+								HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+								ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	
+	public void saveBoardDetail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		 	throws ServletException, IOException, Exception 
+		 {
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			
+			req.setAttribute("templet-bypass", "true");
+			
+			try {
+
+				input.put("emp_cd", getUserObject(req, resp).getId());
+				input.put("cmd", "saveBoard");
+				interact.execute("/community/boardMgr", input);
+
+				String result = getJsonFormat("");
+				responseJson(result, resp);
+			} catch (Exception ex) {
+				responseJson(
+						getJsonFormat(
+								HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+								ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	
+	public void delBoard(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		 	throws ServletException, IOException, Exception 
+		 {
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			
+			req.setAttribute("templet-bypass", "true");
+			
+			try {
+
+				input.put("cmd", "dropBoard");
+				interact.execute("/community/boardMgr", input);
+
+				String result = getJsonFormat("");
+				responseJson(result, resp);
+			} catch (Exception ex) {
+				responseJson(
+						getJsonFormat(
+								HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+								ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	
+	
+	public void getBoardListForMenu(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			
+			input.put("cmd", "boardListForMenu");
+			output = interact.execute( "/community/boardMgr" , input);			
+			String[] blockNames = new String[]{"board_menu_list"};
+
+			output.put(
+					jdf.framework.logic.transform.TransFormConstant.GRID_TYPE,
+					input.getText("grid_type"));
+
+			String result = getJQGridXML(output, blockNames);
+			responseXML(result, resp);
+			
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

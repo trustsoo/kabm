@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="MenuMgr">
+	<processor-info type='dbms' datasource=''>
+	
+	<property name="sqlLogMode" value="bind"/>
+	<property name="isPrint" value="Y"/>
+	
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			
+			
+			if("PURGE_MENU".equals(cmd))
+			{
+				executeSQL("PURGE_MENU", connection, input, output);
+				
+				int deleteNum = 0;
+				try
+				{
+					deleteNum = Integer.parseInt(output.getProperty("rowcount.update:PURGE_MENU"));
+				} catch(Exception ex)
+				{
+				}
+				
+				if(deleteNum == 0)
+					throw new jdf.framework.core.data.ResourceException("", 20406);
+				
+			} 
+			else if("DEPLOY_BOARD_MENU".equals(cmd))
+			{
+				executeSQL("DEPLOY_BOARD_MENU", connection, input, output);
+				executeSQL("UPDATE_BOARD_MENU_REL", connection, input, output);
+			}
+			else
+			{
+				executeSQL(cmd, connection, input, output);
+			}
+			
+			
+			]]> 
+
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		
+		<sql id="GET_LIST">
+			<query>
+				<![CDATA[
+					select
+						a.menu_id, a.p_menu_id, a.url, a.menu_nm, a.sort_no, 
+					    a.depth, a.params, a.auth_type, a.layout,
+						CASE charindex('top', p_menu_id)
+							WHEN 0 THEN 
+								CASE ISNULL((SELECT top 1 'a' flag FROM tb_kabm_menu y WHERE y.p_menu_id = a.menu_id ORDER BY y.p_menu_id, y.sort_no), 'default')								
+									WHEN 'a' THEN 'folder'
+									ELSE 'default'
+								END 
+							ELSE 'drive'								
+						END rel,						
+						ISNULL((SELECT top 1 'Y' FROM tb_kabm_menu y WHERE y.p_menu_id = a.menu_id ORDER BY y.p_menu_id, y.sort_no), 'N') is_exsit_sub,
+						a.view_yn, menu_id id, menu_nm data,
+						a.popup_yn,a.menu_icon
+					from tb_kabm_menu a
+					where  a.p_menu_id = ?
+					ORDER BY a.sort_no
+				]]>
+			</query>
+			<mapping>
+				<setProperty>menu_id</setProperty>
+				<getProperty>menu_id, p_menu_id, url, menu_nm, sort_no, 
+							level,params,auth_type,layout,
+							rel,is_exsit_sub,view_yn,id,data,popup_yn,menu_icon</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="GET_LIST_ALL">
+			<query>
+				<![CDATA[
+					WITH cte_parent AS
+					(
+					SELECT
+						a.menu_id, a.p_menu_id, a.url, a.menu_nm, a.sort_no, 
+					    a.depth, a.params, a.auth_type, a.layout,
+						a.view_yn, menu_id id, menu_nm data,
+						CONVERT(VARCHAR(4000), CAST(menu_id AS VARCHAR(4000)) + '') menu_path,
+						a.popup_yn,a.menu_icon
+					FROM tb_kabm_menu a
+					where a.depth = 1
+					UNION ALL
+					SELECT
+						a.menu_id, a.p_menu_id, a.url, a.menu_nm, a.sort_no, 
+					    a.depth, a.params, a.auth_type, a.layout,
+						a.view_yn, a.menu_id id, a.menu_nm data,
+						convert(varchar(4000), convert(varchar(4000),b.menu_path) + '>' +  convert(varchar(4000), a.menu_id)) menu_path,
+						a.popup_yn,a.menu_icon
+					FROM tb_kabm_menu a
+					INNER JOIN cte_parent b
+						ON a.p_menu_id = b.menu_id
+					)
+					SELECT 
+						a.menu_id, a.p_menu_id, a.url, a.menu_nm, a.sort_no, 
+					    a.depth, a.params, a.auth_type, a.layout,					    
+					    CASE charindex('top', a.p_menu_id)
+							WHEN 0 THEN 
+								CASE ISNULL((SELECT top 1 'a' flag FROM tb_kabm_menu y WHERE y.p_menu_id = a.menu_id ORDER BY y.p_menu_id, y.sort_no), 'default')								
+									WHEN 'a' THEN 'folder'
+									ELSE 'default'
+								END 
+							ELSE 'drive'								
+						END rel,						
+						ISNULL((SELECT top 1 'Y' FROM tb_kabm_menu y WHERE y.p_menu_id = a.menu_id ORDER BY y.p_menu_id, y.sort_no), 'N') is_exsit_sub,
+						a.view_yn, a.menu_id id, a.menu_nm data,
+						'-1>'+menu_path menu_path, a.popup_yn,a.menu_icon
+					FROM cte_parent a			
+					ORDER BY a.depth, a.sort_no
+				]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>menu_id, p_menu_id, url, menu_nm, sort_no, 
+							level,params,auth_type,layout,
+							rel,is_exsit_sub,view_yn,id,data,menu_path,	popup_yn,menu_icon</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_LIST_CMPNY">
+			<query>
+				<![CDATA[
+					WITH cte_parent AS
+					(
+					SELECT
+						a.menu_id, a.p_menu_id, a.url, a.menu_nm, a.sort_no, 
+					    a.depth, a.params, a.auth_type, a.layout,
+						a.view_yn, menu_id id, menu_nm data,
+						CONVERT(VARCHAR(4000), CAST(menu_id AS VARCHAR(4000)) + '') menu_path,
+						a.popup_yn,a.menu_icon
+					FROM tb_kabm_menu a
+					where a.depth = 1					
+					UNION ALL
+					SELECT
+						a.menu_id, a.p_menu_id, a.url, a.menu_nm, a.sort_no, 
+					    a.depth, a.params, a.auth_type, a.layout,
+						a.view_yn, a.menu_id id, a.menu_nm data,
+						convert(varchar(4000), convert(varchar(4000),b.menu_path) + '>' +  convert(varchar(4000), a.menu_id)) menu_path,
+						a.popup_yn,a.menu_icon
+					FROM tb_kabm_menu a
+					INNER JOIN cte_parent b
+						ON a.p_menu_id = b.menu_id
+					)
+					SELECT 
+						a.menu_id, a.p_menu_id, a.url, a.menu_nm, a.sort_no, 
+					    a.depth, a.params, a.auth_type, a.layout,
+						CASE charindex('top', a.p_menu_id)
+							WHEN 0 THEN 
+								CASE ISNULL((SELECT top 1 'a' flag FROM tb_kabm_menu y WHERE y.p_menu_id = a.menu_id ORDER BY y.p_menu_id, y.sort_no), 'default')								
+									WHEN 'a' THEN 'folder'
+									ELSE 'default'
+								END 
+							ELSE 'drive'								
+						END rel,						
+						ISNULL((SELECT top 1 'Y' FROM tb_kabm_menu y WHERE y.p_menu_id = a.menu_id ORDER BY y.p_menu_id, y.sort_no), 'N') is_exsit_sub,
+						a.view_yn, a.menu_id id, a.menu_nm data,
+						'-1>'+menu_path menu_path, a.popup_yn,a.menu_icon
+					FROM cte_parent a
+					ORDER BY a.depth, a.sort_no
+				]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>menu_id, p_menu_id, url, menu_nm, sort_no, 
+							level,params,auth_type,layout,
+							rel,is_exsit_sub,view_yn,id, data,menu_path,popup_yn,menu_icon</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		
+		
+		<sql id="GET_DETAIL_SIMPLE">
+			<query>
+				<![CDATA[
+					SELECT
+					    a.menu_id, a.p_menu_id, a.url, a.menu_nm, a.sort_no, 
+					    a.depth, a.params, a.auth_type, a.layout, a.view_yn,
+					    a.params, a.popup_yn, a.menu_icon,
+						CONVERT(VARCHAR, a.reg_dt, 120) reg_dt,
+						CONVERT(VARCHAR, a.upd_dt, 120) upd_dt,					   
+						a.reg_emp_cd,
+						b.emp_nm reg_user_nm,
+						a.upd_emp_cd,
+						c.emp_nm upd_user_nm
+					FROM tb_kabm_menu a
+						LEFT OUTER JOIN tb_kabm_emp b
+							ON a.reg_emp_cd = b.emp_cd
+						LEFT OUTER JOIN tb_kabm_emp c
+							ON a.upd_emp_cd = c.emp_cd
+					WHERE a.menu_id = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>menu_id</setProperty>
+				<getProperty>menu_id, p_menu_id, url, menu_nm, sort_no,
+							level,params,auth_type, layout, view_yn, 
+							params, popup_yn,menu_icon,reg_dt, upd_dt,
+							reg_emp_cd, reg_user_nm, upd_emp_cd, upd_user_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="GET_DETAIL">
+			<query>
+				<![CDATA[
+					SELECT
+						x.menu_id, x.p_menu_id, x.url, x.menu_nm, x.sort_no, 
+						x.depth, x.params, x.auth_type, x.view_yn, 
+						CASE charindex('top', x.p_menu_id)
+							WHEN 0 THEN 
+								CASE ISNULL((SELECT top 1 'a' flag FROM tb_kabm_menu y WHERE y.p_menu_id = x.menu_id ORDER BY y.p_menu_id, y.sort_no), 'default')								
+									WHEN 'a' THEN 'folder'
+									ELSE 'default'
+								END 
+							ELSE 'drive'								
+						END rel,						
+						ISNULL((SELECT top 1 'Y' FROM tb_kabm_menu y WHERE y.p_menu_id = x.menu_id ORDER BY y.p_menu_id, y.sort_no), 'N') is_exsit_sub,
+						x.popup_yn,a.menu_icon				
+					FROM tb_kabm_menu x 
+					WHERE x.menu_id = ?  
+				]]>
+			</query>
+			<mapping>
+				<setProperty>menu_id</setProperty>
+				<getProperty>menu_id, p_menu_id, url, menu_nm, sort_no, 
+							level,params,auth_type,view_yn,
+							rel, is_exsit_sub,popup_yn,menu_icon</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="MOVE">
+			<query type="storedprocedure">		
+			<![CDATA[
+				{ call sp_move_menu(?, ?, ?) }
+			]]>
+			</query>
+	
+			<mapping-procedure>			
+				<param seq="1" mode="in" type="VARCHAR">menu_id</param>
+				<param seq="2" mode="in" type="VARCHAR">p_menu_id</param>
+				<param seq="3" mode="in" type="INTEGER">position</param>				
+			</mapping-procedure>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="PURGE_MENU">
+			<query>
+			<![CDATA[
+				DELETE FROM tb_kabm_menu WHERE menu_id = ? OR p_menu_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>menu_id,menu_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="UPDATE_MENU">
+			<query>
+				<![CDATA[
+					UPDATE tb_kabm_menu SET					    
+					    url = ?,
+					    menu_nm = ?,
+					    params = ?,
+					    auth_type = ?,
+					    view_yn = ?,
+					    sort_no = ?,					    
+					    upd_emp_cd = ?,
+					    layout = ?,
+					    popup_yn = ?,
+					    menu_icon = ?,
+					    upd_dt = getdate()					    				    
+					WHERE menu_id = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>url, menu_nm, params, auth_type, view_yn, sort_no, emp_cd, layout, popup_yn, menu_icon,menu_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="CREATE_MENU">
+			<query>
+				<![CDATA[				
+					MERGE INTO tb_kabm_menu  a 
+					USING (SELECT ? menu_id )  b
+					ON (a.menu_id = b.menu_id)
+					WHEN MATCHED THEN
+					  UPDATE SET					    
+					    a.menu_nm = ?, 
+						a.url = ?, 
+						a.layout = ?, 
+						a.sort_no = ?, 
+						a.view_yn = ?, 
+						a.auth_type = ?, 
+						a.params = ?, 
+						a.depth = ?,
+						a.upd_dt = getdate(),
+						a.upd_emp_cd = ?, 
+						a.menu_icon = ?, 
+						a.popup_yn = ?
+					WHEN NOT MATCHED THEN
+					  INSERT
+					  (menu_id, p_menu_id, menu_nm, url, layout, 
+					   sort_no, view_yn, auth_type, params, depth, 
+					   reg_emp_cd, upd_emp_cd, menu_icon, popup_yn,
+					   reg_dt, upd_dt)
+					  VALUES
+					  (?, ?, ?, ?, ?, 
+					   ?, ?, ?, ?, ?, 
+					   ?, ?, ?, ?, 
+					  getdate(), getdate());
+				]]>
+			</query>
+			<mapping>
+				<setProperty>menu_id, menu_nm, url, layout, sort_no, view_yn, auth_type, params, depth, emp_cd, menu_icon, popup_yn,
+							 menu_id, p_menu_id, menu_nm, url, layout, sort_no, view_yn, auth_type, params, depth, emp_cd, emp_cd, menu_icon, popup_yn</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+	</processor-info>
+
+	<input>
+		<block name="arg" repeat="1">
+			<field name="menu_id" type="string" size="0" />
+			<field name="id" type="string" size="0" />			
+			<field name="menu_nm" type="string" size="0" />
+			<field name='url' type='String'	size=''/>
+			<field name='depth' type='int'	size=''/>
+			<field name='layout' type='String'	size=''/>
+			<field name='sort_no' type='int'	size=''/>			
+			<field name='emp_cd' type='String'	size=''/>
+			<field name='view_yn' type='String'	size=''/>
+			<field name='params' type='String'	size=''/>
+			<field name='p_menu_id' type='String'	size=''/>
+			<field name='position' type='int'	size=''/>
+			<field name='auth_type' type='String'	size=''/>
+			<field name='popup_yn' type='String'	size=''/>		
+			<field name='menu_icon' type='String'	size=''/>
+		</block>
+	</input>
+	<output>
+		<block repeat=''>
+			<field name="menu_id" type="string" size="0" />
+			<field name="p_menu_id" type="string" size="0" />
+			<field name="menu_nm" type="string" size="0" />
+			<field name='url' type='String'	size=''/>
+			<field name='level' type='String'	size=''/>
+			<field name='layout' type='String'	size=''/>
+			<field name='sort_no' type='int'	size=''/>			
+			<field name='view_yn' type='String'	size=''/>
+			<field name='params' type='String'	size=''/>
+			<field name='auth_type' type='String'	size=''/>
+			<field name='p_menu_id' type='String'	size=''/>
+			<field name='lvl' type='String'	size=''/>
+			<field name='is_exsit_sub' type='String'	size=''/>
+			<field name='rel' type='String'	size=''/>
+			<field name='menu_path' type='String'	size=''/>
+			<field name='popup_yn' type='String'	size=''/>
+			<field name='id' type='String'	size=''/>
+			<field name='data' type='String'	size=''/>
+			<field name='menu_icon' type='String'	size=''/>
+		</block>
+		
+		<block name="menu_list" id="menu_list" repeat="999999">
+			<field name="menu_id" type="string" size="0" properties="isDataId:true"/>
+			<field name='data' type='String'	size='' properties="isDataNm:true"/>
+			<field name="p_menu_id" type="string" size="0" />
+			<field name="url" type="string" size="0" />
+			<field name="menu_nm" type="string" size="0" />
+			<field name="sort_no" type="string" size="0" />			
+			<field name="level" type="string" size="0" />
+			<field name="params" type="string" size="0" />
+			<field name='auth_type' type='String'	size=''/>
+			<field name='rel' type='String'	size=''/>
+			<field name='is_exsit_sub' type='String'	size=''/>
+			<field name='popup_yn' type='String'	size=''/>
+			<field name='view_yn' type='String'	size=''/>
+			<field name='menu_icon' type='String'	size=''/>
+		</block>		
+		
+		<block name="menu_detail" id="menu_detail" repeat="999999">
+			<field name="menu_id" type="string" size="0" />
+			<field name="p_menu_id" type="string" size="0" />
+			<field name="url" type="string" size="0" />
+			<field name="menu_nm" type="string" size="0" />
+			<field name="sort_no" type="string" size="0" />			
+			<field name="level" type="string" size="0" />
+			<field name="params" type="string" size="0" />			
+			<field name="layout" type="string" size="0" />
+			<field name='flag' type='String'	size=''/>
+			<field name='auth_type' type='String'	size=''/>
+			<field name='view_yn' type='String'	size=''/>
+			<field name='popup_yn' type='String'	size=''/>
+			<field name='reg_dt' type='String'	size=''/>
+			<field name='upd_dt' type='String'	size=''/>
+			<field name='reg_emp_cd' type='String'	size=''/>
+			<field name='reg_user_nm' type='String'	size=''/>
+			<field name='upd_emp_cd' type='String'	size=''/>
+			<field name='upd_user_nm' type='String'	size=''/>						
+			<field name='rel' type='String'	size=''/>
+			<field name='is_exsit_sub' type='String'	size=''/>
+			<field name='menu_icon' type='String'	size=''/>
+		</block>
+	</output>
+</transaction>

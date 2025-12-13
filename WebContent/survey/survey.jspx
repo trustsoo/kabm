@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+	<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.UUID" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+		private final String LIST_PAGE = "/survey/_survey_list.jsp";
+		private final String WRITE_PAGE = "/survey/_survey_write.jsp";
+	    private final String APPLY_PAGE="/survey/_survey_apply.jsp";
+	    	    
+	    public void list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+
+			try
+			{
+				
+				req.setAttribute("input", input);
+				req.setAttribute("output", output);
+				view.setViewPage(LIST_PAGE);				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void write(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+	
+			try
+			{
+				
+				String uuid = java.util.UUID.randomUUID().toString().replace("-", "");
+
+				req.setAttribute("input", input);
+				req.setAttribute("output", output);
+				view.setViewPage(WRITE_PAGE);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void apply(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+	
+			try
+			{
+				req.setAttribute("input", input);
+				req.setAttribute("output", output);
+				view.setViewPage(APPLY_PAGE);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    
+	]]>
+	</jsp:declaration>
+</jsp:root>

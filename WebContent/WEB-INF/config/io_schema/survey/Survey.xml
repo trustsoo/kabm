@@ -1,0 +1,515 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='Survey' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<property name="sqlLogMode" value="bind"/>
+		<script language="java" import="java.util.*,
+							java.util.regex.Pattern">
+			<![CDATA[
+		
+		String cmd = input.getText("cmd");
+		
+		if("create".equals(cmd))
+		{
+			String paper_id = input.getText("paper_id");
+			
+			String mode = "update";
+			
+			if ("0".equals(paper_id) || "".equals(paper_id)) {
+				java.util.UUID uuid = java.util.UUID.randomUUID();
+				long l = java.nio.ByteBuffer.wrap(uuid.toString().getBytes()).getLong();
+				paper_id = Long.toString(l, Character.MAX_RADIX);
+				input.put("paper_id", paper_id);
+				
+				mode = "insert";
+			}
+			
+			if ("insert".equals(mode)) {
+				executeSQL("insertPaper", connection, input, output);
+			} else {
+				executeSQL("updatePaper", connection, input, output);
+				
+				executeSQL("deletetQstnExmp", connection, input, output);
+				executeSQL("deleteQstn", connection, input, output);				
+			}
+			
+			String qstn_no = null;
+			String exmp_seq_no = null;
+			
+			DataSet exmpInput = new DataSet();
+			int jdx = 0;
+			for (int idx=0; idx<input.getInt("qstn_cnt"); idx++) {
+				qstn_no = paper_id + "_" + input.getText("qstn_id", idx);
+
+				DataSet questionInput = new DataSet();
+				questionInput.put("qstn_no", qstn_no);
+				questionInput.put("paper_id", input.getText("paper_id"));
+				questionInput.put("qstn_answ", input.getText("qstn_answ", idx));
+				questionInput.put("answ_type", input.getText("answ_type", idx));				
+				questionInput.put("answ_cnt", input.getText("answ_cnt", idx));
+				questionInput.put("exmp_add_seq", input.getText("exmp_add_seq", idx));
+				questionInput.put("multi_yn", input.getText("multi_yn", idx));
+				questionInput.put("multi_cnt", input.getText("multi_cnt", idx));
+				questionInput.put("connect_yn", input.getText("connect_yn", idx));
+				questionInput.put("qstn_ord", input.getText("qstn_ord", idx));
+
+				executeSQL("insertQstn", connection, questionInput, output);
+				
+				DataSet temp = (DataSet)input.get("qstn_"+idx);
+
+				for (int kdx=0; kdx<temp.getMaxDataSize(); kdx++) {
+					exmpInput.put("exmp_seq_no", qstn_no + "_" + temp.getText("exmp_id", kdx), jdx);
+					exmpInput.put("qstn_no", qstn_no, jdx);
+					exmpInput.put("exmp_sort_no", kdx+1, jdx);
+					exmpInput.put("exmp_word", temp.getText("exmp_word", kdx), jdx);
+					exmpInput.put("connect_qstn_no", paper_id+"_"+temp.getText("connect_qstn_no", kdx), jdx);
+					jdx++;
+				}
+			}
+			
+			if (exmpInput.getMaxDataSize() > 0) {
+				executeSQL("insertQstnExmp", connection, exmpInput, output);
+			}
+			
+			output.put("paper_id", paper_id);
+		} else if ("drop".equals(cmd)) {
+			executeSQL("deletePaper", connection, input, output);
+			if(Integer.parseInt(output.getProperty("rowcount.update:deletePaper")) > 0){
+				executeSQL("deletetQstnExmp", connection, input, output);
+				executeSQL("deleteQstn", connection, input, output);
+			}
+		} 
+		else if("answCreate".equals(cmd)){
+				
+			DataSet surveyAnswer = (DataSet)input.get("surveyAnswer");
+							
+			if(surveyAnswer.getMaxDataSize() > 1)
+			{
+				executeSQL("insertSurveyAnswPop", connection, surveyAnswer, output);
+				executeSQL("updateCustProPop", connection, input, output);
+			}	
+								
+		}else if("answDeleteCreate".equals(cmd)){ 
+		
+			DataSet surveyAnswer = (DataSet)input.get("surveyAnswer");
+				
+			if(!"".equals(input.getText("user_lecture_seq_no"))){	
+				executeSQL("deleteSurveyCust", connection, input, output);
+				executeSQL("insertSurveyCust", connection, surveyAnswer, output);
+					
+				if(surveyAnswer.getMaxDataSize() > 0)
+				{	
+					executeSQL("deleteSurveyAnsw", connection, input, output);
+					executeSQL("insertSurveyAnsw", connection, surveyAnswer, output);
+				}	
+			}		
+			
+		}else
+		{
+			executeSQL(cmd, connection, input, output);
+		}
+		
+		
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="insertPaper">
+			<query>
+				<![CDATA[
+				INSERT INTO tb_survey_paper
+				(paper_id, paper_title, qstn_cnt, qstn_add_seq, reg_dt)
+				VALUES
+				(?, ?, ?, ?, getdate())
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id, paper_title, qstn_cnt, qstn_add_seq</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="updatePaper">
+			<query>
+				<![CDATA[
+				UPDATE tb_survey_paper SET
+					paper_title = ?, 
+					qstn_cnt = ?,
+					qstn_add_seq = ?,
+					upd_dt = getdate()
+				WHERE paper_id = ?				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_title, qstn_cnt, qstn_add_seq, paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="insertQstn">
+			<query>
+				<![CDATA[
+				INSERT
+				INTO   tb_survey_qstn (
+					qstn_no, paper_id, qstn_answ, answ_type, answ_cnt,
+					exmp_add_seq, multi_yn, multi_cnt, connect_yn, qstn_ord
+				) VALUES (
+					?, ?, ?, ?, ?,
+					?, ?, ?, ?, ?
+				)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>
+					qstn_no, paper_id, qstn_answ, answ_type, answ_cnt,
+					exmp_add_seq, multi_yn, multi_cnt, connect_yn, qstn_ord
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getQstnNo">
+			<query>
+				<![CDATA[
+				SELECT MAX(qstn_no)+1 AS qstn_no FROM TB_SURVEY_QSTN				
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>qstn_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="deleteQstn">
+			<query>
+				<![CDATA[
+				DELETE FROM tb_survey_qstn WHERE paper_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="insertQstnExmp">
+			<query type="batch">
+				<![CDATA[
+				INSERT INTO tb_survey_qstn_exmp
+				(exmp_seq_no, exmp_sort_no, qstn_no, exmp_word, connect_qstn_no)
+				VALUES
+				(?, ?, ?, ?, ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>exmp_seq_no, exmp_sort_no, qstn_no, exmp_word, connect_qstn_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="deletetQstnExmp">
+			<query>
+				<![CDATA[
+				DELETE FROM tb_survey_qstn_exmp WHERE qstn_no IN (SELECT qstn_no FROM tb_survey_qstn WHERE paper_id = ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getPaperList">
+			<query>
+				<![CDATA[
+				
+					SELECT  a.paper_id,
+							a.paper_title,
+							a.qstn_cnt,
+							CONVERT(VARCHAR, reg_dt, 120) reg_dt,
+							CONVERT(VARCHAR, upd_dt, 120) upd_dt
+					FROM tb_survey_paper a with(nolock)
+					
+				
+				
+			]]>
+			</query>
+			<mapping>
+				<getProperty>paper_id, paper_title, qstn_cnt, reg_dt, upd_dt</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		
+		<sql id="getPaperInfo">
+			<query>
+				<![CDATA[
+				SELECT
+					a.paper_id,
+					a.paper_title,
+					a.qstn_cnt,
+					a.qstn_add_seq,
+					CONVERT(VARCHAR, a.reg_dt, 120) reg_dt,					
+					CONVERT(VARCHAR, a.upd_dt, 120) upd_dt
+				FROM tb_survey_paper a with(nolock) 
+				WHERE 	a.paper_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id</setProperty>
+				<getProperty>paper_id, paper_title, qstn_cnt, qstn_add_seq, reg_dt, upd_dt</getProperty>
+			</mapping>
+		</sql>
+
+		
+		<sql id="deletePaper">
+			<query>
+				<![CDATA[
+				DELETE FROM tb_survey_paper WHERE paper_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="getQstnList">
+			<query>
+				<![CDATA[
+				SELECT 
+					a.qstn_no,
+					a.qstn_answ,
+					a.answ_type,
+					a.answ_cnt,
+					a.exmp_add_seq,
+					a.multi_yn,
+					a.multi_cnt,
+					b.exmp_seq_no,
+					b.exmp_sort_no,
+					b.exmp_word,
+					ISNULL(a.connect_yn, 'N') AS connect_yn,
+          			(CASE WHEN a.connect_yn = 'Y' THEN b.CONNECT_QSTN_NO else '' end) as connect_qstn_no,
+          			a.qstn_ord
+				FROM tb_survey_qstn a 
+				LEFT OUTER JOIN tb_survey_qstn_exmp b ON a.qstn_no = b.qstn_no
+				WHERE a.paper_id = ?
+				ORDER BY a.qstn_ord ,b.exmp_sort_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id</setProperty>
+				<getProperty>qstn_no, qstn_answ, answ_type, answ_cnt, exmp_add_seq, multi_yn, 
+				multi_cnt, exmp_seq_no, exmp_sort_no, exmp_word, connect_yn, connect_qstn_no, qstn_ord</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getAnswList">
+			<query>
+				<![CDATA[
+				SELECT
+				a.answ, b.qstn_no, c.exmp_word, c.exmp_seq_no,
+				(select status from tb_cyber_user_lecture where user_lecture_seq_no = a.user_lecture_seq_no) as status
+				FROM tb_survey_answ a INNER JOIN tb_survey_qstn b ON a.qstn_no = b.qstn_no
+				LEFT OUTER JOIN tb_survey_qstn_exmp c ON a.answ = c.exmp_seq_no +''
+				WHERE a.user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>answ, qstn_no, exmp_word, exmp_seq_no, status</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="insertSurveyAnsw">
+			<query type='batch'>
+				<![CDATA[
+				INSERT INTO TB_SURVEY_ANSW
+				(answ_seq_no, qstn_no, user_lecture_seq_no, answ, paper_id)
+				VALUES
+				((SELECT ISNULL(MAX(ANSW_SEQ_NO)+1,1) FROM TB_SURVEY_ANSW as a) , ?, ?, ?, ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>qstn_no, user_lecture_seq_no, answ, paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+				
+		<sql id="deleteSurveyAnsw">
+			<query>
+				<![CDATA[
+				DELETE FROM tb_survey_answ
+				WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="insertSurveyCust">
+			<query>
+			<![CDATA[
+				INSERT INTO TB_SURVEY_CUST 
+				(user_lecture_seq_no, paper_id, proc_yn, reg_dt, upd_dt, proc_dt)
+				VALUES
+				(? , ? , 'Y', getdate(), getdate(), getdate())
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no, paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		 </sql>
+		 <sql id="deleteSurveyCust">
+			<query>
+				<![CDATA[
+				DELETE FROM TB_SURVEY_CUST
+				WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		 <sql id="updateCustProPop">
+			<query>
+			<![CDATA[
+				UPDATE TB_SURVEY_CUST SET 
+					 proc_yn = 'Y',
+				     proc_dt = getdate()
+				WHERE user_lecture_seq_no = ?	
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		 </sql>
+		 <sql id="getPaperList2">
+			<query>
+				<![CDATA[
+				SELECT 
+					paper_id as cd, 
+					paper_title as cd_nm
+				FROM tb_survey_paper 
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>cd, cd_nm</getProperty>
+			</mapping>
+		</sql>
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='paper_id' type='String' size=''/>
+			<field name='paper_title' type='String' size=''/>
+			<field name='qstn_cnt' type='int' size=''/>
+			<field name='qstn_add_seq' type='int' size=''/>
+			
+			<field name='qstn_no' type='String' size=''/>
+			<field name='qstn_answ' type='String' size=''/>
+			<field name='answ_type' type='String' size=''/>
+			<field name='answ_cnt' type='int' size=''/>
+			<field name='exmp_add_seq' type='int' size=''/>
+			<field name='multi_yn' type='String' size=''/>
+			<field name='multi_cnt' type='int' size=''/>
+			<field name='qstn_ord' type='String' size=''/>
+
+			<field name='exmp_seq_no' type='String' size=''/>
+			<field name='exmp_sort_no' type='int' size=''/>
+			<field name='exmp_word' type='String' size=''/>
+			
+			<field name='answ' type='String' size=''/>
+			
+			<field name='connect_yn' type='String' size=''/>
+			<field name='connect_qstn_no' type='String' size=''/>
+			<field name='user_lecture_seq_no' type='String' size=''/>			
+		</block>
+	</input>
+	
+	
+	<output>
+		<block name="arg">
+			<field name='proc_dt' type='String' size=''/>
+			<field name='proc_yn' type='String' size=''/>
+			<field name='user_lecture_seq_no' type='String' size=''/>
+			
+			<field name='answ' type='String' size=''/>			
+			
+			<field name='paper_id' type='String' size=''/>
+			<field name='paper_title' type='String' size=''/>
+			<field name='qstn_cnt' type='int' size=''/>
+			<field name='qstn_add_seq' type='int' size=''/>
+			
+			<field name='qstn_no' type='String' size=''/>
+			<field name='qstn_answ' type='String' size=''/>
+			<field name='answ_type' type='String' size=''/>
+			<field name='answ_cnt' type='String' size=''/>
+			<field name='exmp_add_seq' type='String' size=''/>
+			<field name='multi_yn' type='String' size=''/>
+			<field name='multi_cnt' type='String' size=''/>
+			
+			<field name='exmp_seq_no' type='String' size=''/>
+			<field name='exmp_sort_no' type='String' size=''/>
+			<field name='exmp_word' type='String' size=''/>
+			
+			<field name='reg_dt' type='String' size=''/>
+			<field name='upd_dt' type='String' size=''/>
+			
+			<field name='status' type='String' size=''/>
+			<field name='connect_yn' type='String' size=''/>
+			<field name='connect_qstn_no' type='String' size=''/>
+			<field name='user_lecture_seq_no' type='String' size=''/>			
+		
+		</block>
+		
+		<block id="paper_info" name="paper_info" repeat="999999">
+			<field name='paper_id' type='String' size='' label='설문지번호' properties="isUnique:true"/>
+			<field name='paper_title' type='String' size='' label='제목'/>
+			<field name='qstn_cnt' type='String' size='' label='문항개수'/>
+			<field name='qstn_add_seq' type='int' size='' label='문항시퀀스'/>
+			<field name='reg_dt' type='String' size='' label='등록일시'/>
+			<field name='upd_dt' type='String' size='' label='최종수정일시'/>
+			
+		</block>
+		
+		<block id="qstn_list" name="qstn_list" repeat="999999">
+			<field name='qstn_no' type='String' size=''/>
+			<field name='qstn_answ' type='String' size=''/>
+			<field name='answ_type' type='String' size=''/>
+			<field name='answ_cnt' type='String' size=''/>
+			<field name='exmp_add_seq' type='String' size=''/>
+			<field name='multi_yn' type='String' size=''/>
+			<field name='multi_cnt' type='String' size=''/>
+			<field name='connect_yn' type='String' size=''/>
+			<field name='qstn_ord' type='String' size=''/>
+		</block>
+		
+		<block id="qstn_exmp_list" name="qstn_exmp_list" repeat="999999">
+			<field name='qstn_no' type='String' size=''/>
+			<field name='exmp_seq_no' type='String' size=''/>
+			<field name='exmp_sort_no' type='String' size=''/>
+			<field name='exmp_word' type='String' size=''/>
+			<field name='connect_qstn_no' type='String' size=''/>
+		</block>
+		
+		<block id="answ_list" name="answ_list" repeat="999999">
+			<field name='answ' type='String' size=''/>
+			<field name='qstn_no' type='String' size=''/>
+			<field name='exmp_word' type='String' size=''/>
+			<field name='exmp_seq_no' type='String' size=''/>
+			<field name='status' type='String' size=''/>
+		</block>
+		<block id='cd_list' name='cd_list' repeat='9999999'>
+			<field name='cd' type='String'	size='' properties="isUnique:true"/>
+			<field name='cd_nm' type='String'	size=''/>
+		</block>
+	</output>
+</transaction>

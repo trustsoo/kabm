@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="ClassMgr">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			executeSQL(cmd, connection, input, output);
+			
+			
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="GET_CLASS_CODE_LIST">
+			<query>
+			<![CDATA[
+				select 
+					a.lecture_seq_no,
+					a.class_no,
+					a.title,
+					a.play_time,
+					a.summary,
+					a.file_path,
+					a.html_path,
+					b.lecture_div
+				from tb_cyber_class a, tb_cyber_lecture b
+				where a.lecture_seq_no = ?
+				and a.lecture_seq_no = b.lecture_seq_no
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>lecture_seq_no</setProperty>
+				<getProperty>
+					lecture_seq_no,class_no,title,play_time,summary,file_path,html_path,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_CLASS_LIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					user_lecture_seq_no,
+					lecture_seq_no,
+					status,
+					case status when '00' then '수강전' 
+					            when '01' then '수강중' 
+					            when '02' then '평가중'
+					            when '03' then '완료'
+					            when '09' then '실격'  
+					else '삭제' END AS status_nm ,
+					certication_file_path,
+					title,
+					dbo.formatDateTime(start_dt,'yyyy.mm.dd') start_dt,
+					dbo.formatDateTime(end_dt,'yyyy.mm.dd') end_dt,
+					tot_cnt,
+					lecture_div
+				FROM
+				(	
+					select 
+						a.user_lecture_seq_no,
+						a.lecture_seq_no,
+						a.status,
+						a.certication_file_path,
+						c.title,
+						d.start_dt,
+						d.end_dt,
+						ROW_NUMBER() over( order by a.user_lecture_seq_no desc) rnum,
+						COUNT(a.user_lecture_seq_no) over() tot_cnt,
+						c.lecture_div
+					from TB_CYBER_USER_LECTURE a 
+					LEFT JOIN TB_CYBER_LECTURE c 
+					ON a.lecture_seq_no = c.lecture_seq_no
+					LEFT JOIN ( select user_lecture_seq_no , min( t.study_start_dt) start_dt , max( t.study_end_dt ) end_dt 
+					            from TB_CYBER_USER_CLASS t where status <> '9'
+					            group by user_lecture_seq_no) d
+					ON a.user_lecture_seq_no = d.user_lecture_seq_no
+					WHERE a.user_seq_no = ?
+					AND a.status <> '99'
+					$addWhere
+				)a	
+				where a.rnum > (?-1)*?	
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no,page_no,rnum</setProperty>
+				<getProperty>
+					user_lecture_seq_no,
+					lecture_seq_no,
+					status,
+					status_nm,
+					certication_file_path,
+					title,
+					start_dt,
+					end_dt,
+					tot_cnt,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_USER_CLASS_ALLLIST">
+			<query>
+			<![CDATA[
+				select 
+					a.lecture_seq_no,
+					a.class_no,
+					b.title,
+					b.play_time,
+					b.summary,
+					b.file_path,
+					b.html_path,
+					ISNULL(a.status,'') status,
+					case ISNULL(a.status,'0') 
+						when '0' then '수강전' 
+						when '1' then '수강중' 
+						when '2' then '수강중'
+						when '3' then '완료'
+						when '4' then '실격'
+						else '삭제' 
+					END AS status_nm ,
+					a.estimate_pass_yn,
+					case ISNULL(a.estimate_pass_yn,'N') 
+						when 'Y' then '완료' 
+						else case ISNULL(a.status,'0') 
+								when '0' then '평가전' 
+								when '1' then '평가전' 
+								when '2' then '평가중'
+								when '3' then '완료'
+								when '4' then '실격'
+								else '삭제' 
+							END 
+					END AS estimate_nm ,
+					a.user_class_seq_no,
+					a.user_lecture_seq_no,
+					ISNULL(a.estimate_cnt , 0 ) estimate_cnt,
+					b.teacher,
+					b.history_path,
+					b.edu_path,
+					b.photo_path,
+					c.lecture_div
+				from tb_cyber_user_class a,tb_cyber_class b, tb_cyber_lecture c
+				where a.class_no = b.class_no
+				and a.lecture_seq_no = b.lecture_seq_no
+				and a.lecture_seq_no = c.lecture_seq_no
+				and a.user_lecture_seq_no = ?
+				order by b.class_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					lecture_seq_no,class_no,title,play_time,summary,file_path,html_path,status,status_nm,
+					estimate_pass_yn,estimate_nm,
+					user_class_seq_no,
+					user_lecture_seq_no,
+					estimate_cnt,
+					teacher,
+					history_path,
+					edu_path,
+					photo_path,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_USER_CLASS_LIST">
+			<query>
+			<![CDATA[
+				select 
+					a.lecture_seq_no,
+					a.class_no,
+					b.title,
+					b.play_time,
+					b.summary,
+					b.file_path,
+					b.html_path,
+					ISNULL(a.status,'') status,
+					case ISNULL(a.status,'0') 
+						when '0' then '수강전' 
+						when '1' then '수강중' 
+						when '2' then '수강중'
+						when '3' then '완료'
+						when '4' then '실격'
+						else '삭제' 
+					END AS status_nm ,
+					ISNULL(a.estimate_pass_yn,'N') estimate_pass_yn,
+					case ISNULL(a.estimate_pass_yn,'N') 
+						when 'Y' then '완료' 
+						else case ISNULL(a.status,'0') 
+								when '0' then '평가전' 
+								when '1' then '평가전' 
+								when '2' then '평가중'
+								when '3' then '완료'
+								when '4' then '실격'
+								else '삭제' 
+							END 
+					END AS estimate_nm ,
+					a.user_class_seq_no,
+					a.user_lecture_seq_no,
+					ISNULL(a.estimate_cnt , 0 ) estimate_cnt,
+					b.teacher,
+					b.history_path,
+					b.edu_path,
+					b.photo_path,
+					c.lecture_div
+				from tb_cyber_user_class a,tb_cyber_class b, tb_cyber_lecture c
+				where a.class_no = b.class_no
+				and a.lecture_seq_no = b.lecture_seq_no
+				and a.lecture_seq_no = c.lecture_seq_no
+				and a.user_lecture_seq_no = ?
+				AND a.status <> '9'
+				order by b.class_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					lecture_seq_no,class_no,title,play_time,summary,file_path,html_path,status,status_nm,
+					estimate_pass_yn,estimate_nm,
+					user_class_seq_no,
+					user_lecture_seq_no,
+					estimate_cnt,
+					teacher,
+					history_path,
+					edu_path,
+					photo_path,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_USER_CLASS_INFO">
+			<query>
+			<![CDATA[
+				select 
+					a.lecture_seq_no,
+					a.class_no,
+					a.title,
+					a.play_time,
+					a.summary,
+					a.file_path,
+					a.html_path,
+					ISNULL(b.status,'') status,
+					case ISNULL(b.status,'0') 
+						when '0' then '수강전' 
+						when '1' then '수강중' 
+						when '2' then '완료'
+						when '3' then '완료'
+						when '4' then '실격'
+						else '삭제' 
+					END AS status_nm ,
+					b.estimate_pass_yn,
+					case ISNULL(b.estimate_pass_yn,'N') 
+						when 'Y' then '완료' 
+						else '평가전' 
+					END AS estimate_nm ,
+					b.user_class_seq_no,
+					b.user_lecture_seq_no,
+					a.photo_path,
+					c.lecture_div
+				from tb_cyber_class a ,tb_cyber_user_class b,tb_cyber_lecture c
+				where a.class_no = b.class_no
+				and a.lecture_seq_no = b.lecture_seq_no
+				and a.lecture_seq_no = c.lecture_seq_no
+				and b.user_lecture_seq_no = ?
+				order by b.class_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					lecture_seq_no,class_no,title,play_time,summary,file_path,html_path,status,status_nm,
+					estimate_pass_yn,estimate_nm,
+					user_class_seq_no,
+					user_lecture_seq_no,
+					photo_path,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_CLASS_INFO">
+			<query>
+			<![CDATA[
+				select 
+					a.lecture_seq_no,
+					a.class_no,
+					a.title,
+					a.play_time,
+					a.summary,
+					a.file_path,
+					a.html_path,
+					ISNULL(b.status,'') status,
+					case ISNULL(b.status,'0') 
+						when '0' then '수강전' 
+						when '1' then '수강중' 
+						when '2' then '완료'
+						when '3' then '완료'
+						when '4' then '실격'
+						else '삭제' 
+					END AS status_nm ,
+					b.estimate_pass_yn,
+					case ISNULL(b.estimate_pass_yn,'N') 
+						when 'Y' then '완료' 
+						else '평가전' 
+					END AS estimate_nm ,
+					b.user_class_seq_no,
+					b.user_lecture_seq_no,
+					a.photo_path,
+					c.lecture_div
+				from tb_cyber_class a
+				left outer join  tb_cyber_user_class b
+				on a.class_no = b.class_no
+				left outer join  tb_cyber_lecture c
+				on a.lecture_seq_no = c.lecture_seq_no
+				where a.lecture_seq_no = ?
+				and a.class_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>lecture_seq_no,class_no</setProperty>
+				<getProperty>
+					lecture_seq_no,class_no,title,play_time,summary,file_path,html_path,status,status_nm,
+					estimate_pass_yn,estimate_nm,
+					user_class_seq_no,
+					user_lecture_seq_no,
+					photo_path,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_CURR_CLASS_NO">
+			<query>
+			<![CDATA[
+				select top 1
+					user_class_seq_no,
+					estimate_cnt
+				from tb_cyber_user_class a
+				where a.user_lecture_seq_no = ?
+				and ISNULL(a.estimate_pass_yn, 'N' ) != 'Y'
+				and a.status <> '9'
+				order by class_no
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					user_class_seq_no,estimate_cnt
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_LECTURE_CLASS_INFO">
+			<query>
+			<![CDATA[
+				select 
+					a.lecture_seq_no,
+                    c.title,
+					a.class_no,
+					a.title cls_title,
+					a.play_time,
+					a.summary,
+					a.file_path,
+					a.html_path,
+					ISNULL(b.status,'') status,
+					case ISNULL(b.status,'0') 
+						when '0' then '수강전' 
+						when '1' then '수강중' 
+						when '2' then '완료'
+						when '3' then '완료'
+						when '4' then '실격'
+						else '삭제' 
+					END AS status_nm ,
+					b.estimate_pass_yn,
+					case ISNULL(b.estimate_pass_yn,'N') 
+						when 'Y' then '완료' 
+						else '평가전' 
+					END AS estimate_nm ,
+					b.user_class_seq_no,
+					b.user_lecture_seq_no,
+                    ISNULL(b.estimate_point,0) estimate_point,                    
+                    case b.estimate_cnt
+						when null then 0
+						when 0 then 5
+						else estimate_cnt
+					end as estimate_cnt,
+                    b.estimate_cha,
+					d.status lecture_status,
+					a.photo_path,
+					c.lecture_div
+				from tb_cyber_class a ,tb_cyber_user_class b, tb_cyber_lecture c, tb_cyber_user_lecture d
+				where a.class_no = b.class_no
+				and a.lecture_seq_no = b.lecture_seq_no
+				and a.lecture_seq_no = c.lecture_seq_no
+				and b.USER_LECTURE_SEQ_NO = d.USER_LECTURE_SEQ_NO
+				and b.user_class_seq_no = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty>
+					lecture_seq_no,
+                    title,
+					class_no,
+					cls_title,
+					play_time,
+					summary,
+					file_path,
+					html_path,
+					status,
+					status_nm ,
+					estimate_pass_yn,
+					estimate_nm ,
+					user_class_seq_no,
+					user_lecture_seq_no,
+                    estimate_point,
+                    estimate_cnt,
+                    estimate_cha,
+                    lecture_status,
+                    photo_path,
+                    lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+
+	<input>
+		<block name="arg" repeat="1">			
+			<field name="lecture_seq_no" type="int"	size="" />
+			<field name="rnum"  type="int"      size="" default="20"/>
+            <field name="page_no"     type="int"      size="" default="1"/>
+            <field name="addWhere"      type="string"   size="" />
+            <field name="user_seq_no"      type="int"   size="" />
+            
+            <field name="class_no" type="int"	size="" />
+            <field name="user_lecture_seq_no" type="int"	size="" />
+            <field name="user_class_seq_no" type="int"	size="" />
+		</block>
+	</input>
+
+	<output>
+		<block repeat=''>
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name="class_no" type="string"	size="" />	
+			<field name="title" 		type="string"	size="" />
+			<field name="play_time" 		type="string"	size="" />
+			<field name='summary' 		type='String'	size=''/>
+			<field name='file_path' 		type='String'	size=''/>
+			<field name='user_class_seq_no' 		type='String'	size=''/>
+		</block>
+		<block id="property" name="property" repeat="1">
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+		<block name="class_info" id="class_info" repeat='9999999'>
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name="class_no" type="string"	size="" />	
+			<field name="title" 		type="string"	size="" />
+			<field name="cls_title" 		type="string"	size="" />
+			<field name="play_time" 		type="string"	size="" />
+			<field name='summary' 		type='String'	size=''/>
+			<field name='file_path' 		type='String'	size=''/>
+			
+			<field name="status" 		type="string"	size="" />
+			<field name="status_nm" 		type="string"	size="" />
+			<field name="certication_file_path" 		type="string"	size="" />
+			<field name='start_dt' 		type='String'	size=''/>
+			<field name='end_dt' 		type='String'	size=''/>
+			<field name='tot_cnt' 		type='String'	size=''/>
+			
+			<field name='user_class_seq_no' 		type='String'	size=''/>
+			<field name='user_lecture_seq_no' 		type='String'	size=''/>
+			<field name='html_path' 			type='String'	size=''/>
+			<field name='estimate_pass_yn' 		type='String'	size=''/>
+			<field name='estimate_nm' 		type='String'	size=''/>
+			
+			<field name='estimate_point' 		type='String'	size=''/>
+			<field name='estimate_cnt' 		type='String'	size=''/>
+			<field name='estimate_cha' 		type='String'	size=''/>
+			
+			<field name='lecture_status' 		type='String'	size=''/>
+			<field name='teacher' 		type='String'	size=''/>
+			<field name='history_path' 		type='String'	size=''/>
+			<field name='edu_path' 		type='String'	size=''/>
+			<field name='photo_path' 		type='String'	size=''/>
+			<field name='lecture_div' 		type='String'	size=''/>
+		</block>
+	</output>
+</transaction>

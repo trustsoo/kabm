@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connector>
+	<adapter-name>dbms</adapter-name>
+	<resourceadapter>
+		<class>
+			jdf.framework.logic.adapter.dbms.ResourceAdapterImpl
+		</class>
+		<processor>
+			jdf.framework.logic.adapter.dbms.DbmsProcessor
+		</processor>
+		<processfactory>
+			jdf.framework.logic.adapter.dbms.ProcessorFactoryImpl
+		</processfactory>
+	</resourceadapter>
+</connector>

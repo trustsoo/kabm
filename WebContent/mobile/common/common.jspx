@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	      
+	    private static final String JSP_CORP_LIST= "_company_list.jsp";
+		
+		public void viewCorpList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			bind(req, input);
+			
+			try
+			{	
+				if( "".equals(input.getText("page_no")))
+					input.put("page_no" , "1");
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_CORP_LIST);
+				
+			} catch(Exception ex)
+			{	
+				Logger.warn.println(Utility.getStackTrace(ex));	
+			}
+		}
+		
+	]]>
+	</jsp:declaration>
+</jsp:root>

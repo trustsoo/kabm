@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.data.schema.*" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+     	public void getSurveyList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+     			throws ServletException, IOException, Exception
+     	{
+     		DataSet input = new DataSet();
+     		DataSet output = new DataSet();		
+     		bind(req, input);
+     		try
+     		{	
+     			
+     			req.setAttribute("templet-bypass", "true");
+     						
+     			input.put("cmd", "getPaperList");
+     			output = interact.execute("/survey/Survey", input);			
+     			String[] blockNames = new String[]{"paper_info"};
+     			
+     			String result = getJson(output, blockNames);
+     			
+     			responseJson(result, resp);	
+     			
+     		} catch(Exception ex)
+     		{			
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+     			Logger.err.print(Utility.getStackTrace(ex));
+     		}
+     	}         
+     	         
+     	public void getSurveyPaper(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+     			throws ServletException, IOException, Exception
+     	{
+     		DataSet input = new DataSet();
+     		DataSet output1 = new DataSet();
+     		DataSet output2 = new DataSet();
+     		bind(req, input);
+     		try
+     		{
+     			req.setAttribute("templet-bypass", "true");
+     			     			
+     			input.put("cmd", "getPaperInfo");
+     			
+     			output1 = interact.execute("/survey/Survey", input);
+     			
+     			input.put("cmd", "getQstnList");			
+     			
+     			output2 = interact.execute("/survey/Survey", input);
+     			
+     			output2.append(output1);
+     			
+     			String[] blockNames = new String[]{"paper_info", "qstn_list", "qstn_exmp_list"};
+     			String data = getJson(output2, blockNames);
+     			
+     			responseJson(data, resp);
+     		} catch(Exception ex)
+     		{			
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+     			Logger.err.print(Utility.getStackTrace(ex));
+     		}
+     	}
+	     	         
+	     	         
+     	public void makeSurvey(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+     			throws ServletException, IOException, Exception
+     	{
+     		DataSet input = new DataSet();
+     		DataSet output = new DataSet();
+     		bind(req, input);
+     		try
+     		{
+     			req.setAttribute("templet-bypass", "true");     			
+     			int questionCnt = 0;
+     			try
+     			{
+     				questionCnt = input.getInt("qstn_cnt");
+     			} catch(Exception ex)
+     			{				
+     			}
+
+     			int exmpCnt = 0;
+
+     			for( int  i = 0, ic = input.getCount("i_qstn_seq"); i < ic; i++){
+     				int idx = input.getInt("i_qstn_seq",i);
+
+     				String answCnt = "D".equals(input.getText("i_answ_type_"+idx)) ? "2" : input.getText("i_answ_cnt_"+idx);
+					String anwsType = input.getText("i_answ_type_"+idx);
+
+     				input.add("qstn_id", input.getText("i_qstn_id_"+idx));
+     				input.add("qstn_answ", input.getText("i_qstn_answ_"+idx));
+     				input.add("answ_type", anwsType);
+     				input.add("answ_cnt", answCnt);
+     				input.add("exmp_add_seq", input.getText("i_exmp_add_seq_"+idx));
+     				input.add("multi_yn", input.getText("i_answ_multi_type_"+idx));
+     				input.add("multi_cnt", input.getText("i_answ_multi_cnt_"+idx));
+     				input.add("connect_yn", input.getText("i_connect_yn_"+idx));
+     				input.add("qstn_ord", input.getText("i_qstn_ord_"+idx));
+
+     				try {
+     					exmpCnt = Integer.parseInt(answCnt);
+     				} catch(Exception ex) {
+     					exmpCnt = 0;
+     				}
+
+     				DataSet atom = new DataSet();
+     				if ("S".equals(anwsType)) {
+
+     					for( int j = 0, jc = input.getCount("i_exmp_seq_" + idx);  j< jc; j++){
+     						int kdx = input.getInt("i_exmp_seq_" + idx, j);
+
+     						atom.add("exmp_id", input.getText("i_exmp_id_"+idx+"_"+kdx));
+     						atom.add("exmp_sort_no", j);
+     						atom.add("exmp_word", input.getText("i_exmp_word_"+idx+"_"+kdx));
+     						atom.add("connect_qstn_no", "q"+input.getText("i_connect_num_"+idx+"_"+kdx));
+
+     					}
+						Logger.debug.println((idx-1 )+"★" + atom);
+
+     					input.put("qstn_"+i, atom);
+     				} else {
+     					input.put("qstn_"+i, new DataSet());
+     				}
+
+     			}
+
+     			Logger.debug.println("★" + input);
+     			Logger.debug.println("★★" + ((DataSet)input.get("qstn_0")).getMaxDataSize());
+     			input.put("cmd", "create");
+     			
+     			output = interact.execute("/survey/Survey", input);
+
+     			StringBuffer data = new StringBuffer();
+     			data.append("{\"survey_result\":[{")
+     			.append("\"paper_id\":")
+     			.append("\"").append(output.getText("paper_id")).append("\"")
+     			.append("}]}");
+
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", data.toString()), resp);
+     		} catch(Exception ex) {
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+     			Logger.err.print(Utility.getStackTrace(ex));
+     		}
+     	}
+     	
+     	
+     	public void dropSurvey(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+     			throws ServletException, IOException, Exception
+     	{
+     		DataSet input = new DataSet();
+     		DataSet output = new DataSet();
+     		bind(req, input);
+     		try
+     		{
+     			req.setAttribute("templet-bypass", "true");
+     			input.put("cmd", "drop");
+     			output = interact.execute("/survey/Survey", input);
+     			
+     			int updateCnt = Integer.parseInt(output.getProperty("rowcount.update:deletePaper"));
+     		
+     			if(updateCnt > 0)
+     				responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", ""), resp);
+     			else 
+     				responseJson(getJsonFormat(HTTPResultConstant.RESULT_NOT_FOUND, "fail", ""), resp);
+     		} catch(Exception ex)
+     		{			
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+     			Logger.err.print(Utility.getStackTrace(ex));
+     		}
+     	}
+	     	
+	     	
+     	public void applySurvey(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+     			throws ServletException, IOException, Exception
+     	{
+     		DataSet input = new DataSet();
+     		DataSet output = new DataSet();
+     		bind(req, input);
+     		try
+     		{	
+     			req.setAttribute("templet-bypass", "true");
+     			     			
+     			input.put("cmd", "apply_survey");
+     			interact.execute("/survey/Survey", input);
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", ""), resp);
+     		} catch(Exception ex)
+     		{			
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+     			Logger.err.print(Utility.getStackTrace(ex));
+     		}
+     	}
+
+     	public void copyPaper(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+     			throws ServletException, IOException, Exception
+     	{
+     		DataSet input = new DataSet();
+     		DataSet output = new DataSet();
+     		bind(req, input);
+     		try
+     		{	
+     			req.setAttribute("templet-bypass", "true");
+     			     			
+     			interact.execute("/survey/SurveyCopy", input);
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", ""), resp);
+     		} catch(Exception ex)
+     		{			
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+     			Logger.err.print(Utility.getStackTrace(ex));
+     		}
+     	}
+     		
+     	//설문지 선택 콤보
+     	public void paperList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+     			throws ServletException, IOException, Exception
+     	{
+     		DataSet input = new DataSet();
+     		DataSet output = new DataSet();
+     		bind(req, input);
+     		try
+     		{	
+     			req.setAttribute("templet-bypass", "true");
+     			input.put("cmd", "getPaperList2");
+     			output = interact.execute("/survey/Survey", input);
+     			
+     			String[] blockNames = new String[]{"cd_list"};
+     			String data = getJson(output, blockNames);
+     			
+     			responseJson(data, resp);
+     			
+     		} catch(Exception ex)
+     		{			
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+     			Logger.err.print(Utility.getStackTrace(ex));
+     		}
+     	}
+     	
+	]]>
+	</jsp:declaration>
+</jsp:root>

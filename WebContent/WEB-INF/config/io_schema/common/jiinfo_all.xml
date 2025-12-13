@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='jiinfo_all' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>       
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_kasm_all">
+            <query>
+                <![CDATA[
+                    select JI_CODE,JISANAME from TB_APC_COMPANY_SUB
+                ]]>
+            </query>
+            <mapping>
+                <setProperty></setProperty>
+                <getProperty>jicode,company</getProperty>
+            </mapping>
+        </sql>
+        
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">               
+        </block>
+    </input>
+    
+    <output>
+       <block id='kasm_all_list' name='kasm_all_list' 	repeat=''>
+        	<field name='jicode' 		type='string' size=''/>
+			<field name='company' 	type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

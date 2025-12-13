@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="org.json.JSONObject" />
+	<jsp:directive.page import="org.json.JSONArray" />
+	
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[	
+	
+	public void getDay(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("cmd", "getDay");
+			
+			output = interact.execute("/common/Code", input);
+			String[] blockNames = new String[]{"last_day_list"};							
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getMonthDay(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("date_code", input.getText("year_code") + input.getText("month_code"));
+			
+			input.put("cmd", "getMonthDay");
+			
+			output = interact.execute("/common/Code", input);
+			String[] blockNames = new String[]{"day_list"};							
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	
+	public void getYear(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("cmd", "getYear");
+			
+			output = interact.execute("/common/Code", input);
+			String[] blockNames = new String[]{"year_list"};							
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getCodeList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			String cmpny_no = getUserObject(req, resp).getCmpnyNo();
+			
+			input.put("cmd", "getCodeList");
+			
+			output = interact.execute("/common/Code", input);
+			String[] blockNames = new String[]{"cd_list"};							
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	//use_yn = 'Y' 인 코드만 불러옴
+	public void getCodeListUseY(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			String cmpny_no = getUserObject(req, resp).getCmpnyNo();
+			
+			input.put("cmpny_no", cmpny_no);
+			input.put("cmd", "getCodeListUseY");
+			
+			output = interact.execute("/common/Code", input);
+			String[] blockNames = new String[]{"cd_list"};							
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getUseCodeList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			String cmpny_no = getUserObject(req, resp).getCmpnyNo();
+			String div_cd = input.getText("div_cd");
+			
+			input.put("cmd", "getUseCodeList");
+			
+			output = interact.execute("/common/Code", input);
+			String[] blockNames = new String[]{"cd_list"};							
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getCodeListTreeFormat(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		JSONObject jsonObj = new JSONObject();
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			String cmpny_no = getUserObject(req, resp).getCmpnyNo();
+			
+			input.put("cmpny_no", cmpny_no);
+			input.put("cmd", "getCodeListByPrntCd");
+			output = interact.execute("/common/Code", input);
+			//log(output.toString());
+			JSONArray jsonArray = new JSONArray();
+			JSONObject itemObj = null;
+			JSONObject itemSubObj = null;
+			for(int idx=0; idx<output.getMaxDataSize();idx++)
+			{
+				itemObj = new JSONObject();
+				itemObj.put("id", output.getText("cd", idx));
+				itemObj.put("name", output.getText("cd_nm", idx));
+				itemObj.put("type", output.getText("type", idx));
+				itemObj.put("prnt_cd", input.getText("prnt_cd"));
+				itemSubObj = new JSONObject();
+				itemSubObj.put("id", output.getText("cd", idx));
+				itemSubObj.put("children", output.getText("type", idx) == "folder" ? "true" : "false");
+				itemSubObj.put("itemSelected", "false");				
+				itemObj.put("additionalParameters", itemSubObj);	
+				jsonArray.put(itemObj);				
+			}
+			
+			
+			jsonObj.put("status", "OK");
+			jsonObj.put("data", jsonArray);
+			
+			responseJson(jsonObj.toString(), resp);
+		} catch(Exception ex)
+		{
+			Logger.err.print(Utility.getStackTrace(ex));
+			jsonObj.put("status", "ERR");
+			jsonObj.put("message", ex.toString());
+			responseJson(jsonObj.toString(), resp);
+		}
+	}
+	
+	public void getCodeListByPrntCd(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			String cmpny_no = getUserObject(req, resp).getCmpnyNo();
+			
+			input.put("cmpny_no", cmpny_no);
+			input.put("cmd", "getCodeListByPrntCd");
+			input.put("use_yn", "Y");
+			output = interact.execute("/common/Code", input);
+			String[] blockNames = new String[]{"cd_list"};							
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	    
+	public void getCodeDetail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			String cmpny_no = getUserObject(req, resp).getCmpnyNo();
+			
+			input.put("cmpny_no", cmpny_no);
+			input.put("cmd", "getCodeDetail");
+			
+			output = interact.execute("/common/Code", input);
+			String[] blockNames = new String[]{"cd_detail"};							
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	         
+	       	
+	
+	public void getWeekOfMonthList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			String _yyyy = input.getText("yyyy");
+			String _mm = input.getText("mm");
+			
+			
+			if(_yyyy.equals("")) _yyyy = DateTime.getFormatString("yyyy");
+			if(_mm.equals("")) _mm = DateTime.getFormatString("MM");
+			
+			int yyyy = Integer.parseInt(_yyyy);
+			int mm = Integer.parseInt(_mm);			
+			int dd = 1;			
+			int last_week_num = 0;
+			int first_day_week_of_day = 0;
+			String last_date_of_month_date = null;
+			//log(input.toString());
+			
+			Calendar cal = Calendar.getInstance();
+			cal.clear();
+			cal.set(Calendar.YEAR, yyyy);
+			cal.set(Calendar.MONTH, mm);
+			cal.add(Calendar.MONTH, -1);		
+			
+			first_day_week_of_day = cal.get(Calendar.DAY_OF_WEEK);
+			cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DATE));    // 마지막 날짜를 넣어서 셋팅해준다.	
+			
+			last_date_of_month_date = DateTime.getString(cal.getTime(), "yyyyMMdd");
+			//log(DateTime.getString(cal.getTime(), "yyyyMMdd"));
+			
+			last_week_num = cal.get(Calendar.WEEK_OF_MONTH);
+			
+			List<String> weekList = new ArrayList<String>();
+			
+			StringBuffer sb = new StringBuffer();
+			
+			
+			String monday_date = null;
+			String sunday_date = null;
+			int dummy_monday_month = 0;
+			cal.set(Calendar.DATE, 1);
+			for(int idx=1; idx<=last_week_num; idx++)
+			{					
+				if(first_day_week_of_day > 2)
+				{
+					if(idx == 1)
+					{
+						//cal.add(Calendar.MONTH, 1);
+					} else if(idx == 2)
+					{
+						cal.add(Calendar.MONTH, 1);					
+					}
+				}
+				cal.set(Calendar.WEEK_OF_MONTH, idx);
+				cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);				
+				monday_date = DateTime.getString(cal.getTime(), "yyyyMMdd");				
+				sunday_date = DateTime.getAdjustDate(monday_date, Calendar.DATE, 6);
+				
+				sb.append("<cd_list>")
+				  .append("<cd>")
+				  .append(StringFormater.fillZero(idx+"", 2))
+				  .append("</cd>")
+				  .append("<cd_nm>")
+				  .append(idx+"주차 ("+DateTime.trans(monday_date, "yyyyMMdd", "yyyy-MM-dd")+"-"+DateTime.trans(sunday_date, "yyyyMMdd", "yyyy-MM-dd")+")")
+				  .append("</cd_nm>")
+				  .append("</cd_list>");;
+				if(sunday_date.equals(last_date_of_month_date+"")) break;
+			}
+			
+			String data = getXMLFormat(sb.toString());
+			responseXML(data, resp);
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

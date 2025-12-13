@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+	<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.UUID" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+		
+		private final String SURVEY_PAGE="/edu/survey/_survey_take_part.jsp";
+		private final String SURVEY_LECTURE_PAGE1="/edu/survey/_survey_lecture_1.jsp";
+		private final String SURVEY_LECTURE_PAGE2="/edu/survey/_survey_lecture_2.jsp";
+		
+		protected String getDefaultMethodName()
+		{
+			return "survey_lecture"; 
+		}
+	    public void survey(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    		throws ServletException, IOException, Exception
+		{
+				DataSet input = new DataSet();
+				DataSet output = new DataSet();
+				bind(req, input);
+		
+				try
+				{
+					String lecture_seq_no = input.getText("lecture_seq_no");
+					String lecture_div = input.getText("lecture_div");
+					if("1".equals(lecture_div)) 
+						input.put("paper_id","qhhqzydmabfl");
+					else
+						input.put("paper_id","qhhqzydmabfl");
+					
+					req.setAttribute("input", input);
+					req.setAttribute("output", output);
+					
+					view.setViewPage(SURVEY_PAGE);				
+				} catch(Exception ex)
+				{
+					throw ex;
+				}
+		}
+	    
+	    public void survey_lecture(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    		throws ServletException, IOException, Exception
+		{
+				DataSet input = new DataSet();
+				DataSet output = new DataSet();
+				bind(req, input);
+		
+				try
+				{
+					
+					req.setAttribute("input", input);
+					req.setAttribute("output", output);
+					
+					String lecture_seq_no = input.getText("lecture_seq_no");
+					String lecture_div = input.getText("lecture_div");
+					if("1".equals(lecture_div)) 
+						view.setViewPage(SURVEY_LECTURE_PAGE1);	
+					else
+						view.setViewPage(SURVEY_LECTURE_PAGE2);	
+								
+				} catch(Exception ex)
+				{
+					throw ex;
+				}
+		}
+	]]>
+	</jsp:declaration>
+</jsp:root>

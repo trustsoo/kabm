@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[         
+
+/******************************************************************************** 
+ * Program ID		: 멤버관리 
+ * FileName		    : member.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/member/smsCert/";
+	
+	private static final String JSP_PREFIX = "_sms";
+	
+	private static final String JSP_SMS_ERROR=JSP_BASE+JSP_PREFIX+"ErrorUrl.jsp";
+	
+	private static final String JSP_SMS_RESULT=JSP_BASE+JSP_PREFIX+"ResultUrl.jsp";
+	
+	
+	public void smsResultUrl(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_SMS_RESULT);
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+
+	public void smsErrorUrl(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_SMS_ERROR);
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

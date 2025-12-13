@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='statistics_search' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+       
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="1">
+            <query>
+                <![CDATA[
+                    select 
+                        potal_cd,                        
+                        sum(pv) as sum_pv
+                    from 
+                        tb_kabm_stat_potal
+                    where yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) >= ? and  
+                          yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) <= ?
+                    group by potal_cd
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>in_ddtm_from , in_ddtm_to</setProperty>
+                <getProperty>potal_cd, sum_pv</getProperty>
+            </mapping>
+        </sql>
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">   
+            <field name='in_ddtm_from' type='string'    size=''/>
+            <field name='in_ddtm_to' type='string'    size=''/>
+        </block>
+    </input>
+    
+    <output>
+       <block id='statics_list' name='statics_list' 	repeat=''>
+            <field name='potal_cd'      type='string' size=''/>
+			<field name='sum_pv'     type='string' size=''/>
+        </block> 
+    </output>
+    
+</transaction>

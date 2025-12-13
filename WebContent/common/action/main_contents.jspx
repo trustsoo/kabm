@@ -1,0 +1,267 @@
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*"/>
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/main_events_calendar2.jsp"/>
+	
+
+	<jsp:declaration>
+	<![CDATA[
+	
+	private final String MAIN_BANNER_VIEW 	= "/common/_index_banner.jsp"	; 
+	private final String MAIN_POPUP_VIEW 	= "/common/_index_popup_contents.jsp"	; 
+	
+
+	public void getBannerList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{		
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+
+
+		try{
+		//banner_div_01 : 메인베너
+		//banner_div_02 : 교육베너
+
+			//input.put("banner_div", "banner_div_01");		
+			 
+			output = interact.execute("/common/banner_list", input);
+
+			req.setAttribute("output_count" ,  output.getCount("seq_no"));
+			req.setAttribute("output" ,  output.toList());
+			req.setAttribute("code" , HTTPResultConstant.RESULT_OK);				
+
+		} catch(Exception ex)
+		{
+			req.setAttribute("code" , HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR);
+			req.setAttribute("msg" ,  ex.getMessage() );
+		}
+		
+		String thumb_url = "";
+		try
+		{
+			Config conf = Configuration.lookup("/file/thumb");
+			thumb_url = conf.getString("url");
+			input.put("thumb_url", thumb_url);
+		}catch(Exception e){}
+		req.setAttribute("input", input);
+	
+		view.setViewPage(MAIN_BANNER_VIEW);	
+	}
+
+
+	public void getPopupList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);		
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			//popup_div_01 : 메인팝업
+			//popup_div_02 : 교육팝업
+
+			input.put("cmd", "select_popup_list");	
+
+			output = interact.execute("/common/popup", input);
+			
+			
+			String[] blockNames = new String[]{"property","popup_list"};
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+
+
+			String result = getJson(output, blockNames);			
+			responseJson(result, resp);
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+
+
+	public void getPopupContent(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);		
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("cmd", "select_popup_item");	
+			
+			output = interact.execute("/common/popup", input);
+			
+			for( int idx = 0 ; idx < output.getCount("contents"); idx++)
+			{
+				output.put("contents" ,  org.apache.commons.lang3.StringEscapeUtils.unescapeHtml4(output.getText("contents",idx)) , idx );
+			}
+			
+			req.setAttribute("open_idx" ,  input.getText("open_idx"));
+
+			req.setAttribute("output" ,  output.toList());
+			req.setAttribute("code" , HTTPResultConstant.RESULT_OK);	
+			
+		} catch(Exception ex)
+		{
+			req.setAttribute("code" , HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR);
+			req.setAttribute("msg" ,  ex.getMessage() );
+		}
+
+		view.setViewPage(MAIN_POPUP_VIEW);	
+	}
+
+
+	public void getMainEventsCalendar(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);		
+		
+
+		req.setAttribute("templet-bypass", "true");
+		
+			
+		String calHtml = getEventsCalendar(req);
+
+		PrintWriter pw = null;		
+		try
+		{
+			resp.reset();
+			resp.setCharacterEncoding("UTF-8");
+			pw = resp.getWriter();
+			pw.print(calHtml);
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	
+	public void getEduTop5List(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);		
+		
+
+		req.setAttribute("templet-bypass", "true");
+		
+		String outHtml = "";
+			
+		try
+		{
+			
+			Calendar cal=Calendar.getInstance(); //현재 시스템이 가지고 있는 날짜 데이터 가지고 오기
+		 	
+	 		//조회 하는 년/월이 오늘과 같은지 비교키 위하여 임시 기억...
+	 		int y=cal.get(Calendar.YEAR);
+		 	int m=cal.get(Calendar.MONTH)+1;
+		 	
+		 	input.put("inYyyyMm",y + ((m < 10)?"0":"")  + m);
+			input.put("cmd", "getTop5");	
+			
+			output = interact.execute("/edu/edct_schedule", input);
+			
+			
+			for (int i=0 ; i < output.getCount("is_date"); i++){
+				outHtml += "<li>" ;
+				outHtml += "<em class=''>" + output.getText("is_date", i) + " ("+output.getText("stime", i) +"-"+ output.getText("etime", i)+ ") " + "</em>";
+				outHtml += "<span>" + output.getText("ist_title", i) +  "</span>";
+				outHtml += "<span>" + output.getText("jisaname", i) + " / " + output.getText("iplace", i)  + "</span>"				;
+				outHtml += "</li>";
+			}
+		
+			
+		} catch(Exception ex)
+		{
+			req.setAttribute("code" , HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR);
+			req.setAttribute("msg" ,  ex.getMessage() );
+		}
+
+
+
+		PrintWriter pw = null;		
+		try
+		{
+			resp.reset();
+			resp.setCharacterEncoding("UTF-8");
+			pw = resp.getWriter();
+			pw.print(outHtml);
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+
+	public void getEduList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);		
+		
+
+		req.setAttribute("templet-bypass", "true");
+		
+		String outHtml = "";
+			
+		try
+		{
+			input.put("cmd", "getEduList");	
+			
+			output = interact.execute("/edu/edct_schedule", input);
+			
+			
+			for (int i=0 ; i < output.getCount("is_date"); i++){
+				outHtml += "<li>";
+				outHtml += "	<span class='event_cont' title='"+output.getText("ist_title", i)+"'>"+jdf.framework.core.util.HtmlFormat.fixLength(output.getText("ist_title", i), 35) +"</span>";
+				outHtml += "	<span class='event_date'>"+output.getText("is_date", i) + " " + output.getText("stime", i) +"</span>";
+				outHtml += "</li>";
+				
+			}
+		
+			
+		} catch(Exception ex)
+		{
+			req.setAttribute("code" , HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR);
+			req.setAttribute("msg" ,  ex.getMessage() );
+		}
+
+
+
+		PrintWriter pw = null;		
+		try
+		{
+			resp.reset();
+			resp.setCharacterEncoding("UTF-8");
+			pw = resp.getWriter();
+			pw.print(outHtml);
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	
+]]>
+	</jsp:declaration>
+</jsp:root>
+	

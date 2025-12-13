@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+	public void getCntInfos(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		 	throws ServletException, IOException, Exception 
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");		
+		try {
+			
+			output = interact.execute("/common/AdminMain", input);
+			
+			log(output.toString());
+			String[] blockNames = new String[] {"bbs_cnt", "qna_cnt", "pv_uv_cnt" };
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			String result = getJson(output, blockNames);
+			log(result);
+			responseJson(result, resp);	
+			
+		} catch (Exception ex) 
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doPasswordModify(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();					
+			bind(req, input);
+			
+			req.setAttribute("templet-bypass", "true");
+			try
+			{
+				
+				jdf.framework.view.auth.User session_user = getUserObject(req , resp);
+				String user_id = "";
+				if(session_user != null )user_id = session_user.getId();
+				
+				String encKey = SitePropertyManager.getString("ENCRYPTION_KEY");
+				input.put("ENCRYPTION_KEY", encKey);
+				
+				input.put("emp_cd", user_id);
+				input.put("change_passwd", input.getText("pw_confirm"));
+				input.put("cmd", "passwdReset");
+				DataSet output = interact.execute( "/common/EmpMgr" , input);
+				
+				String data = "{\"user_id\":\""+user_id+"\"}";
+				data = getJsonFormat(data);
+				responseJson(data, resp);
+				
+			} catch(Exception ex)
+			{	
+				responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

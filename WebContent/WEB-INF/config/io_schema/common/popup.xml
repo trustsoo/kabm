@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='popup' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+           
+            //if( "select_all".equals(cmd) ) 
+            //{
+            	executeSQL(cmd, connection, input, output);
+            //}           
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_popup_list">
+            <query>
+                <![CDATA[
+                    select
+                        seq_no,
+                        popup_div,
+                        use_yn,
+                        start_dt,                       
+                        end_dt,
+                        title,
+                        link,
+                        link_method,
+                        width,
+                        height,
+                        view_div,
+                        popup_type,
+                        CONVERT(CHAR(10), reg_ddtm, 23) reg_ddtm
+                    from
+                        tb_kabm_popup
+                    WHERE   use_yn = 'Y' AND CONVERT(CHAR(8), getDate() , 112) >=start_dt   and  CONVERT(CHAR(8), getDate(), 112) <= end_dt 
+                            AND popup_div = ?
+
+
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>popup_div</setProperty>
+               
+                <getProperty>
+                        seq_no,
+                        popup_div,
+                        use_yn,
+                        start_dt,                       
+                        end_dt,
+                        title,
+                        link,
+                        link_method,
+                        width,
+                        height,
+                        view_div,
+                        popup_type,
+                        reg_ddtm
+                </getProperty>
+            </mapping>
+        </sql>
+
+        <sql id="select_popup_item">
+            <query>
+                <![CDATA[
+                select seq_no,popup_div,A.use_yn,start_dt,end_dt,title,link,link_method,width,height,view_div,popup_type,contents,
+                        A.reg_ddtm,reg_emp_cd, 
+                             (select top(1) file_no from tb_kabm_attach_file where
+                            attach_div_cd ='attach_div_02'  and data_no = A.seq_no
+                            order by file_no desc
+                            ) AS file_no  
+                from   tb_kabm_popup  A                 
+                where seq_no = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>seq_no</setProperty>
+                <getProperty>
+                        seq_no,popup_div,use_yn,start_dt,end_dt,title,link,link_method,width,height,view_div,popup_type,contents,
+                        reg_ddtm,reg_emp_cd,file_no
+                </getProperty>
+            </mapping>
+        </sql>  
+
+
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">  
+            <field name='seq_no'        type='string' size=''/>
+            <field name='popup_div'     type='String' size=''/>
+        </block>
+    </input>
+    
+    <output>
+
+       <block id='popup_list' name='popup_list' 	repeat=''>
+        	    <field name='seq_no'        type='string' size=''/>
+                <field name='popup_div'     type='String' size=''/>
+                <field name='use_yn'        type='String' size=''/>
+                <field name='start_dt'      type='String' size='' format="yyyyMMdd->yyyy-MM-dd"/>
+                <field name='end_dt'        type='String' size='' format="yyyyMMdd->yyyy-MM-dd"/>
+                <field name='title'         type='String' size=''/>
+                <field name='link'          type='String' size=''/>
+                <field name='link_method'   type='String' size=''/>
+                <field name='width'         type='String' size=''/>
+                <field name='height'        type='String' size=''/>
+                <field name='view_div'      type='String' size=''/>
+                <field name='popup_type'    type='String' size=''/>
+                <field name='contents'      type='String' size=''/>
+                <field name='reg_ddtm'      type='String' size=''/>
+                <field name='reg_emp_cd'    type='String' size=''/>
+                <field name='file_no'   type='String' size=''/>                
+        </block>        
+        
+    </output>
+    
+</transaction>

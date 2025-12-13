@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<transaction name="Login">
+	<processor-info type='dbms' datasource=''>
+	
+	<property name="isPrint" value="Y"/>
+	
+		<script language="java" import="">
+			<![CDATA[
+			String cmd = input.getText("cmd");
+			
+			if( "login_default".equals(cmd) ){
+			
+				executeSQL("login_default", connection, input, output);
+			}
+			else{
+				executeSQL(cmd, connection, input, output);
+			}			
+			]]>
+
+		</script>
+		
+		
+		<transaction-type></transaction-type>
+		
+		
+		<sql id="login_default">
+			<query>
+			<![CDATA[
+				select 
+					user_seq_no,
+					user_id,
+					password,
+					ssn,
+					user_nm,
+					(case when a.cp_code is null or a.cp_code = '' then a.CORP_NM else b.company end) as corp_nm,
+					(case when a.mem_div = '4' then a.user_id else b.bsns_no end) as corp_reg_no,
+                    addr,
+                    b.cp_addr as corp_addr,
+					tel_no mobile_no,
+					a.email,
+					a.cp_code,
+					a.ill_no,
+					a.mem_div,
+					a.trans_yn,
+					a.birth_yyyy,
+					a.birth_mm,
+					a.birth_dd,
+					a.sex,
+					(case when a.mem_div = '2' then 'M' when a.mem_div = '3' then 'P' when a.mem_div = '4' then 'P' else 'U' end) auth,
+					a.tmp_pass_yn,
+					(case when b.scode = '90' then 'Y' else 'N' end) as close_yn 
+				from tb_cyber_member a
+					LEFT OUTER JOIN tb_mb_master b 
+					ON a.cp_code = b.cp_code
+					and a.ill_no = b.ill_no
+				where a.user_id = ?
+				and a.password = ?	
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_id, psswd</setProperty>
+				<getProperty>
+					user_seq_no,user_id,psswd,ssn,user_nm,corp_nm,corp_reg_no,
+					addr,corp_addr,mobile_no,email,cp_code,ill_no,mem_div,trans_yn,
+					birth_yyyy,birth_mm,birth_dd,sex,auth,tmp_pass_yn,close_yn
+				</getProperty>
+			</mapping>
+		</sql>
+				
+		<sql id="insert_login_hist">
+			<query>
+				<![CDATA[
+					INSERT INTO tb_kabm_login_hst(user_id, ip,login_ddtm,login_div,user_div)
+					VALUES (?,?,getdate(),?, ?)
+				]]>
+			</query>
+			<mapping>
+				<setProperty>user_id,client_ip,login_div,user_div</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>		
+		
+		<sql id="password_check">
+			<query>
+			<![CDATA[
+				SELECT emp_cd
+				FROM tb_kabm_emp
+				WHERE emp_cd = ?
+				AND passwd = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_id, psswd</setProperty>
+				<getProperty>user_id</getProperty>
+			</mapping>
+			
+		</sql>
+		
+		<sql id="password_change">
+			<query>
+			<![CDATA[
+				UPDATE tb_kabm_emp SET 
+					passwd = ?
+				WHERE emp_cd = ?
+				AND passwd = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>psswd, user_id, cur_pw</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='user_id' type='String' size=''/>
+			<field name='psswd' type='String' size='' properties="encryption:aria"/>				
+			<field name='cur_pw' type='String' size='' properties="encryption:aria"/>
+			
+			<field name='client_ip' type='String' size=''/>
+			<field name='login_div' type='String' size=''/>
+			<field name='user_div' type='String' size=''/>
+		</block>
+	</input>
+	
+	<output> 
+		<block id='' name='' repeat='1'>
+			<field name='user_seq_no' type='String'	size=''/>
+			<field name='user_id' type='String'	size=''/>
+			<field name='user_nm' type='String'	size=''/>
+			<field name='psswd' type='String'	size='' properties="encryption:aria"/>
+			<field name='ssn' type='String'	size=''/>
+			<field name='email' type='String'	size=''/>
+			<field name='tel_no' type='String'	size=''/>
+			<field name='mobile_no' type='String'	size=''/>
+			<field name='cp_code' type='String'	size=''/>
+			<field name='ill_no' type='String'	size=''/>
+			<field name='mem_div' type='String'	size=''/>
+			<field name='trans_yn' type='String'	size=''/>
+			<field name='birth_yyyy' type='String'	size=''/>
+			<field name='birth_mm' type='String'	size=''/>
+			<field name='birth_dd' type='String'	size=''/>
+			<field name='auth' type='String'	size=''/>
+			<field name='corp_nm' type='String'	size=''/>
+			<field name='corp_reg_no' type='String'	size=''/>
+			<field name='addr' type='String'	size=''/>
+			<field name='corp_addr' type='String'	size=''/>
+			<field name='sex' type='String'	size=''/>
+			<field name='tmp_pass_yn' type='String'	size=''/>
+			<field name='close_yn' type='String'	size=''/>
+		</block>
+		
+	</output>
+	
+</transaction>

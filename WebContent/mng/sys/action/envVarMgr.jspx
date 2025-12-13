@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="jdf.framework.core.io.FormatedEntity" />
+
+		
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	         
+	    public void getEnvVar(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			input.put("cmd", "GET_ENV_VAR");
+			
+			output = interact.execute("/common/EnvVarMgr", input);
+			String[] blockNames = new String[]{"env_var_list"};
+			
+			String result = getXML(output, blockNames);
+		
+			log("==========>" + result);
+			
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}	
+	    
+	    public void updateEnvVar(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			try
+			{	
+				String cmpny_no = getUserObject(req,resp).getCmpnyNo(); 
+				input.put("cmpny_no", cmpny_no);
+				input.put("cmd", "UPDATE_ENV_VAR");
+				
+				interact.execute("/common/EnvVarMgr", input);
+				String result = getXMLFormat("");			
+				responseXML(result, resp);
+			} catch(Exception ex)
+			{
+				responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	
+	    public void convertData(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			try
+			{	
+				String val = input.getText("val");
+				String div = input.getText("div");
+				
+				String plainKey = SitePropertyManager.getString("ENCRYPTION_KEY");
+				
+				int plainKeyLen = plainKey.length();					
+				byte[] encryptKeyBytes = new byte[32];
+				
+				jdf.framework.core.util.encrypt.KISA_SHA256.SHA256_Encrpyt( plainKey.getBytes(), plainKeyLen, encryptKeyBytes );
+				
+				String convData = "";
+				if( "convertEnc".equals(div))
+				{
+					byte[] cipherText = jdf.framework.core.util.encrypt.CipherUtil.encode(encryptKeyBytes, val.getBytes("utf-8")); 
+					
+					convData = jdf.framework.core.util.encrypt.CipherUtil.hexToString(cipherText);
+				}else{
+					convData = new String(jdf.framework.core.util.encrypt.CipherUtil.decode(encryptKeyBytes,jdf.framework.core.util.encrypt.CipherUtil.stringToHex(val)) , "utf-8");
+				}
+				
+				String result = getXMLFormat(convData.trim());
+				System.out.println(result);
+				responseXML(result, resp);
+			} catch(Exception ex)
+			{
+				responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

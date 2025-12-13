@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='Log' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<property name="sqlLogMode" value="bind"/>	
+		<script language="java" import="java.util.*">
+		<![CDATA[
+			String cmd = input.getText("cmd");
+			executeSQL(cmd, connection, input, output);
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="getLogList">
+			<query>
+			<![CDATA[
+				
+				SELECT TOP(?) 
+					rnum as data_key,
+				    rnum,
+				    CONVERT(VARCHAR(19), write_dt, 120) as write_dt,
+				    server_alias,
+				    log_mode,
+				    logs,
+				    seq_no
+				FROM (
+				  SELECT 
+				      a.write_dt,
+				      a.server_alias,
+				      a.log_mode,
+				      SUBSTRING(a.logs, 1, 100) as logs,
+				      a.seq_no,
+				      ROW_NUMBER() OVER(ORDER BY a.write_dt DESC) rnum
+				  FROM tb_framework_log a
+				  WHERE a.write_dt >= CONVERT(DATETIME, ?, 120) 
+				  AND a.write_dt <= CONVERT(DATETIME, ? + ' 23:59:59', 120)
+				  AND (CASE WHEN ? = '' THEN '0' ELSE a.server_alias END) = (CASE WHEN ? = '' THEN '0' ELSE ? END)
+				  AND (CASE WHEN ? = '' THEN '0' ELSE a.log_mode END) = (CASE WHEN ? = '' THEN '0' ELSE ? END)
+				) x				
+				WHERE rnum > ?
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>row_per_page, start_dd, end_dd, server_alias, server_alias, server_alias, log_mode, log_mode, log_mode, page_key</setProperty>
+				<getProperty>data_key, rnum, write_dt, server_alias, log_mode, logs, seq_no</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="getLogDetail">
+			<query>
+			<![CDATA[
+				
+				SELECT 
+					CONVERT(VARCHAR(19), a.write_dt, 120) as write_dt,
+					a.server_alias,
+					a.log_mode,
+					a.logs,
+					a.seq_no
+				FROM tb_framework_log a
+				  WHERE a.seq_no = ? 
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>seq_no</setProperty>
+				<getProperty>write_dt, server_alias, log_mode, logs, seq_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="delLog">
+			<query>
+			<![CDATA[
+				
+				DELETE
+				FROM tb_framework_log
+				  WHERE seq_no = ? 
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">				
+			<field name='start_dd' type='String' size=''/>
+			<field name='end_dd' type='String' size=''/>
+			
+			<field name='server_alias' type='String' size=''/>
+			<field name='log_mode' type='String' size=''/>
+			
+			<field name='page_key' type='int' size=''/> 
+			<field name='row_per_page' type='int' size=''/> 
+			
+			<field name='seq_no' type='int' size=''/>
+		</block>
+	</input>
+
+	
+	<output>
+		
+		<block id="" name="" repeat="">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+			<field name='next_key' type='String' size=''/>
+			<field name='prev_key' type='String' size=''/>
+			<field name='data_key' type='String' size=''/>
+			<field name='rnum' type='String' size=''/>			
+			<field name='write_dt' type='String' size=''/>
+			<field name='server_alias' type='String' size=''/>
+			<field name='log_mode' type='String' size=''/>
+			<field name='logs' type='String' size=''/>
+			<field name='seq_no' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='rowid' type='String' size=''/>
+		</block>
+		
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+			<field name='next_key' type='String' size=''/>
+			<field name='prev_key' type='String' size=''/>			
+			
+		</block>
+		
+		<block id='get_log_list' name='get_log_list' repeat="999999">
+			<field name='data_key' type='String' size=''/>
+			<field name='rnum' type='String' size=''/>			
+			<field name='write_dt' type='String' size=''/>
+			<field name='server_alias' type='String' size=''/>
+			<field name='log_mode' type='String' size=''/>
+			<field name='logs' type='String' size=''/>
+			<field name='seq_no' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			
+			
+		</block>
+		
+		
+		
+	</output>
+</transaction>

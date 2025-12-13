@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+
+//*****************	
+//STR : 임원정보관리
+//*****************
+	//지회 리즈트 조회
+	public void getManagerList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		
+		//SQL Injection 공격 대비
+		input = translateInjectField(input);
+
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("cmd", "select_manager_list");		
+
+			output = interact.execute("/mng/content/manager", input);
+			
+			String[] blockNames = new String[]{"property","manager_list"};
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+
+
+			String result = getJson(output, blockNames);			
+			responseJson(result, resp);
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+
+	
+	//임원정보 등록/수정/삭제
+	public void registManager(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		//SQL Injection 공격 대비 
+		input = translateInjectField(input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+
+			if("regist".equals(input.getText("action")))
+			{
+				//emp_no 여부에 따라 insert/update 결정
+				if(input.getText("emp_no").length()>0)
+					input.put("cmd", "update_manager");		
+				else
+					input.put("cmd", "insert_manager");	
+				
+				makeScalrThumbNail(input,68 , 75);
+				//makeThumbNail(input);				
+				
+			}else if ("delete".equals(input.getText("action")))
+			{
+				input.put("cmd", "delete_manager");	
+			}
+			if(getUserObject(req, resp) != null)
+				input.put("reg_emp_cd", getUserObject(req, resp).getId() );
+			else
+				input.put("reg_emp_cd", "admin" );
+			output = interact.execute("/mng/content/manager_action", input);
+			//TO-DO수행 후 seq_no를 가지고 첨부 처리하여야 함.		
+			
+			String[] blockNames = new String[]{"manager_list"};						
+			
+			String result = getJson(output, blockNames);			
+			responseJson(result, resp);
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+
+
+
+	  
+	]]>
+	</jsp:declaration>
+</jsp:root>
+

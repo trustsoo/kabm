@@ -1,0 +1,91 @@
+@charset "utf-8";
+
+/* main */
+
+
+.headerBnr				{text-align:center;border-bottom:1px solid #333;  }
+.headerBnr .btn_2		{background:#002b99; }
+
+.main_container			{background:url(/static/main/img/main/main_content_bg.jpg); }
+.mainContent				{width:1002px; margin:0 auto; padding:0 1px; overflow:hidden; background:#fff;  }
+.mainContent .l_cont		{width:332px; height:565px; float:left;  margin-right:2px;   }
+
+.mainContent .c_cont		{width:332px; height:565px; float:left; }
+.mainContent .r_cont		{width:332px; height:565px; float:right;  }
+.mainContent .loginBox		{background:#7bb2e0; padding:20px }
+.mainContent .loginBox table	{}
+.mainContent .loginBox table th	{text-align:left; color:#fff; font-weight:bold; font-size:14px;  }
+.mainContent .loginBox table td	{padding:5px 0; text-align:left; color:#fff; }
+.mainContent .loginBox table input.it	{width:140px; height:30px; line-height:30px; color:#000;padding-left:3px;}
+.mainContent .loginBox table a.loginBtn	{display:block; width:69px; height:69px; padding-top:0; border:3px solid #fff; text-align:center; padding:22px 0 0; color:#fff; font-size:14px; font-family:open sans}
+.mainContent .loginBox .loginBtn		{text-align:center; padding:9px 0 0 ;}
+.mainContent .loginBox .loginBtn a		{color:#dbefff; font-size:12px; margin:0 2px; font-weight:bold;  }
+
+.mainContent .planBoxWrap			{background:#c9e6ff; padding:15px; border-top:1px solid #e6f3ff;  }
+.mainContent .planBox				{padding:0 15px; background:#fff; }
+.mainContent .planBox .tit			{font-size:18px; text-align:center; color:#1e90f1; padding:5px 0;   }
+.mainContent .planBox .tit_date		{text-align:center; }
+.mainContent .planBox .tit_date span{display:inline-block; padding:0 10px;vertical-align:middle;   }
+.mainContent .planBox .tit_date img	{vertical-align:middle; }
+.mainContent .planBox .calBox		{padding:10px 0 10px; border-bottom:1px solid #3f97e3;  }
+.mainContent .planBox table			{width:225px; margin:0 auto;  border-spacing:2; border-collapse:separate ;}
+.mainContent .planBox table th			{width:30px; height:30px; background:#efefef }
+.mainContent .planBox table th,
+.mainContent .planBox table td				{text-align:center;font-size:12px;   }
+.mainContent .planBox table td				{height:18px;   }
+.mainContent .planBox table td a			{text-align:center;font-size:12px;   }
+.mainContent .planBox table td.on 			{background:#b4efb6}
+.mainContent .planBox table .sun			{color:#ff0000;  }
+.mainContent .planBox table .sat			{color:#1f7baa;  }
+.mainContent .planBox table .eventday		{background:#f1e272;  }
+
+.mainContent .planBox ul.calList			{width:287px; height:200px; overflow:hidden; overflow-y:auto;  }
+.mainContent .planBox ul.calList li			{padding:10px 0 5px 0px; }
+.mainContent .planBox ul.calList li em		{color:#3f97e3; font-weight:13px; }
+.mainContent .planBox ul.calList li span,
+.mainContent .planBox ul.calList li a		{display:block; margin-top:5px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; font-weight:bold; color:#000; font-weight:15px; }
+
+.mainContent .bnr_1			{overflow:hidden; }
+.mainContent a.btn_1_1		{display:block; float:left; width:50%; text-align:center; height:151px; font-size:28px; color:#fff;padding: 75px 0px 0 0px;background:url(/static/main/img/main/main_bnr_edu.jpg) no-repeat 0; }
+.mainContent a.btn_1_2		{display:block; float:left; width:50%; text-align:center; height:151px; font-size:28px; color:#fff;padding: 75px 0px 0 0px; background:url(/static/main/img/main/main_bnr_online.jpg) no-repeat 0; }
+.mainContent .bnr_2			{overflow:hidden; }
+.mainContent a.btn_2_1		{display:block; float:left; width:50%; text-align:center; height:109px; font-size:24px; color:#fff; padding:70px  0 0;background:url(/static/main/img/main/print_bnr_bg_1.jpg) no-repeat 0; }
+.mainContent a.btn_2_2		{display:block; float:left; width:50%; text-align:center; height:109px; font-size:24px; color:#fff; padding:70px  0 0; background:url(/static/main/img/main/print_bnr_bg_2.jpg) no-repeat 0; }
+.mainContent .bnr_3 a		{display:block; height:110px; font-size:30px; color:#fff; padding:40px 0 0 140px; background:url(/static/main/img/main/bnr_bg_1.jpg) no-repeat 0;; }
+.mainContent .bnr_4 a		{display:block; height:151px; font-size:30px; color:#fff; padding:60px 180px 0 10px;  background:url(/static/main/img/main/edu_bnr_bg.jpg) no-repeat 0;; }
+
+
+.noticeBox			{padding:10px 5px; }
+ul.newsTabCont							{position:relative; width:100%; height:184px; overflow:hidden;   }
+ul.newsTabCont > li						{float:left; width:106px; margin-right:1px;     }
+ul.newsTabCont > li:first-child			{border-left:0 }
+ul.newsTabCont > li > a						{display:block; height:29px; padding:5px 0 0; color:#484848; text-align:center; background:#d9d9d9; border-radius:10px 10px 0 0 ;overflow:hidden; font-family:'nanum_square'; font-weight:bold;  }
+ul.newsTabCont > li.on > a					{ color:#fff; background:#3f97e3; height:28px; }
+ul.newsTabCont li div						{position:absolute; width:100%; left:0; top:28px; height:156px; padding:10px 5px; overflow:hidden; border-top:1px solid #3f97e3; border-bottom:1px solid #919191;   }
+ul.newsTabCont li div ul					{padding:0; }
+ul.newsTabCont li div ul li					{height:30px; color:#5a5a5a; }
+ul.newsTabCont li div ul li a				{width:230px; float:left; color:#5a5a5a; font-size:13px;  }
+ul.newsTabCont li div ul li span			{float:right; font-size:13px; color:#3f97e3;  }
+
+
+.thumList				{position:relative; height:219px; overflow:hidden; }
+.thumList .tab			{position:absolute; bottom:0; left:0; width:100%; height:18px; padding:6px;  text-align:center; background:#000; opacity:0.6; filter:alpha(opacity:60)  }
+.thumList .tab a		{display:inline-block; background:#fff; width:32px; height:5px; vertical-align:top; border-radius:3px; overflow:hidden; }
+.thumList .tab a.on		{background:#0088fe; }
+
+
+.callBnr					{background:#dfdfdf; height:200px; margin:1px 0 0; padding:15px 0 0; text-align:center; }
+.callBnr .tit				{width:220px; height:34px; margin:0 auto; padding:6px 0 0 30px; line-height:24px; border-radius:15px; font-size:24px; color:#fff; background:url(/static/main/img/main/call_bul.jpg) no-repeat 50px 0  #3f97e3; }
+.callBnr strong				{display:block; padding:5px 0 0; height:50px; font-size:38px; line-height:50px; color:#000;  }
+.callBnr .info				{text-align:center; background:#3b3b3b; }
+
+
+.mainSlide						{margin:30px auto; width:1000px;  position:relative; overflow:hidden;   }
+.mainSlide .soldeWrap			{width:900px; margin:0 auto; position:relative;   overflow:hidden; height:78px;  border:1px solid #d9d9d9; }
+.mainSlide .soldeWrap ul		{position:absolute; width:7000px; height:80px; padding:15px 0 0 25px; overflow:hidden;}
+.mainSlide .soldeWrap ul li		{float:left;  height:50px; padding-right:50px; }
+.mainSlide .soldeWrap ul li img	{max-height:46px; }
+.mainSlide .btns				{  }
+.mainSlide .btns a.left			{position:absolute; left:20px; top:30px; }
+.mainSlide .btns a.right		{position:absolute; right:20px; top:30px; }
+

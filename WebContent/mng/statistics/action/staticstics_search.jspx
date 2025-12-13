@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+//*****************	
+//STR : 일별접속자통계
+//*****************
+	
+	public void getTotalList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		
+		//SQL Injection 공격 대비
+		input = translateInjectField(input);
+
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("in_ddtm_from", input.getText("in_ddtm_from").replaceAll("-","") );  //날짜 포맷 제거
+			input.put("in_ddtm_to", input.getText("in_ddtm_to").replaceAll("-","") );  //날짜 포맷 제거
+
+			output = interact.execute("mng/statistics/statistics_search", input);
+
+			
+			String[] blockNames = new String[]{"property","statics_list"};
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+
+
+			String result = getJson(output, blockNames);			
+			responseJson(result, resp);
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	]]>
+	</jsp:declaration>
+</jsp:root>
+

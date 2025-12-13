@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.page import="com.kabm.filter.JDFContext" />
+	<jsp:directive.page import="java.security.*" />
+	<jsp:directive.page import="java.security.spec.*" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	
+	protected String getDefaultMethodName()
+	{
+		return "doLogin"; 
+	}
+	
+	public void getSecretKey(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+			generator.initialize(2048);
+			
+			KeyPair keyPair = generator.genKeyPair();
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			
+			
+			PublicKey publicKey = keyPair.getPublic();
+			PrivateKey privateKey = keyPair.getPrivate();
+			
+			
+			// 공개키를 문자열로 변환하여 JavaScript RSA 라이브러리 넘겨준다.
+			RSAPublicKeySpec publicSpec = (RSAPublicKeySpec) keyFactory.getKeySpec(publicKey, RSAPublicKeySpec.class);			
+			String publicKeyModulus = publicSpec.getModulus().toString(16);
+			String publicKeyExponent = publicSpec.getPublicExponent().toString(16);
+			
+			HttpSession session = req.getSession();
+			
+			
+			session.setAttribute("__rsaPrivateKey__", privateKey);
+			
+			String result = getXMLFormat("<info><modulus>"+publicKeyModulus+"</modulus><exponent>"+publicKeyExponent+"</exponent></info>");
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		}
+	}
+	
+	public void doLogin(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		User user = null;
+		DataSet userInfo = new DataSet();
+		String idSaveMode = null;
+		HttpSession session = null;
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			session = req.getSession(); 
+			String securedPassword = input.getText("psswd");
+			PrivateKey privateKey = (PrivateKey) session.getAttribute("__rsaPrivateKey__");
+			
+			
+			if (privateKey == null) {
+	            throw new RuntimeException("암호화 비밀키 정보를 찾을 수 없습니다.");
+	        }
+	        try {
+	        	String password = decryptRsa(privateKey, securedPassword);
+	        	req.setAttribute("psswd", password);
+	            input.put("psswd", password);
+	        } catch (Exception ex) {
+	        	ex.printStackTrace();
+	            throw new Exception(ex.getMessage(), ex);
+	        }
+			
+			
+			user = new com.kabm.filter.auth.DbmsAuthCheckerUser();
+			
+			req.setAttribute("role", "adminUser");
+			user.login(req, resp);
+			userInfo = user.getDataSet();
+			
+			String cookieKey = SitePropertyManager.getString("COOKIE_USER_ID_KEY");
+			String cookieValue = null;
+			
+			try
+			{
+				cookieValue = StringUtil.nvl((String)userInfo.get(cookieKey));
+			} catch(Exception ex)
+			{
+				cookieValue = "";
+			}
+			
+			
+			String result = getXMLFormat("<info><ckey>"+cookieKey+"#"+cookieValue+"</ckey></info>");
+			responseXML(result, resp);
+		} catch(jdf.framework.view.auth.PermissionException pex)
+		{
+			Logger.warn.println(Utility.getStackTrace(pex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_UNAUTHORIZED, pex.getMessage(), ""), resp);
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		} finally
+		{
+			session.removeAttribute("__rsaPrivateKey__");
+			
+		}
+	}
+	
+	private String decryptRsa(PrivateKey privateKey, String securedValue) throws Exception 
+	{
+        
+		javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("RSA");
+        byte[] encryptedBytes = jdf.framework.core.util.encrypt.CipherUtil.stringToHex(securedValue);
+        cipher.init(javax.crypto.Cipher.DECRYPT_MODE, privateKey);
+        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+        String decryptedValue = new String(decryptedBytes, "utf-8"); // 문자 인코딩 주의.
+        return decryptedValue;
+    }
+	
+	
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

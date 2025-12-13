@@ -1,0 +1,132 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='subcomp_action' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+           if( "insert_sub".equals(cmd) ) 
+            {
+                executeSQL(cmd, connection, input, output);
+                executeSQL("getIdentity", connection, input, output);
+            }           
+
+           
+            if( "update_sub".equals(cmd) || "delete_sub".equals(cmd) ) 
+            {
+                executeSQL(cmd, connection, input, output);
+                output.put("seq_no", input.get("seq_no"));
+            }      
+
+			if( ("insert_sub".equals(cmd) || "update_sub".equals(cmd)) && input.getCount("file_nm") > 0) 
+            {
+                DataSet fileInfo = new DataSet();                
+                
+                for (int i = 0, ic = input.getCount("file_nm"); i < ic; i++) {
+	                fileInfo.put("file_nm", input.getText("file_nm", i), i);
+	                fileInfo.put("file_path", input.getText("file_path", i), i);
+	                fileInfo.put("file_size", input.getText("file_size", i), i);
+	                fileInfo.put("ext_nm", input.getText("ext_nm", i), i);
+	                fileInfo.put("user_file_nm", input.getText("user_file_nm", i), i);
+	                fileInfo.put("attach_div_cd", input.getText("attach_div_cd"), i);
+	                fileInfo.put("data_no", output.getText("seq_no"), i);
+	                
+	                if (input.getText("file_no").length() > 0 )
+	                   fileInfo.put("cmd", "update", i);
+	                else
+	                   fileInfo.put("cmd", "create", i);
+	            } 
+                executeTxBL("/common/Attach", fileInfo, output); 
+            } 
+           
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="insert_sub">
+            <query>
+                <![CDATA[
+                   insert into tb_kabm_sub (cp_code,ji_code, ji_nm,use_yn,samu_nm,intro,reg_ddtm,reg_emp_cd) 
+                    values
+                    (?,?,?,'Y',?,?,getDate(),?)     
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>cp_code,ji_code,ji_nm,samu_nm,intro,reg_emp_cd </setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+
+        <sql id="getIdentity">
+            <query>
+                <![CDATA[
+                    SELECT @@IDENTITY AS 'seq_no'                
+                ]]>
+            </query>
+            <mapping>
+                <setProperty></setProperty>
+                <getProperty>seq_no</getProperty>
+            </mapping>
+        </sql>
+
+        <sql id="update_sub">
+            <query>
+                <![CDATA[
+                    update tb_kabm_sub set ji_nm=?,samu_nm=?,intro=?,reg_emp_cd=?
+                    where seq_no=?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>ji_nm,samu_nm,intro,reg_emp_cd,seq_no </setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+
+         <sql id="delete_sub">
+            <query>
+                <![CDATA[
+                    delete from tb_kabm_sub where seq_no=?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>seq_no </setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1"> 
+            <field name='cp_code'      type='string' size=''/>
+            <field name='ji_code'             type='string' size=''/>
+
+            <field name='seq_no'         type='string' size=''/>
+            <field name='ji_nm'     type='string' size=''/>       <!--지회명 -->
+            <field name='use_yn'        type='string' size=''/>   <!--사용유무 -->
+            <field name='samu_nm'       type='string' size=''/>  <!-- 사무총장 -->
+            <field name='tel_no'            type='string' size=''/> <!-- 연락처 -->
+            <field name='fax_no'      type='string' size=''/><!-- 팩스 -->
+            <field name='email'      type='string' size=''/><!-- 이메일 -->
+            <field name='homepage'      type='string' size=''/><!-- 홈페이지  -->
+            <field name='post_no'      type='string' size=''/><!-- 우편번호 -->
+            <field name='addr'      type='string' size=''/><!-- 주소 -->
+            <field name='intro'      type='string' size=''/><!-- 인사말 -->
+            <field name='reg_ddtm'      type='string' size=''/><!-- 등록일시 -->
+            <field name='president_nm'      type='string' size=''/><!--지회장-->
+            <field name='reg_emp_cd'    type='string' size=''/><!-- 등록자 ID -->
+        </block>
+    </input>
+    
+    <output>
+
+        <block id='sub_list' name='sub_list' 	repeat=''>
+        	<field name='seq_no' 		type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

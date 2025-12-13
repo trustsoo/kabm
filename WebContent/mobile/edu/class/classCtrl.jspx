@@ -1,0 +1,490 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.concurrent.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	 
+	<jsp:declaration>
+	<![CDATA[   
+
+/******************************************************************************** 
+ * Program ID		: 수강
+ * FileName		    : classCtrl.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/mobile/edu/class/";
+	
+	private static final String JSP_CLASS = "_class";
+	
+	private static final String JSP_CLASS_LIST=JSP_BASE+JSP_CLASS+"_list.jsp";
+	
+	private static final String JSP_CLASS_VIEW=JSP_BASE+JSP_CLASS+"_view.jsp";
+	
+	private static final String JSP_CLASS_CLASS=JSP_BASE+JSP_CLASS+"_class.jsp";
+	
+	private static final String JSP_CLASS_REVIEW=JSP_BASE+JSP_CLASS+"_review.jsp";
+	
+	private static final String JSP_CLASS_TEST=JSP_BASE+JSP_CLASS+"_test.jsp";
+	
+	protected String getDefaultMethodName()
+	{
+		return "list"; 
+	}
+	
+	public void list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			if( "".equals(input.getText("page_no")))
+				input.put("page_no" , "1");
+			
+			Config conf = Configuration.lookup("/file/certify");
+			String certifyPath = conf.getString("url");
+			input.put("certifyPath",certifyPath);
+			
+			User session_user = getUserObject(req, resp);
+			DataSet s_userData = session_user.getDataSet();
+			input.put("s_user_ip", session_user.getIp());			
+			input.put("s_emp_no", session_user.getId());
+			input.put("s_emp_name", session_user.getName());						
+			input.put("s_email", session_user.getEmail());
+			input.put("s_user_seq_no", session_user.getUser_seq_no());
+			
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_CLASS_LIST);
+			
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	
+	public void view(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			User session_user = getUserObject(req, resp);
+			DataSet s_userData = session_user.getDataSet();
+			input.put("s_user_ip", session_user.getIp());			
+			input.put("s_emp_no", session_user.getId());
+			input.put("s_emp_name", session_user.getName());						
+			input.put("s_email", session_user.getEmail());
+			input.put("s_user_seq_no", session_user.getUser_seq_no());
+			
+			String lecture_seq_no = input.getText("lecture_seq_no");
+			String user_lecture_seq_no = input.getText("user_lecture_seq_no");
+			
+			boolean isDoing = true;
+			if( "".equals(lecture_seq_no) || "".equals(user_lecture_seq_no)  )
+			{
+				input.put("user_seq_no", session_user.getUser_seq_no());
+				input.put("cmd", "GET_CURR_USER_LECTURE");
+				DataSet temp = interact.execute( "/edu/LectureMgr" , input);
+				
+				if( temp != null && temp.getCount("lecture_seq_no") > 0 )
+				{
+					input.put("lecture_seq_no", temp.getText("lecture_seq_no"));
+					input.put("user_lecture_seq_no", temp.getText("user_lecture_seq_no"));
+				}else{
+					isDoing = false;
+				}
+			}
+			
+			if( isDoing )
+			{
+				Config conf = Configuration.lookup("/file/photo");
+				String photoPath = conf.getString("url");
+				
+				input.put("cmd", "GET_USER_LECTURE_DETAIL");
+				DataSet lectureView = interact.execute( "/edu/LectureMgr" , input);
+				
+				try{
+					String sec = lectureView.getText("diff");
+					if( sec== null || "".equals(sec)) sec = "0";
+					long seconds = Long.parseLong(sec);
+					int day = (int) TimeUnit.SECONDS.toDays(seconds);        
+					long hours =  TimeUnit.SECONDS.toHours(seconds) - (day *24);
+					long minute =  TimeUnit.SECONDS.toMinutes(seconds) - (TimeUnit.SECONDS.toHours(seconds)* 60);
+					long second =  TimeUnit.SECONDS.toSeconds(seconds) - (TimeUnit.SECONDS.toMinutes(seconds) *60);
+					
+					lectureView.put("diff" , day + "일 " + hours + "시간 " + minute + "분" );
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				
+				req.setAttribute("photoPath", photoPath);
+				req.setAttribute("input", input);
+				req.setAttribute("detail", lectureView);
+				
+				String step = input.getText("step");
+				String status = lectureView.getText("status");
+				int class_cnt = lectureView.getInt("class_cnt");
+				lecture_seq_no = lectureView.getText("lecture_seq_no");
+				view.setViewPage(JSP_CLASS_VIEW);
+				
+			}else{
+				list( req,  resp,  view);
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	
+	public void doFirstClass(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		try
+		{	
+			input.put("cmd", "GET_USER_LECTURE_DETAIL");
+			DataSet detailLecture = interact.execute( "/edu/LectureMgr" , input);
+			
+			String status = detailLecture.getText("status");
+			if( "03".equals(status )) return;
+			
+			input.put("cmd", "SET_LECTURE_START_DT");	
+			interact.execute( "/edu/EstimateMgr" , input);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+		doClass( req, resp, view );
+	}
+	
+	public void doClass(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{	
+			Config conf = Configuration.lookup("/file/lecture");
+			//String lecturePath = conf.getString("url");
+			
+			String lecturePath = "/ekabm/lecture";
+			conf = Configuration.lookup("/file/chart");
+			String photoPath = conf.getString("url");
+			
+			conf = Configuration.lookup("/site");
+			//String domain = conf.getString("domain");
+			String domain = "https://nas.kabm.org";
+			
+			try{
+				int n = input.getInt("user_lecture_seq_no");
+				if (n % 2 == 1) {
+		            domain = "https://nas.kabm.org";
+		        } else if (n % 2 == 0) {
+		            domain = "https://nas.kabm.org";
+		        }
+			}catch(Exception ee){}
+			
+			input.put( "domain" ,domain);
+			
+			input.put("cmd", "GET_USER_LECTURE_DETAIL");
+			DataSet detailLecture = interact.execute( "/edu/LectureMgr" , input);
+			req.setAttribute("detailLecture", detailLecture);
+			
+			String status = detailLecture.getText("status");
+			if( "03".equals(status )) return;
+			
+			String user_class_seq_no = input.getText("user_class_seq_no");
+			
+			if( user_class_seq_no == null || "".equals(user_class_seq_no))
+			{
+				input.put("cmd", "GET_CURR_CLASS_NO");
+				output = interact.execute( "/edu/ClassMgr" , input);
+				user_class_seq_no = output.getText("user_class_seq_no");
+			}
+			
+			input.put("user_class_seq_no", user_class_seq_no );
+			input.put("cmd", "GET_LECTURE_CLASS_INFO");
+			DataSet lectureView = interact.execute( "/edu/ClassMgr" , input);
+			
+			input.put("cmd", "SET_CLASS_STATUS");
+			input.put("status", "1");
+			interact.execute( "/edu/EstimateMgr" , input);
+			
+			input.put("cmd", "SET_LECTURE_STATUS");	
+			input.put("status", "01");
+			interact.execute( "/edu/EstimateMgr" , input);
+			
+			req.setAttribute("cur_user_class_seq_no", user_class_seq_no );
+			req.setAttribute("user_lecture_seq_no", input.getText("user_lecture_seq_no"));
+			
+			input.put( "lecturePath" ,lecturePath);
+			
+			User session_user = getUserObject(req, resp);
+			DataSet s_userData = session_user.getDataSet();
+			input.put("s_user_ip", session_user.getIp());			
+			input.put("s_user_id", session_user.getId());
+			input.put("s_user_nm", session_user.getName());						
+			input.put("s_email", session_user.getEmail());
+			input.put("s_user_seq_no", session_user.getUser_seq_no());
+			input.put("s_mem_div", s_userData.getText("mem_div"));
+			
+			DataSet top_input = new DataSet();
+			top_input.put("cmd","GET_PROCESS_CLASS_LIST");
+			top_input.put("user_seq_no",session_user.getUser_seq_no());
+			DataSet cls_list = interact.execute("/edu/EstimateMgr" , top_input );
+			
+			req.setAttribute("cls_list", cls_list);
+			req.setAttribute("detail", lectureView);
+			
+			
+			DataSet output2 = new DataSet();
+			
+			input.put("user_class_seq_no", output.getText("user_class_seq_no") );
+			input.put("cmd", "GET_EXAM_LIST");
+			output = interact.execute( "/edu/EstimateMgr" , input);
+			
+			if( output.getCount("estimate_seq_no") <= 0 )
+			{				
+				input.put("cmd", "SET_EXAM_SELECT_LIST");
+				output = interact.execute( "/edu/EstimateMgr" , input);
+			}
+			
+			for( int idx = 0 ; idx < output.getCount("estimate_seq_no"); idx++)
+			{
+				String exam_type = output.getText("exam_type", idx);
+				output2 = new DataSet();
+				if( exam_type != null && "1".equals(exam_type))
+				{
+				 	input.put("exam_seq_no" , output.getText("exam_seq_no", idx) );
+				 	input.put("cmd" , "GET_ITEM_LIST");
+				 	executeBL("/edu/EstimateMgr", input, output2);
+				}
+				output.put( "reqView" , output2 ,idx );
+				   
+			}
+			
+			DataSet status_in = new DataSet();
+			status_in.put("cmd", "SET_STATUS_START");
+			status_in.put("user_class_seq_no" ,input.getText("user_class_seq_no"));
+			status_in.put("user_lecture_seq_no" ,input.getText("user_lecture_seq_no"));
+			status_in.put("status" ,"2");
+			executeBL( "/edu/EstimateMgr" , status_in);
+			
+			input.put("cmd", "GET_USER_CLASS_LIST");			
+			DataSet class_list = interact.execute( "/edu/ClassMgr" , input);
+			req.setAttribute("class_list", class_list);
+			req.setAttribute("user_class_seq_no", input.getText("user_class_seq_no"));
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			req.setAttribute("photoPath", photoPath);
+			
+			
+			int curr_examno = 0;
+			String exam_open_time = "";
+			String exam_clear_status = "";
+			for( int idx=0; idx < output.getCount("estimate_seq_no"); idx++){
+				
+				String time = output.getText("exam_open_time",idx);
+				if( time == null || "".equals(time)) time = "5";
+				if(idx == 0 )
+					exam_open_time = "" + time + "";
+				else
+					exam_open_time = exam_open_time + "," + time + "";
+				
+				
+				String answer = output.getText("answer",idx);
+				boolean isPass = false;
+				if( "1".equals(output.getText("exam_type",idx)) ){ 				
+					DataSet reqView = (DataSet)output.get("reqView",idx);					
+					for( int jdx=0 ; jdx < reqView.getCount("item_seq_no"); jdx++){
+						String check_yn = reqView.getText("check_yn",jdx);
+						String item_seq_no = reqView.getText("item_seq_no",jdx);
+						if("Y".equals(check_yn) && item_seq_no.equals(answer) ){
+							isPass = true;
+							break;
+						}
+					}
+				}
+				
+				if(isPass){
+					curr_examno = idx+1;
+					
+					if(idx == 0 )
+						exam_clear_status = "1";
+					else
+						exam_clear_status = exam_clear_status + ",1";
+				}else{
+					if(idx == 0 )
+						exam_clear_status = "0";
+					else
+						exam_clear_status = exam_clear_status + ",0";
+				}
+				
+				
+			}
+			req.setAttribute("curr_examno", curr_examno);
+			req.setAttribute("exam_open_time", exam_open_time);
+			req.setAttribute("exam_clear_status", exam_clear_status);
+			
+			Logger.mon.println(domain + lecturePath + lectureView.getText("file_path") );
+			
+			view.setViewPage(JSP_CLASS_CLASS);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void reViewClass(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{	
+			Config conf = Configuration.lookup("/file/lecture");
+			//String lecturePath = conf.getString("url");
+			String lecturePath = "/ekabm/lecture";
+			
+			conf = Configuration.lookup("/site");
+			//String domain = conf.getString("domain");
+			String domain = "https://nas.kabm.org";
+			
+			try{
+				int n = input.getInt("user_lecture_seq_no");
+				if (n % 2 == 1) {
+		            domain = "https://nas.kabm.org";
+		        } else if (n % 2 == 0) {
+		            domain = "https://nas.kabm.org";
+		        }
+			}catch(Exception ee){}
+			
+			input.put( "domain" ,domain);
+			
+			input.put("cmd", "GET_USER_LECTURE_DETAIL");
+			DataSet detailLecture = interact.execute( "/edu/LectureMgr" , input);
+			req.setAttribute("detailLecture", detailLecture);
+			
+			String status = detailLecture.getText("status");
+			if( !"03".equals(status )) return;
+			
+			String user_class_seq_no = input.getText("user_class_seq_no");
+			if( user_class_seq_no == null || "".equals( user_class_seq_no ) ) user_class_seq_no = detailLecture.getText("user_class_seq_no");
+			input.put("user_class_seq_no", user_class_seq_no );
+			input.put("cmd", "GET_LECTURE_CLASS_INFO");
+			DataSet lectureView = interact.execute( "/edu/ClassMgr" , input);
+			
+			input.put( "lecturePath" ,lecturePath);
+			
+			req.setAttribute("detail", lectureView);
+							
+			input.put("cmd", "GET_USER_CLASS_ALLLIST");			
+			DataSet class_list = interact.execute( "/edu/ClassMgr" , input);
+			req.setAttribute("class_list", class_list);
+			req.setAttribute("cur_user_class_seq_no", input.getText("user_class_seq_no"));
+			req.setAttribute("user_lecture_seq_no", input.getText("user_lecture_seq_no"));
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			Logger.mon.println(domain + lecturePath + lectureView.getText("file_path") );
+			
+			view.setViewPage(JSP_CLASS_REVIEW);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void testClass(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{	
+			Config conf = Configuration.lookup("/file/lecture");
+			//String lecturePath = conf.getString("url");
+			String lecturePath = "/ekabm/lecture";
+			
+			conf = Configuration.lookup("/site");
+			//String domain = conf.getString("domain");
+			String domain = "https://nas.kabm.org";
+			
+			try{
+				int n = input.getInt("user_lecture_seq_no");
+				if (n % 2 == 1) {
+		            domain = "https://nas.kabm.org";
+		        } else if (n % 2 == 0) {
+		            domain = "https://nas.kabm.org";
+		        }
+			}catch(Exception ee){}
+			
+			input.put( "domain" ,domain);
+			
+			input.put("cmd", "GET_USER_LECTURE_DETAIL");
+			DataSet detailLecture = interact.execute( "/edu/LectureMgr" , input);
+			req.setAttribute("detailLecture", detailLecture);
+			
+			String status = detailLecture.getText("status");
+			
+			String user_class_seq_no = input.getText("user_class_seq_no");
+			if( user_class_seq_no == null || "".equals( user_class_seq_no ) ) user_class_seq_no = detailLecture.getText("user_class_seq_no");
+			input.put("user_class_seq_no", user_class_seq_no );
+			input.put("cmd", "GET_LECTURE_CLASS_INFO");
+			DataSet lectureView = interact.execute( "/edu/ClassMgr" , input);
+			
+			input.put( "lecturePath" ,lecturePath);
+			
+			req.setAttribute("detail", lectureView);
+							
+			input.put("cmd", "GET_USER_CLASS_ALLLIST");			
+			DataSet class_list = interact.execute( "/edu/ClassMgr" , input);
+			req.setAttribute("class_list", class_list);
+			req.setAttribute("cur_user_class_seq_no", input.getText("user_class_seq_no"));
+			req.setAttribute("user_lecture_seq_no", input.getText("user_lecture_seq_no"));
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			Logger.mon.println(domain + lecturePath + lectureView.getText("file_path") );
+			
+			view.setViewPage(JSP_CLASS_TEST);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

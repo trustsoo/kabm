@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="euc-kr"?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="htt://java.sun.com/xml/ns/j2ee web-jsptaglibrary_2_0.xsd"
+	version="2.0">
+	
+	<description></description>
+	<tlib-version>1.0</tlib-version>
+	<short-name>ELFunctions</short-name>
+	<uri>/ELFunctions</uri>
+	
+	
+	<function>
+		<description>
+			
+		</description>
+		<name>htmlTranslate</name>
+		<function-class>
+			jdf.framework.core.util.HtmlFormat
+		</function-class>
+		<function-signature>
+			java.lang.String translate(java.lang.String)
+		</function-signature>
+	</function>
+	
+	<function>
+		<description>
+			
+		</description>
+		<name>htmlTranslateNewline</name>
+		<function-class>
+			jdf.framework.core.util.HtmlFormat
+		</function-class>
+		<function-signature>
+			java.lang.String translateNewline(java.lang.String)
+		</function-signature>
+	</function>
+	
+	
+	<function>
+		<description>
+			
+		</description>
+		<name>formatDoubleByDouble</name>
+		<function-class>
+			jdf.framework.core.util.HtmlFormat
+		</function-class>
+		<function-signature>
+			java.lang.String formatDouble(double, java.lang.String)
+		</function-signature>
+	</function>
+	
+	<function>
+		<description>
+			
+		</description>
+		<name>formatDoubleByString</name>
+		<function-class>
+			jdf.framework.core.util.HtmlFormat
+		</function-class>
+		<function-signature>
+			java.lang.String formatDouble(java.lang.String)
+		</function-signature>
+	</function>
+	
+	<function>
+		<description>
+			
+		</description>
+		<name>formatIntByInt</name>
+		<function-class>
+			jdf.framework.core.util.HtmlFormat
+		</function-class>
+		<function-signature>
+			java.lang.String formatInt(int, java.lang.String)
+		</function-signature>
+	</function>
+	
+	<function>
+		<description>
+			
+		</description>
+		<name>formatIntByString</name>
+		<function-class>
+			jdf.framework.core.util.HtmlFormat
+		</function-class>
+		<function-signature>
+			java.lang.String formatInt(java.lang.String)
+		</function-signature>
+	</function>
+	
+	<function>
+		<description>
+			
+		</description>
+		<name>parseInt</name>
+		<function-class>
+			java.lang.Integer
+		</function-class>
+		<function-signature>
+			int parseInt(java.lang.String)
+		</function-signature>
+	</function>
+	
+</taglib>
+

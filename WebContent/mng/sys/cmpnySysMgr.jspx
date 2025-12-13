@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+    <jsp:directive.page contentType="text/html; charset=UTF-8"
+        pageEncoding="UTF-8" />
+    
+    <jsp:directive.page extends="jdf.framework.core.http.JspController" />
+    <jsp:directive.page import="java.io.*" />
+    <jsp:directive.page import="java.util.*" />
+    <jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+    <jsp:directive.page import="jdf.framework.core.util.*" />
+    <jsp:directive.page import="jdf.framework.core.log.*" />
+    <jsp:directive.page import="jdf.framework.core.*" />
+    <jsp:directive.page import="com.kabm.util.*" />
+    
+    <jsp:directive.include file="/common/common.jsp"/>
+    
+    <jsp:declaration>
+    <![CDATA[            
+    private final String MENU_PAGE = "/mng/sys/_menu_mgr.jsp";
+    private final String CODE_PAGE = "/mng/sys/_code_mgr.jsp";
+    private final String EMP_LIST_PAGE = "/mng/sys/_emp_mgr_list.jsp";
+    private final String GLBL_CALENDAR_PAGE = "/mng/sys/_calendar_mgr.jsp"; 
+    private final String ENV_VAR_PAGE ="/mng/sys/_env_var_mgr.jsp";
+    private final String LOG_LIST_PAGE ="/mng/sys/_log_list.jsp";
+    private final String ADMIN_LOG_LIST_PAGE ="/mng/sys/_admin_log_list.jsp";
+    private final String LOG_DETAIL_PAGE ="/mng/sys/_log_detail.jsp";
+    
+    
+    public void getGlobalCalendar(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        
+        DataSet global_output = new DataSet();
+        DataSet tmp_person_output = new DataSet();
+        DataSet person_output = new DataSet();
+        bind(req, input);
+        
+        try
+        {
+            
+            HashMap<String, String> colorMap = new HashMap<String, String>();
+            
+            colorMap.put("GLBL_SCHDL", "label-yellow");
+            colorMap.put("GLBL_HOLIDAY", "label-danger");
+            colorMap.put("PRSN_VCTN", "label-success");
+            colorMap.put("PRSN_SCHDL", "label-info");
+            colorMap.put("DFT_ETC", "label-grey");
+            
+            
+            input.put("div_cd", "GLOBAL_SCHEDULE");
+            input.put("cmd", "getUseCodeList");
+            input.put( "cmpny_no" , getUserObject(req, resp).getCmpnyNo());
+            global_output = interact.execute("/common/Code", input);
+            
+            int global_idx = 0;
+            List<Map> global_list = new ArrayList<Map>();
+            Map<String, String> global_map = new HashMap<String, String>();
+            for(int idx=0; idx<global_output.getMaxDataSize(); idx++){
+                global_map = new HashMap<String, String>();
+                global_map.put("cd", global_output.getText("cd", idx));
+                global_map.put("cd_nm", global_output.getText("cd_nm", idx));
+                global_list.add(global_idx , global_map);
+                global_idx++;
+            }
+            
+            input.put( "isCalAdmin" , true);
+            req.setAttribute("input", input);
+            req.setAttribute("colorMap", colorMap);
+            req.setAttribute("global_output",global_list);
+            req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            view.setViewPage(GLBL_CALENDAR_PAGE);           
+        } catch(Exception ex)
+        {
+            throw ex;
+        }
+    }
+    
+    /* 리스트구조  */
+    public void getEmplist(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+        
+        try
+        {
+            req.setAttribute("input", input);
+            req.setAttribute("output", output);
+            view.setViewPage(EMP_LIST_PAGE);            
+        } catch(Exception ex)
+        {
+            throw ex;
+        }
+    }
+    
+        
+    public void getMenu(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+        
+        try
+        {
+            req.setAttribute("input", input);
+            req.setAttribute("output", output);
+            req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            view.setViewPage(MENU_PAGE);            
+        } catch(Exception ex)
+        {
+            throw ex;
+        }
+    }
+        
+    public void getCode(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+        
+        try
+        {
+            req.setAttribute("input", input);
+            req.setAttribute("output", output);
+            req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            view.setViewPage(CODE_PAGE);            
+        } catch(Exception ex)
+        {
+            throw ex;
+        }
+    } 
+
+    
+    public void getEnvVar(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+        
+        try
+        {
+            req.setAttribute("input", input);
+            req.setAttribute("output", output);
+            req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            view.setViewPage(ENV_VAR_PAGE);         
+        } catch(Exception ex)
+        {
+            throw ex;
+        }
+    }
+    
+    public void getLogList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+        
+        try
+        {
+            req.setAttribute("input", input);
+            req.setAttribute("output", output);
+            req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            
+            String today =  DateTime.getFormatString("yyyyMMdd");
+            
+            req.setAttribute("today", today);
+            req.setAttribute("prevday", DateTime.getAdjustDate(today, java.util.Calendar.MONTH, -1));
+            
+            view.setViewPage(LOG_LIST_PAGE);            
+        } catch(Exception ex)
+        {
+            throw ex;
+        }
+    }
+    
+    public void getAdminLogList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+        
+        try
+        {
+            req.setAttribute("input", input);
+            req.setAttribute("output", output);
+            req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            
+            String today =  DateTime.getFormatString("yyyyMMdd");
+            
+            req.setAttribute("today", today);
+            req.setAttribute("prevday", today);
+            
+            view.setViewPage(ADMIN_LOG_LIST_PAGE);          
+        } catch(Exception ex)
+        {
+            throw ex;
+        }
+    }
+    
+    public void getLogDetail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+        
+        try
+        {
+            int seq_no = Integer.parseInt(input.getText("seq_no"));
+            String rowid = input.getText("rowid");
+            input.put("seq_no",seq_no);
+            input.put("cmd", "getLogDetail");
+            log("input>>>>>>>>>>>>>>>>>>>>"+input);
+            output = interact.execute("/common/Log", input);
+            output.put("rowid",rowid);
+            log("output>>>>>>>>>>>>>>>>>>"+output);
+            
+            
+            req.setAttribute("input", input);
+            req.setAttribute("output", output);
+            req.setAttribute("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            view.setViewPage(LOG_DETAIL_PAGE);          
+        } catch(Exception ex)
+        {
+            throw ex;
+        }
+    }
+    
+    
+    ]]>
+    </jsp:declaration>
+</jsp:root>

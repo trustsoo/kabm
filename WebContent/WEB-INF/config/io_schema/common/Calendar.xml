@@ -1,0 +1,438 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='Calendar' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+            
+            String ins_emp_info_yn = input.getText( "ins_emp_info_yn" );
+            DataSet day_input = new DataSet();
+         	DataSet day_output = new DataSet();
+         	DataSet term_output = new DataSet();
+           	
+            
+            if( "doGlobalEventAdd".equals( cmd ) )
+            {
+            	executeSQL(cmd, connection, input, output);
+            	
+            	int seq_no = input.getInt( "seq_no" );
+                if( seq_no <= 0 )
+                {
+	                executeSQL("getGlobalEventsSeqno", connection, input,output);
+                }else{
+                    output.put("seq_no", seq_no );
+                }
+				
+            }else if("doGlobalEventDel".equals(cmd))
+           	{
+           		int deleteNum = 0;
+           		executeSQL(cmd, connection, input, output);
+				try
+				{
+					deleteNum = Integer.parseInt(output.getProperty("rowcount.update:doGlobalEventDel"));
+				} catch(Exception ex)
+				{
+				}
+				
+				if(deleteNum == 0)
+					throw new jdf.framework.core.data.ResourceException("", 20406);
+           	} else
+           	{
+           		executeSQL(cmd, connection, input, output);
+           	}
+            
+            
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="getGlobalDay">
+            <query>
+                <![CDATA[
+                    SELECT CONVERT(VARCHAR(16), start_dt, 120) AS start_dt, 
+                    	   CONVERT(VARCHAR(16), end_dt, 120) AS end_dt 
+					FROM tb_kabm_calendar_global
+					WHERE seq_no = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>seq_no</setProperty>
+                <getProperty>start_dt, end_dt</getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="getDayTerm">
+            <query>
+               <![CDATA[
+					SELECT
+						CONVERT(VARCHAR, start_dt, 112) AS start_dt,
+						CONVERT(VARCHAR, end_dt, 112) AS end_dt,
+						(CASE WHEN start_dt > end_dt THEN 'N' ELSE 'Y' END) as change_yn
+					FROM
+					(
+						SELECT
+							(CASE WHEN GETDATE()+1 <= start_dt THEN start_dt ELSE GETDATE()+1 END) AS start_dt, 
+							end_dt
+						FROM 
+						(
+							SELECT 
+								CONVERT(DATETIME, ?) AS start_dt,
+								CONVERT(DATETIME, ?) AS end_dt
+						) t
+					) tt
+	                ]]>
+            </query>
+            <mapping>
+                <setProperty>start_dt, end_dt</setProperty>
+                <getProperty>start_dt, end_dt, change_yn</getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="chkWeekDD">
+			<query>
+			<![CDATA[
+				 SELECT (CASE DATEPART(DW, CONVERT(DATETIME, ?)) WHEN 1 THEN 'N' WHEN 7 THEN 'N' ELSE 'Y' END) AS change_yn
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>global_dd</setProperty>
+				<getProperty>change_yn</getProperty>
+			</mapping>
+		</sql>
+		
+        <sql id="getGlobalEventsSeqno">
+            <query>
+               <![CDATA[
+                    SELECT @@IDENTITY
+                ]]>
+            </query>
+            <mapping>
+                <setProperty></setProperty>
+                <getProperty>seq_no</getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="getGlobalEventsList">
+            <query>
+               <![CDATA[
+                    SELECT 
+						seq_no, 
+						SUBSTRING(CONVERT(VARCHAR, start_dt, 120), 0, 17) start_dt,
+						CASE 
+							WHEN is_allday = 'Y' and start_dt = end_dt THEN SUBSTRING(CONVERT(VARCHAR, start_dt, 120), 0, 12) + '23:59'
+							ELSE SUBSTRING(CONVERT(VARCHAR, end_dt, 120), 0, 17)
+						END as end_dt,
+						schdl_nm, 
+						glbl_schdl_type,
+						CASE is_allday
+							WHEN 'Y' THEN 'true'
+							ELSE 'false' 
+						END as is_allday,
+						schdl_cntnt
+					FROM tb_kabm_calendar_global a
+					WHERE start_dt >= CONVERT(DATETIME, ?)
+  					AND end_dt <= CONVERT(DATETIME, ?)
+  					AND glbl_schdl_type = ?
+					AND schdl_nm like '%'+'$search_word'+'%'
+					
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>start_dt,end_dt,search_schdl_type</setProperty>
+                <getProperty>seq_no, 
+                        start_dt, 
+                        end_dt, 
+                        schdl_nm, 
+                        schdl_type,is_allday,schdl_cntnt</getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="doGlobalEventAdd">
+            <query>
+               <![CDATA[
+                    MERGE INTO tb_kabm_calendar_global a
+                    USING (SELECT ? seq_no) b
+                    ON (a.seq_no = b.seq_no)
+                    WHEN MATCHED THEN
+                        UPDATE SET      
+                            a.start_dt = CONVERT(DATETIME, ?), 
+	                        a.end_dt = CONVERT(DATETIME, ?), 
+	                        a.schdl_nm = ?, 
+	                        a.glbl_schdl_type = ?,
+	                        a.is_allday = ?,
+	                        a.schdl_cntnt = ?
+                    WHEN NOT MATCHED THEN
+                        INSERT
+                        (start_dt, end_dt, schdl_nm,  glbl_schdl_type, is_allday, schdl_cntnt)
+                        VALUES
+                        (CONVERT(DATETIME, ?), CONVERT(DATETIME, ?), ?, ?, ?, ?);
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>seq_no, start_dd, end_dd, schdl_nm,glbl_schdl_type, is_allday,schdl_cntnt,
+                             start_dd, end_dd, schdl_nm, glbl_schdl_type, is_allday, schdl_cntnt
+                </setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="doGlobalEventDel">
+            <query>
+                <![CDATA[
+                    DELETE FROM tb_kabm_calendar_global WHERE seq_no = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>seq_no</setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="getGlobalMainEventsList">
+            <query>
+               <![CDATA[
+                    SELECT 
+						seq_no, 
+						CONVERT(CHAR(10), start_dt, 23) start_dt,
+				        CONVERT(CHAR(10), end_dt, 23) end_dt,
+				        SUBSTRING(CONVERT(CHAR(19), start_dt, 0),12, len(CONVERT(CHAR(19), start_dt, 0))) start_time, 
+				        SUBSTRING(CONVERT(CHAR(19), end_dt, 0),12, len(CONVERT(CHAR(19), end_dt, 0))) end_time,
+						schdl_nm, 
+						glbl_schdl_type,
+						CASE is_allday
+							WHEN 'Y' THEN 'true'
+							ELSE 'false' 
+						END as is_allday,
+						schdl_cntnt
+					FROM tb_kabm_calendar_global a
+					WHERE glbl_schdl_type = ? 
+					and (
+					start_dt between CONVERT(DATETIME, ?) and CONVERT(DATETIME, ?) 
+					OR end_dt between CONVERT(DATETIME, ?) and CONVERT(DATETIME, ?)
+					)
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>search_schdl_type,start_dt,end_dt,start_dt,end_dt</setProperty>
+                <getProperty>seq_no, 
+                        start_dt, 
+                        end_dt,
+                        start_time, end_time,
+                        schdl_nm, 
+                        schdl_type,is_allday,schdl_cntnt</getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="getCalendarList">
+        <query>
+        <![CDATA[
+        	select top (?)
+				no, seq_no, start_dt, end_dt, start_time, end_time, 
+				schdl_nm, glbl_schdl_type, is_allday, schdl_cntnt, tot_cnt
+			from
+			(
+				select 
+				 row_number() over(ORDER BY start_dt) no,
+				 seq_no, 
+				 start_dt,
+				 end_dt,
+				 start_time,
+				 end_time,
+				 schdl_nm,
+				 glbl_schdl_type,
+				 schdl_cntnt,			 				 
+				 CASE WHEN start_dt = end_dt
+							THEN 'true'
+							ELSE 'false' 
+						END as is_allday,
+				 COUNT(*) OVER() tot_cnt
+				from
+				(
+					SELECT 
+						seq_no, 
+						glbl_schdl_type,
+						schdl_nm,
+						schdl_cntnt,
+						CONVERT(CHAR(10), start_dt, 23) start_dt,
+				        CONVERT(CHAR(10), end_dt, 23) end_dt,
+				        SUBSTRING(CONVERT(CHAR(19), start_dt, 0),12, len(CONVERT(CHAR(19), start_dt, 0))) start_time, 
+				        SUBSTRING(CONVERT(CHAR(19), end_dt, 0),12, len(CONVERT(CHAR(19), end_dt, 0))) end_time
+					FROM tb_kabm_calendar_global a
+					WHERE start_dt >= CONVERT(DATETIME, ?)
+  					AND end_dt <= CONVERT(DATETIME, ?)
+					AND schdl_nm like '%'+'$search_word'+'%'
+					AND glbl_schdl_type = ?
+										
+				) z
+			) k
+			where k.no > (?-1) * ?
+
+
+        ]]>
+        </query>
+        <mapping>
+        	<setProperty>row_per_page, 
+        				start_dt, end_dt, search_schdl_type,    				
+        				cur_pg, row_per_page 
+        	</setProperty>
+            <getProperty>
+            	no, seq_no, start_dt, end_dt, start_time, end_time, 
+            	schdl_nm, glbl_schdl_type, is_allday, schdl_cntnt, tot_cnt
+            </getProperty>
+        </mapping>
+        </sql>
+        
+        <sql id="getCalendarInfo">
+        <query>
+        <![CDATA[
+        	select 
+				seq_no, start_dt, end_dt, start_time, end_time, schdl_nm, 
+				glbl_schdl_type, is_allday, schdl_cntnt
+			from
+			(
+				select 
+				 seq_no, 
+				 start_dt,
+				 end_dt,
+				 start_time,
+				 end_time,
+				 schdl_nm,
+				 schdl_cntnt,
+				 glbl_schdl_type,				 				 
+				 CASE WHEN start_dt = end_dt
+							THEN 'true'
+							ELSE 'false' 
+						END as is_allday
+				from
+				(
+					SELECT 
+						seq_no, 
+						glbl_schdl_type,
+						schdl_nm,
+						schdl_cntnt,
+						CONVERT(CHAR(10), start_dt, 23) start_dt,
+				        CONVERT(CHAR(10), end_dt, 23) end_dt,
+				        SUBSTRING(CONVERT(CHAR(19), start_dt, 0),12, len(CONVERT(CHAR(19), start_dt, 0))) start_time, 
+				        SUBSTRING(CONVERT(CHAR(19), end_dt, 0),12, len(CONVERT(CHAR(19), end_dt, 0))) end_time
+					FROM tb_kabm_calendar_global a
+					WHERE seq_no = ?
+				) z
+			) k
+			
+
+        ]]>
+        </query>
+        <mapping>
+        	<setProperty>seq_no</setProperty>
+            <getProperty>seq_no, start_dt, end_dt, start_time, end_time, schdl_nm, 
+				glbl_schdl_type, is_allday, schdl_cntnt</getProperty>
+        </mapping>
+        </sql>
+        
+        </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">       
+            <field name='seq_no' type='int'   size=''/>
+            <field name='emp_no' type='int'    size=''/>
+            <field name='start_dt' type='string'  size=''/>
+            <field name='end_dt' type='string'    size=''/>
+            <field name='start_dd' type='string'  size=''/>
+            <field name='end_dd' type='string'    size=''/>
+            <field name='schdl_type' type='string'    size=''/>
+            <field name='schdl_nm' type='string' size=''/>
+            <field name='is_allday' type='string' size=''/>
+            <field name='search_word' type='string' size=''/>
+            <field name='search_schdl_type' type='string' size=''/>
+            <field name='glbl_schdl_type' type='string' size=''/>
+            
+            
+            <field name='global' type='int' size=''/>
+            <field name='personal' type='int' size=''/>
+            
+            <field name='start_mm' type='string'  size=''/>
+            <field name='end_mm' type='string'    size=''/>
+            
+            <field name='row_per_page' type='int'	size=''/>
+			<field name='cur_pg' type='int'	size=''/>
+			
+			<field name='reg_emp_no' type='int'   size=''/>
+			<field name='global_dd' type='String'   size=''/>
+			<field name='global_dd' type='String'   size=''/>
+			<field name='work_value' type='string'   size=''/>
+			<field name='attndnc_value' type='string'   size=''/>
+			<field name='schdl_cntnt' type='string'   size=''/>
+        </block>
+    </input>
+    
+    <output> 
+        
+        <block id='arg' repeat=''>
+        	<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>		
+			
+        	<field name='no' type='string' size=''/>
+        	<field name='cal_type' type='string' size=''/>
+            <field name='cal_emp_nm' type='string' size=''/>
+            <field name='cal_title' type='string' size=''/>
+            <field name='cal_dt' type='string' size=''/>
+            
+        	<field name='seq_no' type='string' size=''/>
+            <field name='emp_no' type='string'   size=''/>
+            <field name='start_dt' type='string'  size=''/>
+            <field name='end_dt' type='string'/>
+            <field name='schdl_type' type='string'/>
+            <field name='schdl_nm' type='string'    size=''/>
+            <field name='reg_dt' type='string'  size=''/>
+            <field name='is_allday' type='string' size=''/>
+            
+            <field name='week_start' type='string' size=''/>
+            <field name='week_end' type='string' size=''/>
+            <field name='year' type='string' size=''/>
+            <field name='year_week_cnt' type='string' size=''/>
+            <field name='year_month' type='string' size=''/>
+            <field name='month_week_cnt' type='string' size=''/>
+            
+            <field name='change_yn' type='String'   size=''/>
+        </block>
+        
+        <block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>			
+		</block>
+        
+        <block id='event_list' name='event_list' repeat='9999999'>
+            <field name='seq_no' type='string' size=''/>
+            <field name='emp_no' type='string'   size=''/>
+            <field name='start_dt' type='string'  size=''/>
+            <field name='end_dt' type='string'/>
+            <field name='schdl_type' type='string'/>
+            <field name='schdl_nm' type='string'    size=''/>
+            <field name='reg_dt' type='string'  size=''/>
+            <field name='is_allday' type='string' size=''/>
+            <field name='schdl_cntnt' type='string'   size=''/>
+        </block>
+        
+        <block id='calendar_list' name='calendar_list' repeat='9999999'>
+        	<field name='seq_no' type='string' size=''/>
+            <field name='start_dt' type='string' size=''/>
+            <field name='end_dt' type='string' size=''/>
+            <field name='start_time' type='string' size=''/>
+            <field name='end_time' type='String'   size=''/>
+            <field name='schdl_nm' type='String'   size=''/>
+            <field name='glbl_schdl_type' type='String'   size=''/>
+            <field name='is_allday' type='String'   size=''/>
+            <field name='schdl_cntnt' type='string'   size=''/>
+            <field name='tot_cnt' type='String'   size=''/>	
+        </block>
+        
+    </output>
+    
+</transaction>

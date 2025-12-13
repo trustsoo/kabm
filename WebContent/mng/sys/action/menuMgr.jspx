@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	public void getMenuListTreeFormat(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			if("".equals(input.getText("menu_id")))
+			{
+				input.put("menu_id", "top");
+				input.put("depth", "0");
+			}
+			input.put("cmd", "GET_LIST");
+			output = interact.execute( "/common/MenuMgr" , input);			
+			String[] blockNames = new String[]{"menu_list"};
+			
+			String result = getJsTreeJson(output, blockNames);
+			responseJson(result, resp);			
+			
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		}
+	}
+	
+	
+	
+	public void getMenuSimpleDetail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("cmd", "GET_DETAIL_SIMPLE");
+			output = interact.execute( "/common/MenuMgr" , input);			
+			String[] blockNames = new String[]{"menu_detail"};
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		}
+	}
+	
+	
+	public void moveMenu(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			input.put("cmd", "MOVE");				
+			interact.execute( "/common/MenuMgr" , input);
+			
+			String result = getXMLFormat("");			
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		}
+	}
+	
+	public void updateMenu(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			req.setAttribute("templet-bypass", "true");
+			try
+			{	
+				
+				if("".equals(input.getText("menu_id")))
+				{	
+					input.put("menu_id", System.currentTimeMillis()+"");					
+				}
+				input.put("emp_cd", getUserObject(req, resp).getId() );
+				input.put("cmd", "CREATE_MENU");
+				interact.execute( "/common/MenuMgr" , input);		
+					
+				String result = getXMLFormat("");			
+				responseXML(result, resp);
+				
+			} catch(Exception ex)
+			{
+				String message = null;
+				String code = null;
+				if(ex instanceof jdf.framework.core.data.ResourceException)
+				{
+					jdf.framework.core.data.ResourceException sqlex = (jdf.framework.core.data.ResourceException)ex;
+					
+					if(sqlex.getErrorCode() == 1)
+					{
+						jdf.framework.core.Message msg= new jdf.framework.core.MessageBox();
+						message = msg.getMessage(UserAgentUtil.getUserLanguage(req),"ORA", "00001");
+					
+						code = ResResultConstant.RESULT_NOT_ACCEPTABLE;
+					} else
+					{
+						message = ex.getMessage();
+						code = HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR;
+					}
+				} else
+				{
+					message = ex.getMessage();
+					code = HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR;
+				}			
+				
+				responseXML(getXMLFormat(code, message, ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));	
+			}
+		}
+	
+	
+	public void updateWebSiteMenu(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			jdf.framework.view.menu.bean.MenuMgrBean.loadSitemap(req.getRealPath("/"), req.getContextPath());
+			String result = getXMLFormat("");			
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		}
+	}
+
+	   public void updateConfig(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	            throws ServletException, IOException, Exception
+	    {
+	        DataSet input = new DataSet();
+	        DataSet output = new DataSet();
+	        bind(req, input);
+	        req.setAttribute("templet-bypass", "true");
+	        try
+	        {
+	            com.kabm.util.SitePropertyManager.reflesh();
+	            String result = getXMLFormat("");           
+	            responseXML(result, resp);
+	        } catch(Exception ex)
+	        {
+	            Logger.warn.println(Utility.getStackTrace(ex));
+	            responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+	        }
+	    }
+	
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>

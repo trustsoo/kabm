@@ -1,0 +1,241 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<!-- Force latest IE rendering engine or ChromeFrame if installed -->
+<!--[if IE]>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<![endif]-->
+<meta charset="utf-8">
+<title>jQuery File Upload Demo</title>
+<meta name="description" content="File Upload widget with multiple file selection, drag&amp;drop support, progress bars, validation and preview images, audio and video for jQuery. Supports cross-domain, chunked and resumable file uploads and client-side image resizing. Works with any server-side platform (PHP, Python, Ruby on Rails, Java, Node.js, Go etc.) that supports standard HTML form file uploads.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap styles -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="/common/lib/jquery/fileupload/css/jquery.fileupload.css">
+<link rel="stylesheet" href="/common/lib/jquery/fileupload/css/jquery.fileupload-ui.css">
+
+
+<style>
+    .fileupload-wrapper{
+        border: 1px solid rgb(126, 177, 221);
+        background-color: rgb(240, 247, 248);
+    }
+    
+    .fileupload-wrapper a {
+        color:#fff;
+    }
+    
+    .fileupload-wrapper .error{
+        display:inline-block;position:relative;padding: 7px 8px;margin-left:5px;
+    }
+    
+    
+    .fileupload-type-ul .files{
+        padding:0;
+        margin:0;
+    }
+   
+    .fileupload-type-ul li{
+        border-radius: 3px;
+        display: inline-block;
+        background: #6480FF;
+        background: -moz-linear-gradient(top, #DBE0FF 1%, #92A7FF 50%, #6480FF 100%); /* FF3.6+ */
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(1%, #DBE0FF), color-stop(50%, #92A7FF), color-stop(100%,#6480FF)); /* Chrome,Safari4+ */
+        background: -webkit-linear-gradient(top, #DBE0FF 1%, #92A7FF 50%, #6480FF 100%); /* Chrome10+,Safari5.1+ */
+        background: -o-linear-gradient(top, #DBE0FF 1%, #92A7FF 50%, #6480FF 100%); /* Opera11.10+ */
+        background: -ms-linear-gradient(top, #DBE0FF 1%, #92A7FF 50%, #6480FF 100%); /* IE10+ */
+
+        color: #FFFFFF !important;
+        font-weight: normal !important;
+        margin: 0 5px 5px 5px;
+        position: relative;
+        height: 24px;
+    }
+    
+    .fileupload-type-ul > div{
+        vertical-align: middle;
+    }
+    
+    .fileupload-type-ul li > .progress {
+        position: absolute;
+        top:0;
+        left:0;
+        right:0;
+        bottom:0;
+    }
+    
+    .fileupload-type-ul .progress{
+        margin-bottom: 0;
+        background: transparent;
+        height: 3px;
+    }
+    
+    .fileupload-type-ul li .progress{
+        margin-bottom: 0;
+        background: transparent;
+        height: auto;
+        
+    }
+    
+    .fileupload-type-ul .fileupload-list-scroller{
+        max-height: 88px;
+        overflow: auto;
+    }
+    
+    .fileupload-type-ul .name{
+        display: inline-block;
+        max-width: 120px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        vertical-align: bottom;
+        position: relative;
+    }
+    
+    .fileupload-type-ul li button{
+        padding:2px 2px 0px 2px;
+        width:20px;
+        height:24px;
+        position: relative;
+        margin-left: 5px;
+        vertical-align: top;
+    }
+    
+    .fileupload-type-ul li img{
+        width: 16px;
+        height: 16px;
+        vertical-align: sub;
+        margin-right: 5px;
+        margin-left: 5px;
+        position: relative;
+    }
+    
+    .fileupload-type-ul .fileupload-name{
+        line-height: 23px;
+        height: 24px;
+    }
+    
+    .fileupload-type-ul .fileupload-list-area{
+        display: table-cell;
+    }
+    
+    .fileupload-type-ul .fileupload-files-area{
+        display: table;width:100%;
+    }
+    
+    .fileupload-type-ul .fileupload-buttonbar{
+        display: table-cell;
+        width:45px;
+        padding-right:5px;
+    }
+    
+    .fileupload-type-ul .fileupload-buttonbar .btn{
+        width: 100%;
+    }
+    
+    .fileupload-type-table .progress{
+        margin-bottom: 0;
+        background: transparent;
+        height: 38px;
+        border-radius:0;
+    }
+    
+    .fileupload-type-table .fileupload-progress .progress{
+        height: 3px;
+    }
+    
+    .fileupload-type-table .fileupload-files-area{
+        display: table;width:100%;
+    }
+    
+    .fileupload-type-table .fileupload-buttonbar{
+        display: table-cell;
+        padding:5px 0 0 5px;
+    }
+    
+    .fileupload-type-table .fileupload-progress{
+        display: table-cell;
+    }
+    
+    .fileupload-type-table .table{
+        margin-bottom: 0;
+    }
+    
+    .fileupload-type-table .fileupload-name{
+        position: relative;
+    }
+    
+    .fileupload-type-table .fileupload-name > div{
+        position: absolute;
+        top:0;
+        left:0;
+        right:0;
+        bottom:0;
+    }
+    
+    .fileupload-type-table .files .btn{
+        padding: 0px 3px;
+    }
+    
+    .fileupload-type-table .fileupload-name > div.name,.fileupload-type-table .fileupload-name > div.error{
+        padding:8px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <br/><br/>
+    <div id="fileupload-table"></div>
+    
+    <br/><br/>
+    <div id="fileupload-ul"></div>
+</div>
+
+
+<script src="/common/lib/jquery/jquery.min.js"></script>
+
+<script src="/common/lib/jquery/fileupload/js/vendor/jquery.ui.widget.js"></script>
+<!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+<script src="/common/lib/bootstrap/js/bootstrap.min.js"></script>
+<script src="/common/lib/jquery/fileupload/js/jquery.fileupload.js"></script>
+<script src="/common/lib/jquery/fileupload/js/jquery.fileupload-process.js"></script>
+<script src="/common/lib/jquery/fileupload/js/jquery.fileupload-validate.js"></script>
+<script src="/common/lib/jquery/fileupload/js/jquery.fileupload-ubicus-ui.js"></script>
+<script src="/common/js/ubicus.app.js"></script>
+
+<!-- The main application script -->
+<script>
+$(function () {
+    'use strict';
+
+    var tempResult = {files:[{"thumbnailUrl":"/upload?getthumb=Chrysanthemum.jpg","name":"Chrysanthemum.jpg","deleteUrl":"/upload?delfile=Chrysanthemum.jpg","type":"image/jpg","url":"/upload?getfile=Chrysanthemum.jpg","deleteType":"DELETE","size":879394},{"thumbnailUrl":"/upload?getthumb=Desert.jpg","name":"Desert.jpg","deleteUrl":"/upload?delfile=Desert.jpg","type":"image/jpg","url":"/upload?getfile=Desert.jpg","deleteType":"DELETE","size":845941}]};
+    
+    
+    ubicus.app.uploader('#fileupload-table',{
+        url: '/upload',
+        template:'table',
+        uploaded:function(file,$row,i){
+            
+        }
+        ,maxNumberOfFiles:5
+    });
+    
+    ubicus.app.uploader('#fileupload-ul',{
+        url: '/upload',
+        template: 'ul',
+        uploaded:function(file,$row,i){
+            
+        }
+        ,maxNumberOfFiles:4
+    });
+});
+</script>
+
+<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->
+<!--[if (gte IE 8)&(lt IE 10)]>
+<script src="js/cors/jquery.xdr-transport.js"></script>
+<![endif]-->
+
+</body>
+</html>

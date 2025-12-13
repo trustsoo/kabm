@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="jdf.framework.core.io.FormatedEntity" />
+
+		
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	         
+	    //상용구 조회.
+		public void getContents(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			
+			
+			try
+			{
+				req.setAttribute("templet-bypass", "true");
+				String dataType = input.getText("rtnType");
+				if(dataType == null || "".equals(dataType))
+					dataType = "jqgrid";
+				
+				req.setAttribute("templet-bypass", "true");
+				
+				if("".equals(input.getText("rows"))) input.put("rows", SitePropertyManager.getString("ROW_PER_PAGE"));
+				if("".equals(input.getText("page"))) input.put("page", "0");
+				
+				input.put("cmpny_no" , getUserObject(req,resp).getCmpnyNo());
+				input.put("emp_no", getUserObject(req, resp).getUser_seq_no() );
+				
+				input.put("row_per_page", input.getText("rows"));
+				input.put("cur_pg", input.getText("page"));
+				
+				input.put("cmd", "getContents");
+				
+				output = interact.execute("/voc/common/contents", input);
+				String[] blockNames = new String[]{"contents_list"};						
+				
+				if("jqgrid".equals(dataType))
+				{		
+					output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+					output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			
+					output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "jqgrid");
+					
+					String result = getJson(output, blockNames);
+					responseJson(result, resp);
+				} else if("xls".equals(dataType))
+				{				
+					input.put("cur_pg", "1");
+					input.put("row_per_page", "99999999");
+					
+					String file = getXls("상용구목록", null, output,blockNames);
+					java.io.File xls = new java.io.File(file);
+					sendFileStream("상용구목록-"+DateTime.getShortDateString()+"-"+DateTime.getShortMilliTimeString() + ".xls", (int)xls.length(), xls, resp, req);				
+				} else {
+					
+					String result = getJson(output, blockNames);				
+					responseJson(result, resp);
+				}
+				
+			} catch(Exception ex)
+			{
+				responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}         
+		
+		
+		
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='subcomp' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        
+        
+        <transaction-type>rollback</transaction-type>
+       
+         <sql id="select_sub_list">
+            <query>
+                <![CDATA[
+                      select              
+                        A.cp_code,  A.ji_code, A.daepyo,    A.jisaname, A.zip_code,     A.addr1 + A.addr2 as addr,  A.tel, A.fax, A.e_mail,
+                        B.seq_no,  B.samu_nm,    B.intro,                    
+                        f.file_no , f.file_nm , f.file_path 
+                    from 
+                        tb_apc_company_sub A LEFT OUTER JOIN tb_kabm_sub B 
+                        LEFT OUTER JOIN  (select data_no , file_no , file_nm, file_path  from tb_kabm_attach_file where
+                        	attach_div_cd ='attach_div_05' group by  data_no , file_no , file_nm , file_path                        
+                    	) f
+                    	ON B.seq_no = f.data_no                        
+                        ON A.cp_code = B.cp_code AND A.ji_code = B.JI_CODE 
+                        
+                    where
+                        A.USE_YN = 'Y' AND A.cp_code=? and A.ji_code = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>cp_code,ji_code</setProperty>
+                <getProperty>cp_code,ji_code,daepyo,  jisaname, zip_code, addr, tel,fax,e_mail,seq_no,samu_nm,intro,file_no,file_nm , file_path</getProperty>
+            </mapping>
+        </sql>
+
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1"> 
+            <field name='cp_code'             type='string' size=''/>  
+            <field name='ji_code'             type='string' size=''/>  
+
+        </block>
+    </input>
+    
+  
+
+    <output>
+       <block id='sub_list' name='sub_list' 	repeat=''>
+            <field name='cp_code'      type='string' size=''/>
+            <field name='ji_code'      type='string' size=''/>
+            <field name='daepyo'      type='string' size=''/>
+            <field name='jisaname'      type='string' size=''/>
+            <field name='zip_code'      type='string' size=''/>
+            <field name='addr'      type='string' size=''/>
+            <field name='tel'      type='string' size=''/>
+            <field name='fax'      type='string' size=''/>
+            <field name='e_mail'      type='string' size=''/>
+            <field name='seq_no'      type='string' size=''/>
+            <field name='samu_nm'      type='string' size=''/>
+            <field name='intro'      type='string' size=''/>
+        
+
+            <field name='file_no' type='string' size=''/>  
+            <field name='file_nm' type='string' size=''/>
+            <field name='file_path' type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

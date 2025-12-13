@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[         
+
+/******************************************************************************** 
+ * Program ID		: 강좌관리 
+ * FileName		    : lectureAction.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	
+	protected String getDefaultMethodName()
+	{
+		return "getLectureList";
+	}
+	
+	
+	public void getLectureList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "GET_LECTURE_LIST");			
+			DataSet output = interact.execute( "/edu/LectureMgr" , input);
+			
+			String[] blockNames = new String[] { "property","lecture_info" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void getOfflineEduInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "getOfflineEdu");			
+			DataSet output = interact.execute( "/edu/LectureMgr" , input);
+			
+			String[] blockNames = new String[] { "offline_edu" };
+			
+			String result = getJson(output, blockNames);
+			System.out.println( result );
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	
+	public void getCertInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			User session_user = getUserObject(req, resp);
+			
+			input.put("user_id" , session_user.getId());
+			input.put("cmd", "MEM_INFO");
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String user_seq_no = output.getText("user_seq_no");
+			String ssn = output.getText("ssn");
+			String user_nm = output.getText("user_nm");
+			String building_nm = output.getText("building_nm");
+			String tel_no = output.getText("tel_no");
+			String addr = output.getText("addr");
+			
+			String[] blockNames = new String[] { "MEM_INFO" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void certConfirm(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			User session_user = getUserObject(req, resp);
+			
+			input.put("user_id" , session_user.getId());
+			input.put("cmd", "MEM_INFO");
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String user_seq_no = output.getText("user_seq_no");
+			String ssn = output.getText("ssn");
+			String user_nm = output.getText("user_nm");
+			String building_nm = output.getText("building_nm");
+			String tel_no = output.getText("tel_no");
+			String addr = output.getText("addr");
+			
+			input.put("user_seq_no", user_seq_no);
+			input.put("ssn", ssn);
+			input.put("user_nm", user_nm);
+			input.put("building_nm", building_nm);
+			input.put("tel_no", tel_no);
+			input.put("addr", addr);
+			input.put("corp_nm", output.getText("corp_nm") );
+			input.put("addr_nm", output.getText("addr_nm") );
+			input.put("cmd", "SET_CERT_INFO");
+			interact.execute( "/edu/EstimateMgr" , input);
+			 
+			String result = getJsonFormat("");
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void certDown(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			String user_lecture_seq_no = input.getText("user_lecture_seq_no");
+			
+			User session_user = getUserObject(req, resp);
+			input.put("user_id" , session_user.getId());
+			
+			input.put("cmd", "GET_CERT_INFO");
+			DataSet output = interact.execute( "/edu/EstimateMgr" , input);
+			String user_seq_no = output.getText("user_seq_no");
+			String ssn = output.getText("ssn");
+			String user_nm = output.getText("user_nm");
+			String building_nm = output.getText("building_nm");
+			String tel_no = output.getText("tel_no");
+			String addr = output.getText("addr");
+			String float_end_dt = output.getText("float_end_dt");
+			String end_dt = output.getText("end_dt");
+			String lecture_seq_no = output.getText("lecture_seq_no");
+			String cert_div = output.getText("cert_div");
+			String std_yyyy = output.getText("std_yyyy");
+			String lecture_div = output.getText("lecture_div");
+			
+			if( cert_div == null || "".equals(cert_div) ) cert_div = "1";
+			if( lecture_seq_no == null || "".equals(lecture_seq_no) ) lecture_seq_no = "1";
+			if( lecture_div == null || "".equals(lecture_div) ) lecture_div = "1";
+			
+			output.put("no", float_end_dt + "-" + StringFormater.fillBackZero(user_lecture_seq_no , 6) );
+			output.put("qr", user_seq_no + ssn + user_nm + building_nm + tel_no + addr);
+			output.put("user_nm", user_nm);
+			output.put("ssn", ssn);
+			output.put("home_addr", addr);
+			output.put("wk_place", building_nm);
+			
+			output.put("corp_nm", output.getText("corp_nm") );
+			output.put("corp_addr", output.getText("addr_nm") );
+			output.put("today", end_dt);
+			output.put("std_yyyy", std_yyyy + "년도");
+			
+			String saved_file = "";
+			String saved_fine_nm = "";
+			if( "1".equals(cert_div ))
+			{
+				if( "1".equals(lecture_div ))
+				{
+					saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_11 , output);
+					saved_fine_nm = "신규개설및승계자_수료증_"+end_dt;
+				}else{
+					saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_21 , output);
+					saved_fine_nm = "책임자교육_수료증_"+end_dt;
+				}
+			}else{
+				if( "1".equals(lecture_div ))
+				{
+					saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_12 , output);
+					saved_fine_nm = "신규개설및승계자_수료확인증_"+end_dt;
+				}else{
+					saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_22 , output);
+					saved_fine_nm = "책임자교육_수료확인증_"+end_dt;
+				}
+			}
+			File file = new File(saved_file);
+			
+			if(file.exists())
+				sendFileStream(saved_fine_nm +".pdf", (int)file.length(), file, resp, req);
+			else
+				resp.sendError(resp.SC_NOT_FOUND);
+			
+			//최종 다운로드 날짜 업데이트
+			input.put("cmd", "UPDATE_CERT_INFO");
+			interact.execute( "/edu/EstimateMgr" , input);
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void certExtraDown(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet output = new DataSet();
+		DataSet input = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			String user_lecture_seq_no = input.getText("user_lecture_seq_no");
+			String user_id = input.getText("user_id");
+			
+			if( user_id == null || "".equals(user_id)) return;
+			
+			input.put("cmd", "GET_CERT_INFO");
+			output = interact.execute( "/edu/EstimateMgr" , input);
+			
+			if( output == null || output.getCount("user_lecture_seq_no") < 1 )
+			{
+				input.put("cmd", "GET_EXTRA_CERT_INFO");
+				output = interact.execute( "/edu/EstimateMgr" , input);				
+			}
+			
+			String user_seq_no = output.getText("user_seq_no");
+			String ssn = output.getText("ssn");
+			String user_nm = output.getText("user_nm");
+			String building_nm = output.getText("building_nm");
+			String tel_no = output.getText("tel_no");
+			String addr = output.getText("addr");
+			String float_end_dt = output.getText("float_end_dt");
+			String end_dt = output.getText("end_dt");
+			String lecture_seq_no = output.getText("lecture_seq_no");
+			String cert_div = output.getText("cert_div");
+			String lecture_div = output.getText("lecture_div");
+			
+			if( cert_div == null || "".equals(cert_div) ) cert_div = "1";
+			if( lecture_seq_no == null || "".equals(lecture_seq_no) ) lecture_seq_no = "1";
+			if( lecture_div == null || "".equals(lecture_div) ) lecture_div = "1";
+			
+			output.put("no", float_end_dt + "-" + StringFormater.fillBackZero(user_lecture_seq_no , 6) );
+			output.put("qr", user_seq_no + ssn + user_nm + building_nm + tel_no + addr);
+			output.put("user_nm", user_nm);
+			output.put("ssn", ssn);
+			output.put("home_addr", addr);
+			output.put("wk_place", building_nm);
+			
+			output.put("corp_nm", output.getText("corp_nm") );
+			output.put("corp_addr", output.getText("addr_nm") );
+			output.put("today", end_dt);
+			
+			String saved_file = "";
+			String saved_fine_nm = "";
+			if( "1".equals(cert_div ))
+			{
+				if( "1".equals(lecture_div ))
+				{
+					saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_11 , output);
+					saved_fine_nm = "신규개설및승계자_수료증_"+end_dt;
+				}else{
+					saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_21 , output);
+					saved_fine_nm = "책임자교육_수료증_"+end_dt;
+				}
+			}else{
+				if( "1".equals(lecture_div ))
+				{
+					saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_12 , output);
+					saved_fine_nm = "신규개설및승계자_수료확인증_"+end_dt;
+				}else{
+					saved_file = com.kabm.pdf.PdfManager.excuteProcess(com.kabm.pdf.PdfManager.IST_Cyber_22 , output);
+					saved_fine_nm = "책임자교육_수료확인증_"+end_dt;
+				}
+			}
+			File file = new File(saved_file);
+			
+			if(file.exists())
+				sendFileStream(saved_fine_nm +".pdf", (int)file.length(), file, resp, req);
+			else
+				resp.sendError(resp.SC_NOT_FOUND);
+			
+			//최종 다운로드 날짜 업데이트
+			input.put("cmd", "UPDATE_CERT_INFO");
+			interact.execute( "/edu/EstimateMgr" , input);
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

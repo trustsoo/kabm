@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<site-menu domain="http://localhost" name="VOC">
+	<start-page>
+		<url>/index.jsp</url>
+		<layout>main</layout>		
+		<!-- publish>
+		    <source-url>/index.jsp</source-url>
+		    <time-gap>60</time-gap>
+		    <min-page-size>10</min-page-size>
+		</publish-->
+	</start-page>
+    
+</site-menu>

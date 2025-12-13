@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[         
+
+/******************************************************************************** 
+ * Program ID		: 집합교육관리
+ * FileName		    : offlineAction.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	
+	public void getOfflineEduList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("is_date", DateTime.getShortDateString() );
+			input.put("cmd", "GET_OFFLINE_EDU_LIST");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+			
+			String[] blockNames = new String[] { "property","offline_info" };
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void setOfflineEduInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			User session_user = getUserObject(req, resp);
+			
+			input.put("user_seq_no" , session_user.getUser_seq_no());
+			input.put("cmd", "INSERT_OFFLINE_EDU");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+			
+			String user_nm = session_user.getName();
+			String tel_no = session_user.getHpNo();
+			String mem_div_nm = "신규및승계자교육";
+			String mem_div = input.getText("dtl_code");
+			if( "03".equals(mem_div)) mem_div_nm = "공중위생관리책임자교육";
+			
+			String subject = "[한국건물위생관리협회]집합교육접수완료";
+			String sms_msg = user_nm+ "님 "+mem_div_nm+"신청서 접수가 완료되었습니다.";
+			
+			sendSMS( subject, sms_msg, user_nm , tel_no );
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void getOfflineEduInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "getOfflineEdu");			
+			DataSet output = interact.execute( "/edu/LectureMgr" , input);
+			
+			String[] blockNames = new String[] { "offline_edu" };
+			
+			String result = getJson(output, blockNames);
+			System.out.println( result );
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void certSms(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			User session_user = getUserObject(req, resp);
+			String sms_tel_no = input.getText("sms_tel_no");
+			
+			if(sms_tel_no == null || "".equals(sms_tel_no)) return;
+			
+			String certNo =  com.kabm.util.PasswordUtil.getPassword();
+			
+			String subject = "[한국건물위생관리협회]집합교육 본인확인";
+			String sms_msg = "인증번호는 다음과 같습니다. [" +certNo + "]";
+			
+			sendSMS( subject, sms_msg,  "집합교육 본인확인" , sms_tel_no  );
+				
+			String data = "{\"resultCode\":\""+certNo+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	public void certJupsu(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("cmd", "GET_OFFLINE_JUPSU_INFO");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+			
+			String[] blockNames = new String[] { "offline_jupsu_info" };
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	public void getUserOfflineList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("is_date", DateTime.getShortDateString() );
+			input.put("cmd", "GET_OFFLINE_USER_LIST");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+			
+			String[] blockNames = new String[] { "property","offline_user_info" };
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	
+	public void getUserOfflineInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("cmd", "GET_OFFLINE_USER_INFO");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+			
+			String[] blockNames = new String[] { "offline_user_info" };
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void getUserOfflineHistory(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("is_date", DateTime.getShortDateString() );
+			input.put("cmd", "GET_OFFLINE_USER_HISTORY");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+			
+			String[] blockNames = new String[] { "property","offline_user_info" };
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+		
+	public void getUserOfflineCancel(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			
+			input.put("cmd", "CANCEL_OFFLINE_USER_INFO");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);			
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);				
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void getUserOfflineChange(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			
+			input.put("cmd", "CHANGE_OFFLINE_USER_EDU_INFO");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);			
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);				
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+
+	public void updateUserOfflineCorpInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			String mod_yn = input.getText("mod_yn");
+			if( "Y".equals(mod_yn)){
+				
+			}else{
+				input.put("re_corp_zipcode","");
+				input.put("re_corp_addr","");
+				input.put("re_corp_nm","");
+				input.put("re_president_nm","");
+				input.put("re_corp_reg_no","");
+			}
+			input.put("cmd", "UPDATE_OFFLINE_USER_CORP_INFO");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);			
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);				
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void updateUserOfflineBuildingInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			
+			input.put("cmd", "UPDATE_OFFLINE_USER_BUILDING_INFO");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);			
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);				
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void updateUserOfflineStudentInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			
+			input.put("cmd", "UPDATE_OFFLINE_USER_STUDENT_INFO");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);			
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);				
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	public void updateUserOfflineDepositInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			
+			input.put("cmd", "UPDATE_OFFLINE_USER_DEPOSIT_INFO");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);			
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);				
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

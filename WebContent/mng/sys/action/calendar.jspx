@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+	public void list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet global_output = new DataSet();
+		DataSet person_output = new DataSet();
+		bind(req, input);
+		try
+		{
+			String search_schdl_div = input.getText("search_schdl_div");
+			String search_schdl_type = input.getText("search_schdl_type");
+			
+			HashMap<String, String> colorMap = new HashMap<String, String>();
+			
+			colorMap.put("GLBL_SCHDL", "label-yellow");
+            colorMap.put("GLBL_HOLIDAY", "label-danger");
+            colorMap.put("PRSN_VCTN", "label-success");
+            colorMap.put("PRSN_SCHDL", "label-info");
+            colorMap.put("DFT_ETC", "label-grey");
+			
+			boolean isCalAdmin = true;
+			req.setAttribute("templet-bypass", "true");
+			
+			JSONObject jObject = new JSONObject();
+			JSONArray jArray = new JSONArray(); 
+			
+			String _start = input.getText("start");
+			String _end = input.getText("end");
+			
+			long startStamp = Long.parseLong(_start) * 1000;
+            long endStamp  = Long.parseLong(_end) * 1000;
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyyMMdd HH:mm", Locale.KOREA);
+            
+            String start = sdf.format(startStamp);          
+            String end = sdf.format(endStamp);
+			
+			input.put("start_dt", start );
+			input.put("end_dt", end );
+			input.put("emp_no", getUserObject(req, resp).getUser_seq_no());
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			
+			String schdl_div = "GLOBAL_SCHEDULE";
+			if( search_schdl_div == null || "".equals(search_schdl_div ) || schdl_div.equals(search_schdl_div))
+			{
+				input.put("cmd", "getGlobalEventsList");
+				global_output = interact.execute("/common/Calendar", input);
+				
+				
+				for(int idx=0; idx<global_output.getCount("seq_no"); idx++)
+				{
+					JSONObject atom = new JSONObject();
+					atom.put("id", schdl_div + "_" +global_output.getText("seq_no" , idx));
+					atom.put("title", global_output.getText("schdl_nm" , idx) );
+					
+					atom.put("start", global_output.getText("start_dt" , idx) );
+					atom.put("end", global_output.getText("end_dt" , idx) );
+					
+					atom.put("schdl_div",  schdl_div);
+					atom.put("schdl_type", global_output.getText("schdl_type" , idx) );
+					atom.put("seq_no", global_output.getText("seq_no" , idx) );
+					
+					String schdl_type = global_output.getText("schdl_type" , idx);
+					if( schdl_type != null )
+					{
+						String color = colorMap.get(schdl_type);
+						if( color != null && !"".equals(color) )
+							atom.put("className",color);
+						else
+							atom.put("className", colorMap.get("DFT_ETC") );
+					}else{
+					    atom.put("className", colorMap.get("DFT_ETC") );
+					}
+					
+					String allDay = global_output.getText("is_allday" , idx);
+					if( allDay == null || "".equals( allDay) || "true".equals( allDay) )
+						atom.put("allDay", true);
+					else
+						atom.put("allDay", false);					
+					
+					
+					if(getUserObject(req, resp).getCmpnyNo().equals(global_output.getText("cmpny_no", idx)))
+						atom.put("editable", true);
+					else
+						atom.put("editable", false);
+					
+					if(!jArray.contains(atom))				
+						jArray.add(atom);
+				}
+			}
+			
+			
+			//log(jArray.toString());
+			responseJson(jArray.toString(), resp);
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	
+	//일정리스트 조회.
+	public void getCalendarList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("emp_no", getUserObject(req, resp).getUser_seq_no());
+			input.put("personal", 1);
+			input.put("global", 1);
+			
+			input.put("start_dt", input.getText("dt1").replace("-",""));
+			input.put("end_dt", input.getText("dt2").replace("-",""));
+			
+			if("".equals(input.getText("rows"))) input.put("rows", input.getText("rows"));
+			if("".equals(input.getText("page"))) input.put("page", "1");
+			
+			input.put("row_per_page", input.getText("rows"));
+			input.put("cur_pg", input.getText("page"));
+			
+			if("PERSONAL_SCHEDULE".equals(input.getText("search_schdl_div"))){
+				input.put("global", 0);
+			} else if("GLOBAL_SCHEDULE".equals(input.getText("search_schdl_div"))){
+				input.put("personal", 0);
+			}
+			
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			input.put("cmd", "getCalendarList");
+			output = interact.execute("/common/Calendar", input);			
+			
+			String[] blockNames = new String[]{"property", "calendar_list"};
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "jqgrid");
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		} catch(Exception ex)
+		{			
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	//일정 등록.
+    public void doEventAdd(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception 
+        {
+            DataSet input = new DataSet();
+            DataSet output = new DataSet();
+            bind(req, input);
+               
+            try {
+            	boolean isok = true;
+            	String schdl_div = input.getText("schdl_div");
+            	if( schdl_div != null && "GLOBAL_SCHEDULE".equals(schdl_div)) {
+            	    input.put("cmd", "doGlobalEventAdd");
+	            	input.put("work_value", "LW05");
+	            	input.put("attndnc_value", "ISMHWG08");
+            	}
+            	else if( schdl_div != null && "PERSONAL_SCHEDULE".equals(schdl_div)) {
+            		input.put("cmd", "doPersonEventAdd");
+	            	input.put("work_value", "LW04");
+	            	input.put("attndnc_value", "ISMHWG07");
+            	}
+            	else 
+            		isok = false;
+            	
+            	input.put("emp_no", getUserObject(req, resp).getUser_seq_no());
+            	input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            	
+            	//log(input.toString());
+            	
+            	if( isok)
+            		output = interact.execute("/common/Calendar", input);
+                
+                String result = getXMLFormat(output.getText("seq_no"));
+                responseXML(result, resp);
+            } catch (Exception ex) {
+                responseXML(
+                        getXMLFormat(
+                                HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+                                ex.getMessage(), ""), resp);
+                Logger.err.print(Utility.getStackTrace(ex));
+            }
+        }
+    
+    //일정 삭제.
+    public void doEventDel(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception 
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+           
+        try {          
+            
+        	String schdl_div = input.getText("schdl_div");
+            if( schdl_div != null && "GLOBAL_SCHEDULE".equals(schdl_div))
+                input.put("cmd", "doGlobalEventDel");
+            else if( schdl_div != null && "PERSONAL_SCHEDULE".equals(schdl_div))
+                input.put("cmd", "doPersonEventDel");
+            
+            input.put("emp_no", getUserObject(req, resp).getUser_seq_no());
+            input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            
+            output = interact.execute("/common/Calendar", input);
+
+            String result = getXMLFormat("");
+            responseXML(result, resp);
+        } catch (Exception ex) {
+            
+        	String message = null;
+			String code = null;
+			if(ex instanceof jdf.framework.core.data.ResourceException)
+			{
+				jdf.framework.core.data.ResourceException sqlex = (jdf.framework.core.data.ResourceException)ex;
+				
+				if(sqlex.getErrorCode() == 20406)
+				{
+					jdf.framework.core.Message msg= new jdf.framework.core.MessageBox();
+					message = msg.getMessage(UserAgentUtil.getUserLanguage(req),"ORA", "20406");
+				
+					code = ResResultConstant.RESULT_NOT_ACCEPTABLE;
+				} else
+				{
+					message = ex.getMessage();
+					code = HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR;
+				}
+			} else
+			{
+				message = ex.getMessage();
+				code = HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR;
+			}			
+			
+			responseXML(getXMLFormat(code, message, ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+        	
+        	
+            Logger.err.print(Utility.getStackTrace(ex));
+        }
+    }
+	]]>
+	</jsp:declaration>
+</jsp:root>	

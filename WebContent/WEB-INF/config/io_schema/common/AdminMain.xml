@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='AdminMain' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+		<![CDATA[
+			
+			executeSQL("qna_cnt", connection, input, output);
+			executeSQL("bbs_cnt", connection, input, output);
+			executeSQL("pv_uv_cnt", connection, input, output);
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		
+		<sql id="qna_cnt">
+			<query>
+			<![CDATA[
+				select 
+					COUNT(case ISNULL(answer, '')
+						when '' then 1
+					end) non_cnt,
+					COUNT(*) tot_cnt
+				from dbo.tb_kabm_question
+				where reg_ddtm between convert(datetime, convert(varchar(11), GETDATE() - 30, 120)+'00:00:00') and GETDATE()
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>non_cnt, qna_tot_cnt</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="bbs_cnt">
+			<query>
+			<![CDATA[
+				select
+					COUNT(
+					case 
+						when reg_ddtm between convert(datetime, convert(varchar(11), GETDATE() - 30, 120)+'00:00:00') and GETDATE() then 1
+					end) rcnt_cnt,
+					COUNT(*) tot_cnt
+				from tb_kabm_board
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>rcnt_cnt, bbs_tot_cnt</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="pv_uv_cnt">
+			<query>
+			<![CDATA[
+				select 
+					ISNULL(SUM(case when dd =  convert(int, convert(varchar(2), GETDATE(), 3))then uv end), 0) today_uv_cnt,
+					ISNULL(SUM(case when dd =  convert(int, convert(varchar(2), GETDATE(), 3)) then pv end), 0) today_pv_cnt,
+					ISNULL(SUM(uv), 0) tot_uv_cnt,
+					ISNULL(SUM(pv), 0) tot_pv_cnt
+				from dbo.tb_kabm_stat_view
+				where yyyy = convert(varchar(4), GETDATE(), 120)
+				and mm = convert(int, convert(varchar(2), GETDATE(), 101))
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>today_uv_cnt, today_pv_cnt, tot_uv_cnt, tot_pv_cnt</getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">			
+		</block>
+	</input>
+	
+	<output>
+
+		<block name="arg" repeat="1">
+			<field name='rcnt_cnt' type='String'	size=''/>			
+			<field name='non_cnt' type='String'	size=''/>
+			<field name='bbs_tot_cnt' type='String'	size=''/>
+			<field name='qna_tot_cnt' type='String'	size=''/>
+			<field name='today_uv_cnt' type='String'	size=''/>			
+			<field name='today_pv_cnt' type='String'	size=''/>
+			<field name='tot_uv_cnt' type='String'	size=''/>
+			<field name='tot_pv_cnt' type='String'	size=''/>
+		</block>
+		
+		
+		<block id='bbs_cnt' name='bbs_cnt' repeat='1'>		
+			<field name='rcnt_cnt' type='String'	size='' format="#,##0"/>
+			<field name='bbs_tot_cnt' type='String'	size='' format="#,##0"/>
+		</block>
+		
+		<block id='qna_cnt' name='qna_cnt' repeat='1'>		
+			<field name='non_cnt' type='String'	size='' format="#,##0"/>						
+			<field name='qna_tot_cnt' type='String'	size='' format="#,##0"/>
+			
+		</block>
+		
+			
+		<block id='pv_uv_cnt' name='pv_uv_cnt' repeat='1'>		
+			<field name='today_uv_cnt' type='String'	size='' format="#,##0"/>
+			<field name='today_pv_cnt' type='String'	size='' format="#,##0"/>			
+			<field name='tot_uv_cnt' type='String'	size='' format="#,##0"/>
+			<field name='tot_pv_cnt' type='String'	size='' format="#,##0"/>
+			
+		</block>
+	
+	</output>
+	
+	
+</transaction>

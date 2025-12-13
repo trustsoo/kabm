@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[         
+
+/******************************************************************************** 
+ * Program ID		: 평가관리 
+ * FileName		    : estimateAction.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/estimate/";
+	
+	protected String getDefaultMethodName()
+	{
+		return "getEstimateList";
+	}
+	/** lecture > _class_list : class list search **/
+	public void getEstimateList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "GET_ESTIMATE_LIST");			
+			DataSet output = interact.execute( "/edu/EstimateMgr" , input);
+			
+			String[] blockNames = new String[] { "property","estimate_info" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	/** no use **/
+	public void getClassList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "GET_CLASS_LIST");			
+			DataSet output = interact.execute( "/edu/EstimateMgr" , input);
+			
+			String[] blockNames = new String[] { "property","class_info" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	/** no use **/
+	public void setEstimateResult(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			
+			input.put("cmd", "SET_ESTIMATE_RESULT");
+			DataSet output = interact.execute( "/edu/EstimateMgr" , input);
+			
+			String result = getXMLFormat("");
+			responseXML(result, resp);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));
+			String message = ex.getMessage();
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, message, ""), resp);
+		}
+	}
+	/** lecture > _class_class : class play final result **/
+	public void setNewResult(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			
+			input.put("cmd", "SET_NEW_RESULT");
+			DataSet output = interact.execute( "/edu/EstimateMgr" , input);
+			String status = output.getText("status");
+			String result = getJsonFormat(HTTPResultConstant.RESULT_OK, status , "");
+			
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	/** lecture > _class_list : lecture term extend **/
+	public void setTermExtend(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			
+			input.put("cmd", "SET_TERM_EXTEND");
+			DataSet output = interact.execute( "/edu/EstimateMgr" , input);
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	/** lecture > _class_class : class exam answer check **/
+	public void getAnswerCheck(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "GET_ANSWER_CHECK");
+			input.put("answer" , input.getText("item_seq_no"));
+			DataSet output = interact.execute( "/edu/EstimateMgr" , input);
+			
+			String[] blockNames = new String[] {"item_info" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	/** lecture > _lecture_cert : lecture cert list search **/
+	public void getCertList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "GET_CERT_LIST");			
+			DataSet output = interact.execute( "/edu/EstimateMgr" , input);
+			
+			String[] blockNames = new String[] { "property","cert_info" };
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

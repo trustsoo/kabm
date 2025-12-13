@@ -1,0 +1,40 @@
+.W49P {width:20% !important; min-width:20% !important; max-width:20% !important;}
+.W49P {width:49% !important; min-width:49% !important; max-width:49% !important;}
+.W50P {width:50% !important; min-width:50% !important; max-width:50% !important;}
+.W65P {width:65%;}
+.W70P {width:70%;}
+.W75P {width:75%;}
+.W80P {width:80%;}
+.W85P {width:85%;}
+.W90P {width:90%;}
+.W99P {width:99%;}
+.W100P {width:100% !important; min-width:100% !important; max-width:100% !important;}
+
+table.com_table_box {width:100%;margin-top:3px; background-color:#fff;}
+table.com_table_box tbody { border-top:1px solid #4A90CC;border-bottom:1px solid #4A90CC;}
+table.com_table_box tr {width:100%; height:30px;}
+table.com_table_box tr th {padding: 2px 5px; width:90px;min-width:90px; height:30px; background-color:#F3F3F3; border-bottom:1px solid #CCCCCC;color: #03629E;text-align:center;font-weight: bold;font-size: 12px;font-family: "����";white-space: nowrap; word-wrap: nowrap;}
+table.com_table_box tr td {padding: 5px 5px; min-width:100px;border-bottom:1px solid #CCCCCC;white-space: nowrap; word-wrap: nowrap;}
+table.com_table_box tr th.lastChild{ border-bottom:0px!important;}
+table.com_table_box tr td.lastChild{ border-bottom:0px!important;}
+
+.headings th{ text-align:center;}
+.center { text-align:center;}
+
+
+.jquery-spinner {}
+.jquery-spinner .ui-spinner {width: 96px;}
+.jquery-spinner .ui-spinner-down {bottom: initial; right: initial; top: 3px; left: 0; height: 26px; width: 26px; line-height: 26px;}
+.jquery-spinner .ui-spinner-up {bottom: initial; right: initial; top: 3px; left: 60px; height: 26px; width: 26px; line-height: 26px;}
+.jquery-spinner .ui-spinner-input {margin-left: 28px; vertical-align: top; text-align : center;border-radius: 0!important;  color: #858585;  background-color: #fff;  border: 1px solid #d5d5d5; padding: 5px 4px; line-height: 1.2;}
+.btn{
+	border-radius:3px;
+}
+
+button,
+.buttons,
+.btn,
+.modal-footer .btn+.btn {
+/*     margin-bottom: 5px; */
+    margin-right: 5px
+}

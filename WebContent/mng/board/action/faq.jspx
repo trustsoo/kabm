@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.UUID" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	<jsp:declaration>
+	<![CDATA[
+    
+    
+    
+    public void doFaqList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+    {
+    	DataSet input = new DataSet();
+		 DataSet output = new DataSet();
+		 bind(req, input);
+		
+	 	 req.setAttribute("templet-bypass", "true");
+	 	 input.put("emp_no", getUserObject(req, resp).getId());
+		 try {
+			 input.put("start_dt", input.getText("start_dt").replace("-",""));
+			 input.put("end_dt", input.getText("end_dt").replace("-",""));
+			 
+			
+			 input.put("cmd", "list");
+			 output = interact.execute("/community/FAQ", input);
+			 String[] blockNames = new String[] {"property", "list" };
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("board_row_per_page"));
+			 output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			 String result = getJson(output, blockNames);
+			 responseJson(result, resp);	
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+    }
+    
+    
+    public void doFaqAdd(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			 throws ServletException, IOException, Exception 
+	 {
+		 DataSet input = new DataSet();
+		 DataSet output = new DataSet();
+		 DataSet authput = new DataSet();
+		 
+		 boolean isAddOK = true;
+		 
+		 bind(req, input);
+			
+			
+		 req.setAttribute("templet-bypass", "true");
+		 try 
+		 {
+			 
+			 if("".equals(input.getText("faq_no")))
+			 {
+				 input.put("faq_no", "-1");
+			 }
+			 
+			 input.put("reg_emp_cd", getUserObject(req, resp).getId());
+			 
+			 if(!"-1".equals(input.get("faq_no")))
+			 {
+				 input.put("cmd", "update");
+			 } else
+			 {
+				 input.put("cmd", "create");	 
+			 }
+			 
+			 
+			 output = interact.execute("/community/FAQ", input);
+			 
+			 String faq_no = input.getText("faq_no");
+			 
+			 String result = getJsonFormat("");
+			 responseJson(result, resp);
+			
+		 } catch (Exception ex) {
+			 responseJson(
+					 getJsonFormat(
+							 HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+							 ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	 }
+    
+    public void doFaqDel(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			 throws ServletException, IOException, Exception 
+	 {
+		 DataSet input = new DataSet();
+		 DataSet output = new DataSet();
+		 DataSet authput = new DataSet();
+		 
+		 boolean isAddOK = true;
+		 
+		 bind(req, input);
+			
+			
+		 req.setAttribute("templet-bypass", "true");
+		 try 
+		 {
+			 
+			 input.put("cmd", "drop");
+			 output = interact.execute("/community/FAQ", input);
+			 
+			 String result = getJsonFormat("");
+			 responseJson(result, resp);
+			
+		 } catch (Exception ex) {
+			 responseJson(
+					 getJsonFormat(
+							 HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+							 ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	 }
+    
+    public void doBoardRead(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			
+			input.put("emp_no", getUserObject(req, resp).getId());
+			input.put("cmd", "detail");
+			interact.execute("/community/FAQ", input, output);
+			
+			String[] blockNames = new String[] { "detail"};
+
+			String result = getJson(output, blockNames);
+			System.out.println(result);
+			responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			throw ex;				
+		}
+	}	 
+    
+    
+    public void doSetNotice(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			
+			input.put("start_dt", input.getText("notice_start_dt").replace("-",""));
+			input.put("end_dt", input.getText("notice_end_dt").replace("-",""));
+			input.put("emp_no", getUserObject(req, resp).getId());
+			input.put("cmd", "setNotice");
+			interact.execute("/community/board", input, output);
+			
+			
+			
+			
+			String[] blockNames = new String[] { "board_detail"};
+
+			String result = getJsonFormat("");
+			 responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			throw ex;				
+		}
+	}	 
+    
+    
+    
+    
+    
+	]]>
+	</jsp:declaration>
+</jsp:root>
+

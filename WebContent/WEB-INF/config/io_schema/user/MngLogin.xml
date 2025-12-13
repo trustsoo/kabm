@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<transaction name="MngLogin">
+	<processor-info type='dbms' datasource=''>
+	
+	<property name="isPrint" value="Y"/>
+	
+		<script language="java" import="">
+			<![CDATA[
+			String cmd = input.getText("cmd");
+			
+			if( "login_default".equals(cmd) ){
+			
+				executeSQL("login_default", connection, input, output);
+			}
+			else{
+				executeSQL(cmd, connection, input, output);
+			}			
+			]]>
+
+		</script>
+		
+		
+		<transaction-type></transaction-type>
+		
+		
+		<sql id="login_default">
+			<query>
+				<![CDATA[				
+				SELECT
+					a.emp_cd, 
+					a.emp_nm,
+					CASE ?
+						WHEN a.passwd THEN 'Y'
+						ELSE 'N' 
+					END as is_match_passwd,
+					a.email,
+					a.tel_no,
+					a.mobile_no,
+					a.auth
+				FROM tb_kabm_emp a
+				WHERE a.emp_cd = ?		
+				AND a.use_yn = 'Y' 
+			]]>
+			</query>
+			<mapping>
+				<setProperty>psswd,user_id</setProperty>
+				<getProperty>user_id, user_nm, 
+							 is_match_passwd,
+							 email, tel_no,mobile_no,auth
+				</getProperty>
+			</mapping>
+		</sql>
+				
+		<sql id="insert_login_hist">
+			<query>
+				<![CDATA[
+					INSERT INTO tb_kabm_login_hst(user_id, ip,login_ddtm,login_div,user_div)
+					VALUES (?,?,getdate(),?, ?)
+				]]>
+			</query>
+			<mapping>
+				<setProperty>user_id,client_ip,login_div,user_div</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>		
+		
+		<sql id="password_check">
+			<query>
+			<![CDATA[
+				SELECT emp_cd
+				FROM tb_kabm_emp
+				WHERE emp_cd = ?
+				AND passwd = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_id, psswd</setProperty>
+				<getProperty>user_id</getProperty>
+			</mapping>
+			
+		</sql>
+		
+		<sql id="password_change">
+			<query>
+			<![CDATA[
+				UPDATE tb_kabm_emp SET 
+					passwd = ?
+				WHERE emp_cd = ?
+				AND passwd = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>psswd, user_id, cur_pw</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='user_id' type='String' size=''/>
+			<field name='psswd' type='String' size='' properties="encryption:aria"/>				
+			<field name='cur_pw' type='String' size='' properties="encryption:aria"/>
+			
+			<field name='client_ip' type='String' size=''/>
+			<field name='login_div' type='String' size=''/>
+			<field name='user_div' type='String' size=''/>
+		</block>
+	</input>
+	
+	<output> 
+		<block id='' name='' repeat='1'>
+			<field name='user_id' type='String'	size=''/>
+			<field name='user_nm' type='String'	size=''/>
+			<field name='psswd' type='String'	size='' properties="encryption:aria"/>
+			<field name='is_match_passwd' type='String'	size=''/>
+			<field name='email' type='String'	size=''/>
+			<field name='tel_no' type='String'	size=''/>
+			<field name='mobile_no' type='String'	size=''/>
+			<field name='auth' type='String'	size=''/>
+		</block>
+		
+	</output>
+	
+</transaction>

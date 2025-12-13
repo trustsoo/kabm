@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='subcomp' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+           	//배너 리스트 조회
+            //if( "select_all".equals(cmd) ) 
+            //{
+            	executeSQL(cmd, connection, input, output);
+            //}           
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_sub_list">
+            <query>
+                <![CDATA[
+                  SELECT TOP (?) 
+                        cp_code,ji_code, daepyo, jisaname,zip_code,  addr, tel, fax,e_mail,seq_no,samu_nm,
+                        file_no , file_nm , file_path ,
+                        rnum,tot_cnt 
+                FROM ( 
+                    select 
+                        ROW_NUMBER() OVER( ORDER BY A.ji_code) AS rnum,
+                        count(*) over() tot_cnt, 
+                        A.cp_code,  A.ji_code, A.daepyo,    A.jisaname, A.zip_code,     A.addr1 + A.addr2 as addr,  A.tel, 
+                        A.fax, A.e_mail,
+                        B.seq_no,
+                        B.samu_nm,
+                        f.file_no , f.file_nm , f.file_path 
+                    from 
+                        tb_apc_company_sub A LEFT OUTER JOIN tb_kabm_sub B 
+                         LEFT OUTER JOIN  (select data_no , file_no , file_nm, file_path  from tb_kabm_attach_file where
+                        	attach_div_cd ='attach_div_05' group by  data_no , file_no , file_nm , file_path                        
+                    	) f
+                    	ON B.seq_no = f.data_no  
+                        ON A.cp_code = B.cp_code AND A.ji_code = B.JI_CODE 
+                    where
+                        A.USE_YN = 'Y' AND
+                        A.jisaname like '%' + ? + '%' AND A.DAEPYO like '%' + ? + '%'
+                  ) x 
+                 WHERE rnum > (?-1) * ? 
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>row_per_page, in_jisaname, in_daepyo, cur_pg, row_per_page </setProperty>
+                <getProperty>cp_code,ji_code, daepyo, jisaname,zip_code,  addr, tel, fax,e_mail,seq_no,samu_nm, file_no , file_nm , file_path ,rnum,tot_cnt</getProperty>
+            </mapping>
+        </sql>
+        
+
+         <sql id="select_sub_item">
+            <query>
+                <![CDATA[
+                        SELECT 
+                            seq_no, cp_code,ji_code, samu_nm, intro,
+                            (
+                                select top(1) file_no from tb_kabm_attach_file where
+                                attach_div_cd ='attach_div_05'  and data_no = A.seq_no
+                                order by file_no desc
+                            ) AS file_no  
+                        FROM tb_kabm_sub A
+                        WHERE cp_code=? AND ji_code=?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>cp_code,ji_code</setProperty>
+                <getProperty>seq_no, cp_code,ji_code, samu_nm, intro,file_no</getProperty>
+            </mapping>
+        </sql>
+
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1"> 
+            <field name='in_daepyo'      type='string' size=''/><!--지회장-->
+            <field name='in_jisaname'             type='string' size=''/>  <!--지회명 -->
+
+            <field name='daepyo'      type='string' size=''/><!--지회장-->
+            <field name='jisaname'             type='string' size=''/>  <!--지회명 -->
+
+
+            <field name='cp_code'      type='string' size=''/>
+            <field name='ji_code'             type='string' size=''/>
+
+
+            <field name='cur_pg' type='int' size=''/>
+            <field name='row_per_page' type='int'   size=''/>
+
+            <field name='seq_no'        type='string' size=''/>
+        </block>
+    </input>
+    
+    <output>
+
+        <block id="property" name="property" repeat="1">
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+
+
+       <block id='sub_list' name='sub_list' 	repeat=''>
+            <field name='cp_code'      type='string' size=''/>
+            <field name='ji_code'      type='string' size=''/>
+            <field name='daepyo'      type='string' size=''/>
+            <field name='jisaname'      type='string' size=''/>
+            <field name='zip_code'      type='string' size=''/>
+            <field name='addr'      type='string' size=''/>
+            <field name='tel'      type='string' size=''/>
+            <field name='fax'      type='string' size=''/>
+            <field name='e_mail'      type='string' size=''/>
+            <field name='seq_no'      type='string' size=''/>            
+            <field name='rnum'      type='string' size=''/>            
+        	<field name='tot_cnt' 		type='string' size=''/>
+
+
+            <field name='seq_no' type='string' size=''/>  
+            <field name='samu_nm'      type='string' size=''/>
+            <field name='intro'      type='string' size=''/>
+
+            <field name='file_no' type='string' size=''/>  
+            <field name='file_nm' type='string' size=''/>
+            <field name='file_path' type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<layout-profile>
+	<portal>
+		<layouts default="default">
+			<layout name="default">
+				<template-page>
+					/templets/main/templet.jsp
+				</template-page>
+			</layout>
+			<layout name="index">
+				<template-page>
+					/templets/main/templet_index2.jsp
+				</template-page>
+			</layout>
+			<layout name="common">
+				<template-page>
+					/templets/main/templet_common.jsp
+				</template-page>
+			</layout>
+			<layout name="popup">
+				<template-page>
+					/templets/main/templet_pop.jsp
+				</template-page>
+			</layout>
+			
+			<layout name="no-body">
+				<template-page>
+					/templets/main/templet_no_body.jsp
+				</template-page>
+			</layout>			
+			
+			<layout name="no-apply">
+				<template-page></template-page>
+			</layout>
+			
+			<!-- 관리자 전용 -->
+			<layout name="mng_default">
+				<template-page>
+					/templets/mng/templet.jsp
+				</template-page>
+			</layout>
+			<!-- 모바일 전용 -->
+			<layout name="mobile">
+				<template-page>
+					/templets/mobile/templet.jsp
+				</template-page>
+			</layout>
+			<layout name="mobile-pop">
+				<template-page>
+					/templets/mobile/templet_pop.jsp
+				</template-page>
+			</layout>
+			<layout name="mobile-index">
+				<template-page>
+					/templets/mobile/templet_index.jsp
+				</template-page>
+			</layout>
+		</layouts>
+	</portal>
+</layout-profile>

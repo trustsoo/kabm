@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='question_action' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+          if( "insert_question".equals(cmd) ) 
+        {
+            executeSQL(cmd, connection, input, output);
+            executeSQL("getIdentity", connection, input, output);
+        }   
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="insert_question">
+            <query>
+                <![CDATA[                	
+                    insert into tb_kabm_question(
+                        name,
+                        tel_no,
+                        email,
+                        title,
+                        question,   
+                        reg_ddtm,
+                        question_div
+                    ) values(
+                        ?,?,?,?,?,
+                        getDate(),
+                        ?
+                    )
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>  
+                        name,
+                        tel_no,
+                        email,
+                        title,
+                        question,                           
+                        question_div
+                    </setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+         <sql id="getIdentity">
+            <query>
+                <![CDATA[
+                    SELECT @@IDENTITY AS 'seq_no'                
+                ]]>
+            </query>
+            <mapping>
+                <setProperty></setProperty>
+                <getProperty>seq_no</getProperty>
+            </mapping>
+        </sql>
+
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">              
+            <field name='name'         type='string'    size=''/>
+            <field name='tel_no'         type='string'    size=''/>
+            <field name='email'         type='string'    size=''/>
+            <field name='title'         type='string'    size=''/>
+            <field name='question'         type='string'    size=''/>
+            <field name='reg_ddtm'         type='string'    size=''/>
+            <field name='question_div'         type='string'    size=''/> 
+        </block>
+    </input>
+    
+    <output>
+       <block id='question' name='question' 	repeat=''>
+        	<field name='seq_no' 		type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

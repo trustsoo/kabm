@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	    
+	    private final String MOBILE_MAIN = "/mobile/_main.jsp";
+	    private static final String JSP_PASS="_modify_password.jsp";
+	    
+	    protected String getDefaultMethodName()
+		{
+			return "main"; 
+		}
+	    public void main(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				
+				req.setAttribute("input", input);
+				view.setViewPage(MOBILE_MAIN);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void passModifyView(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    		throws ServletException, IOException, Exception
+	    	{
+	    		DataSet input = new DataSet();
+	    		bind(req, input);		
+	    		
+	    		DataSet output = new DataSet();
+	    		try
+	    		{	
+	    			jdf.framework.view.auth.User session_user = getUserObject(req , resp);
+	    			String user_id = "";
+	    			if(session_user != null )user_id = session_user.getId();
+	    			
+	    			req.setAttribute("input", input);
+	    			
+	    			view.setViewPage(JSP_PASS);
+	    		} catch(Exception ex)
+	    		{	
+	    			throw ex;
+	    		}
+	    	}
+	    
+	]]>
+	</jsp:declaration>
+</jsp:root>

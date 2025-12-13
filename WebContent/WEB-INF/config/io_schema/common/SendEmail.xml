@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='SendEmail' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="jdf.framework.core.log.Logger,
+										jdf.framework.core.util.*">
+		<![CDATA[
+			String cmd = input.getText("cmd");		
+			
+			executeSQL(cmd, connection, input, output);
+			
+
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="sendEmailHst">
+			<query>
+			   <![CDATA[
+			   		INSERT INTO TB_KABM_EMAIL_TRANS
+				           (SENDER
+				           ,RECEIVER
+				           ,MSG
+				           ,RG_DATE
+				           ,TITLE
+				           ,USER_ID)
+				     VALUES
+				           (?, ? , ? , getdate(), ? , ?)
+				]]>
+			</query>
+			<mapping>
+				<setProperty>sender,receiver,msg,title,user_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+	</processor-info>
+	
+	
+	<input>
+		<block name="arg" repeat="1">		
+			<field name='user_id' type='String'	size=''/>
+			<field name='sender' type='String'	size=''/>
+			<field name='receiver' type='String'	size=''/>
+			<field name='msg' type='String'	size=''/>
+			<field name='title' type='String'	size=''/>
+		</block>
+	</input>
+	
+	<output> 
+		<block id="" name="" repeat="">
+			
+		</block>
+	</output>
+	
+</transaction>

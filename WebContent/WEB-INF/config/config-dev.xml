@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<config version="4.0">
+
+	<properties>
+		<property desc="web site domain" name="site.url" value="http://218.237.52.98:8080" />
+		<property desc="web port" name="web.port" value="8080" />
+		<property desc="web site domain" name="server.domain" value="218.237.52.98"  />
+		<property desc="DOCUMENT_ROOT_DIR" name="DOCUMENT_ROOT_DIR" value="C:\repository\git\kabm\WebContent" />
+		<property desc="LIB_DIR" name="LIB_DIR" value="C:\repository\git\kabm\WebContent\WEB-INF\lib" />
+		<property desc="CLASS_DIR" name="CLASS_DIR" value="C:\repository\git\kabm\WebContent\WEB-INF\classes" />
+		<property desc="CONFIG_DIR" name="CONFIG_DIR" value="C:\repository\git\kabm\WebContent\WEB-INF\config" />
+		<property desc="APP_DATA_DIR" name="APP_DATA_DIR" value="C:\repository\git\kabm\WebContent\repository" />
+	</properties>
+
+	<!--=============================================
+		web site config
+		=============================================-->
+	<site documentRoot="${DOCUMENT_ROOT_DIR}"
+	  domain="http://${server.domain}:${web.port}" 
+	  server_domain="${server.domain}"	  
+	  web_port="${web.port}"
+	  target-encoding="utf-8"      
+      isTest="true"
+	/>
+	
+	<payment confpath="C:/repository/git/kabm/WebContent/edu/lgdacom"/>
+	
+	<file>
+		<lecture path="${APP_DATA_DIR}/lecture"
+				url="/repository/lecture" />
+		<photo path="${APP_DATA_DIR}/photo"
+				url="/repository/photo" />
+		<chart path="${APP_DATA_DIR}/chart"
+				url="/repository/chart" />
+		<certify path="${APP_DATA_DIR}/cert"
+				url="/repository/cert" />
+		<thumb path="${APP_DATA_DIR}/thumb"
+				url="/repository/thumb" />			
+	</file>
+	
+	<pdf basedir="${DOCUMENT_ROOT_DIR}\static\edu\pdf"
+		makedir="${CONFIG_DIR}\data\pdf"
+		fontpath="${DOCUMENT_ROOT_DIR}\static\edu\font"
+	/>
+	
+	<MultipartAttributes maxUploadFileKilloBytes="500000" 
+						encoding="UTF-8"
+						tempPath="${CONFIG_DIR}\data\temp"
+						publicDir = "${DOCUMENT_ROOT_DIR}\data"
+						publicUrl = "/data"
+						dir = "${CONFIG_DIR}\data"
+						photoUploadCallback="/static/lib/ckeditor/filecalback.jsp"
+						msgUrl = "${DOCUMENT_ROOT_DIR}/plugin/messenger_after/data"
+						photoExtNames="bmp,gif,jpg,jpeg,png"
+						includExtNames="jpg,jpeg,bmp,png,gif,doc,hwp,txt"
+						excludExtNames="jsp,jspx,class,php,php3,php5,phtml,asp,aspx,asp,ascx,cfm,cfc,pl,bat,exe,dll,reg,cgi,js,html,css,sh,bin"
+						imageMagic="C:\Program Files\ImageMagick-7.0.6-Q16\convert.exe"
+						/>
+						
+	<scheduler file="schedule.xml" isEnable="true"/>	
+	<!--==============================================
+		RDBMS Connection
+		==============================================-->
+	
+	<!-- JNDI DB Connection -->
+	
+	<!--db
+	dataSourceName="jdbc/oracle"
+	_dataSourceDir="java:comp/env/jdbc/oracle"
+	/-->
+	
+	<db url="jdbc:apache:commons:dbcp:MSSQLPool" 
+	 jdbcDriver="jdf.framework.core.pool.jdbc.DBCP2PoolDriver" 
+	 dataSourceName="" />
+			
+	<connectionPool>
+
+		 <!-- (!!!!!!)필독..
+			 maxTotal(구 maxActive) : 동시에 사용될수 있는 최대 커넥션 개수
+			 maxWait : connection 사용이 많아져서 connection pool이 비었을 때 대기시간 (단위 1/1000초)
+			 maxIdle : 사용되지 않고 풀에 저장될 수 있는 최대 커넥션 개수
+			 minIdle : 사용되지 않고 풀에 저장될 수 있는 최소 커넥션 개수
+			 removeAbandoned : 유효하지 않는 커넥션의 제거 여부
+			 removeAbandonedTimeout : 유효하지 않은 커넥션의 삭제시의 타임아웃
+			 logAbandoned : 유효하지 않는 커넥션을 생성한 코드 위치 로그생성 여부
+			 validationQuery : 커넥션 유효성 체크 쿼리 
+			 testOnBorrow : 커넥션 풀에서 커넥션을 얻어올 때 테스트 실행(기본값: true)
+			 testOnReturn : 커넥션 풀로 커넥션을 반환할 때 테스트 실행(기본값: false)
+			 testWhileIdle : Evictor 스레드가 실행될 때 (timeBetweenEvictionRunMillis > 0) 커넥션 풀 안에 있는 유휴 상태의 커넥션을 대상으로 테스트 실행(기본값: false)
+			 numTestsPerEvictionRun : Evictor 스레드 작동 시 한 번에 검사할 커넥션의 갯수
+			 minEvictableIdleTimeMillis : Evictor 스레드 작동 시 커넥션의 유휴 시간을 확인해 설정값 이상일 경우 커넥션을 제거한다(기본값: 30분)
+			 timeBetweenEvictionRunsMillis : Evictor 스레드가 작동하는 간격. 기본값은 -1이며 Evictor 스레드의 실행이 비활성화돼 있다.
+			 accessToUnderlyingConnectionAllowed 
+			 whenBlockExhausted : maxActive를 넘어 섰을때 대기 또는 컨넥션 증가(true:대기, false:증가)
+			 defaultTransactionIsolation : transaction isolation level. (1:TRANSACTION_READ_UNCOMMITTED, 2:TRANSACTION_READ_COMMITTED, 4:TRANSACTION_REPEATABLE_READ, 8:TRANSACTION_SERIALIZABLE)
+			 오라클의 경우 설정하지 않고, MS-SQL의 경우 1로 세팅한다(쿼리에 WITH(NOLOCK)과 같은 효과)
+		-->
+		
+		<MSSQLPool maxTotal="5"   
+            maxWait="10000"
+            maxIdle="5"
+                  minIdle="3"
+            removeAbandoned="true"
+            removeAbandonedTimeout="30"    
+            logAbandoned="true"
+            validationQuery="SELECT 1"    
+            testOnBorrow="true"
+            testOnReturn="true"
+            testWhileIdle="true"
+            numTestsPerEvictionRun="5"
+            minEvictableIdleTimeMillis="3600000"
+            timeBetweenEvictionRunsMillis="60000"
+            accessToUnderlyingConnectionAllowed="true"
+            whenBlockExhausted="true"
+            defaultTransactionIsolation="1"
+            url="jdbc:sqlserver://218.237.52.98:1433;DatabaseName=eKABM"
+            driver="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+            user="sa"
+            password="Itams0860"/>
+      <SMSPool maxTotal="5"   
+            maxWait="10000"
+            maxIdle="5"
+            minIdle="3"
+            removeAbandoned="true"
+            removeAbandonedTimeout="30"    
+            logAbandoned="true"
+            validationQuery="SELECT 1"    
+            testOnBorrow="true"
+            testOnReturn="true"
+            testWhileIdle="true"
+            numTestsPerEvictionRun="5"
+            minEvictableIdleTimeMillis="3600000"
+            timeBetweenEvictionRunsMillis="60000"
+            accessToUnderlyingConnectionAllowed="true"
+            whenBlockExhausted="true"
+            defaultTransactionIsolation="1"
+            url="jdbc:sqlserver://218.237.52.100:1433;DatabaseName=SMS"
+            driver="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+            user="sa"
+            password="Itams0860"/>
+		
+	</connectionPool>
+	
+	<network>
+		<socket>
+			<dump enable="false"/>
+			<packet dump="false"/>
+			<buffer writeSize="512" readSize="512"/>
+		</socket>
+		<async>
+			<AsyncSocketClientManager maxProcessThreadNum="100" processThreadNum="20" byteReadTimeout="200" userPerThread="50"></AsyncSocketClientManager>
+		</async>
+		<parser>
+			<encode type="UTF-8"/>
+			<pool size="1000" enable="true"/>
+		</parser>
+	</network>	
+	
+	<!--=================================================
+		Log		
+		dateFormat="yy/MM/dd HH:mm:ss"
+		dateFormat="'[serverName]' yy/MM/dd HH:mm:ss"
+		==================================================-->
+	<logger _printSystemProperty="weblogic.Name" autoflush="true" consoleOutput="true"
+		dateFormat="yy/MM/dd HH:mm:ss.SSS" dir="./log" isAsync="false" logPreservationDay="30"
+		printSystemProperty="" serverId="W1" logDBPool="jdbc:apache:commons:dbcp:MSSQLPool">
+
+		<sys dir="./log" trace="true" />
+		<err error-trace="true" trace="true" />
+		<warn error-trace="true" trace="true" />
+		<info trace="true" consoleOutput="true"/>
+		<debug trace="true" consoleOutput="true"/>
+		<user consoleOutput="false" dir="./log/user" isAsync="true" trace="true" />
+		<sql consoleOutput="true" dir="./log/sql" isAsync="true" trace="true" />
+		<packet consoleOutput="true" dir="./log/packet" isAsync="true" trace="true" />
+		<monitor consoleOutput="false" dir="./log/mon" isAsync="true" trace="false" db-trace="false"/>
+		<batch consoleOutput="false" dir="./log/batch" isAsync="true" trace="true" />
+	</logger>
+
+	
+	<!--=================================================
+		Java Mail & Message
+		===================================================-->
+	<message 
+		dir="${CONFIG_DIR}\messages\"
+		supportedLang="ko,en"
+		default="ko">
+	</message>
+	<mail 
+		
+		admin="webmaster@e-tams.com" 
+                adminName="한국건물위생관리협회" 
+                cc="" 
+                ccFlag="false"
+                host="mail.e-tams.com"
+                port="25"
+                auth="true"
+                authID="garibi"
+                adminPassword="Itams0860"
+
+
+		templateDir="${CONFIG_DIR}\\mailTemplets\\" />		
+	
+	<messenger msgtemplate="./messengerMsg.txt"/>
+	
+	<!--=================================================
+		external resource configuration
+		===================================================-->
+	<resource>
+		<anylogic dbEncoding="utf-8" packetCapture="false" vmEncoding="utf-8" isUnknownCharaterLength="true">
+			<ioSchema checkIntervalTime="5100" checkSignature="false" classpath=".;${LIB_DIR}\\sqljdbc41.jar;${LIB_DIR}\\commons-pool2-2.4.2.jar;${LIB_DIR}\\commons-dbcp2-2.1.1.jar;${CLASS_DIR};" compiler="C:\Program Files\Java\jdk1.7.0_80\bin\javac -encoding UTF-8"
+				dir="./io_schema"
+				genDir="${CONFIG_DIR}\\io_schema_gen\\bld-classes" history="false" initLoadAll="false"
+				lib_dir="${LIB_DIR}" runBldStatus="" poolVender="0"></ioSchema>
+	
+			<resource-adapter dir="" />
+	
+			<transfer-extension-name base64-type="" binary-type="" comma-type="" excel-type="" html-type=""
+				xml-type="" json-type="" xls-type="" jq-grid-type=""/>
+			<cache ioprocessSvltCache="false" manager-class="jdf.framework.logic.spi.cache.MultiServerCacheManager">
+				<HttpCachePropagator>
+					<!--target-server url="${site.url}/anylogic/cache"/-->
+				</HttpCachePropagator>
+			</cache>
+			<dbConnectionList names="mssqlPool" />
+		</anylogic>
+	</resource>		
+	
+</config>
+

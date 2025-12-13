@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.UUID" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+    public void doBoardRead(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			
+			String emp_no = "";
+			
+			try
+			{
+				if(getUserObject(req, resp) != null && getUserObject(req, resp).getId() != null)
+				{			
+					emp_no = getUserObject(req, resp).getId();
+				}	
+			} catch(Exception ex)
+			{}
+			
+			
+			input.put("emp_no", emp_no);
+			
+			input.put("cmd", "doBoardRead");
+			interact.execute("/community/board", input, output);
+			
+			String[] blockNames = new String[] { "board_detail"};
+
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw ex;				
+		}
+	}
+    
+    
+	]]>
+	</jsp:declaration>
+</jsp:root>
+

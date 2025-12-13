@@ -1,0 +1,193 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='EmpMgr' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+	<property name="sqlLogMode" value="bind"/>
+	<property name="isPrint" value="Y"/>
+	
+		<script language="java" import="">
+		<![CDATA[
+				
+			String cmd = input.getText("cmd");		
+			executeSQL(cmd, connection, input, output);
+			
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="getEmpList">
+			<query>
+			   <![CDATA[
+			   		SELECT TOP (?) 
+			   			emp_cd, emp_nm, tel_no, email, mobile_no,use_yn, auth, rnum,tot_cnt 
+			   		
+			   		FROM
+			   		(
+						SELECT 
+						ROW_NUMBER() OVER( ORDER BY a.emp_nm asc ) AS rnum, 
+						count(*) over() tot_cnt,
+						emp_cd, emp_nm, tel_no, email, mobile_no, a.use_yn, c.cd_nm auth
+						FROM TB_KABM_EMP a LEFT OUTER JOIN TB_KABM_CODE c
+						ON a.auth = c.cd
+						AND c.div_cd = 'emp_auth'
+					) x 
+				    WHERE rnum > (?-1) * ? 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>row_per_page,cur_pg, row_per_page</setProperty>
+				<getProperty>emp_cd, emp_nm, tel_no, email, mobile_no,use_yn, auth,rnum, tot_cnt</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getEmpinfo">
+			<query>
+			   <![CDATA[
+					SELECT emp_cd, emp_nm, tel_no, email, mobile_no,use_yn, auth
+					FROM TB_KABM_EMP a
+					WHERE A.EMP_CD = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>emp_cd</setProperty>
+				<getProperty>emp_cd, emp_nm, tel_no, email, mobile_no,use_yn, auth</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getEmpPsswd">
+			<query>
+			   <![CDATA[
+					SELECT 
+					       a.passwd
+					FROM TB_KABM_EMP a
+					WHERE A.EMP_CD = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>emp_cd</setProperty>
+				<getProperty>passwd</getProperty>
+			</mapping>
+		</sql>
+				
+		<sql id="saveEmpinfo">
+			<query>
+			   <![CDATA[
+					MERGE INTO TB_KABM_EMP a
+					USING (SELECT ? emp_cd ) b
+					ON (a.emp_cd = b.emp_cd )
+					WHEN MATCHED THEN
+						UPDATE SET
+							emp_nm = ?,
+						    tel_no = ?,
+	                        mobile_no = ?,
+	                        email= ?,
+	                        use_yn = ?,
+	                        auth = ?,
+	                        upd_ddtm = getdate()
+					WHEN NOT MATCHED THEN
+						INSERT
+					 	(emp_cd, emp_nm, tel_no, email, mobile_no, 
+					  	use_yn, auth, passwd,reg_ddtm)
+						VALUES
+						 (?, ?, ?, ?, ?,
+						  ?, ?, ?, getdate());
+				]]>
+			</query>
+			<mapping>
+				<setProperty>emp_cd,
+							 emp_nm, tel_no, mobile_no, email, use_yn, emp_auth,
+							 emp_cd, emp_nm, tel_no, email, mobile_no,use_yn, emp_auth,passwd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="updateEmpinfo">
+			<query>
+			   <![CDATA[
+					UPDATE TB_KABM_EMP
+					SET					    
+					    emp_nm = ?,
+					    tel_no = ?,
+                        mobile_no = ?,
+                        email= ?,
+                        use_yn = ?,
+                        auth = ?,
+                        upd_ddtm = getdate()
+                    WHERE emp_cd = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>emp_nm, tel_no, mobile_no, email, use_yn, emp_auth, emp_cd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="passwdReset">
+			<query>
+			<![CDATA[
+				UPDATE tb_kabm_emp SET
+					passwd = ?
+				WHERE emp_cd = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>change_passwd, emp_cd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+		
+		</processor-info>
+	
+	
+	<input>
+		<block name="arg" repeat="1">		
+			<field name='emp_cd' type='String'	size=''/>
+			<field name='emp_nm' type='string'	size=''/>
+			<field name='tel_no' type='string'	size=''/>
+			<field name='mobile_no' type='string'	size=''/>
+			<field name='email' type='string'	size=''/>
+			<field name='emp_auth' type='string'	size=''/>
+			<field name='use_yn' type='string'	size=''/>
+			
+			
+			<field name='current_passwd' type='string'	size='' properties="encryption:aria"/>
+			<field name='change_passwd' type='string'	size='' properties="encryption:aria"/>			
+			<field name='passwd' type='String'	size=''  properties="encryption:aria"/>
+					
+			<field name='cur_pg' type='int'	size=''/>
+			<field name='row_per_page' type='int'	size=''/>
+		</block>
+	</input>
+	
+	<output> 
+		
+		<block id='' name='' repeat='9999999'>
+			<field name='passwd' type='string'	size=''/>
+			<field name='emp_cd' type='String'	size=''/>
+			<field name='emp_nm' type='String'	size=''/>
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+		</block>
+		
+		<block id='emp_info' name='emp_info' repeat='9999999'>
+			<field name='emp_cd' type='string'	size='' properties="isUnique:true"/>
+			<field name='emp_nm' type='string'	size=''/>
+			<field name='tel_no' type='string'	size=''/>
+			<field name='mobile_no' type='string'	size=''/>
+			<field name='email' type='string'	size=''/>
+			<field name='use_yn' type='string'	size=''/>
+			<field name='auth' type='string'	size=''/>
+			<field name='rnum' type='string'	size=''/>
+			<field name='tot_cnt' type='string'	size=''/>
+		</block>
+		
+	</output>
+	
+</transaction>

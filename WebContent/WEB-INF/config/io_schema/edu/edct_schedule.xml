@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="edct_schedule">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			executeSQL(cmd, connection, input, output);
+			
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="getTop5">
+			<query>
+			<![CDATA[
+				select
+					 is_date, ist_title, is_ill, iplace,fmt_is_date,stime,etime,jisaname,start_yn,end_yn,ing_yn
+				from (
+					select top(50) a.schedule_id,
+						CONVERT(CHAR(10), is_date, 23) as is_date, ist_title, is_ill, iplace, CONVERT(CHAR(8), is_date, 112) as fmt_is_date,
+						convert( char(5), stime, 8 ) stime,
+						convert( char(5), etime , 8 ) etime,
+						replace(b.jisaname, '지회', '' ) jisaname,
+						case when ( cast( srcv_date as datetime) - getdate() +1  ) <= 0 then 'Y' else 'N' end as start_yn,
+						case when ( cast(ercv_date as datetime) - getdate() -1 ) <= 0 then 'Y' else 'N' end as end_yn,
+						case when cast(srcv_date as datetime) <= getdate()-1  and  cast(ercv_date as datetime) >= getdate()-1  then 'Y' else 'N' end as ing_yn
+					from TB_EDCT_SCHEDULE a, tb_apc_company_sub b
+					where a.ji_code = b.ji_code 
+					and a.use_yn = 'Y'
+					and CONVERT(CHAR(8), is_date, 112) >= ? + '00'
+					order by is_date asc
+				)a
+				order by is_date desc
+			]]>
+			</query>
+			<mapping>
+				<setProperty>inYyyyMm</setProperty>
+				<getProperty>
+					is_date, ist_title, is_ill, iplace,fmt_is_date,stime,etime,jisaname,start_yn,end_yn,ing_yn
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getMonthSchedule">
+			<query>
+			<![CDATA[
+				select 
+					is_date, ist_title, is_ill, iplace,fmt_is_date,stime,etime,jisaname,start_yn,end_yn,ing_yn
+				from (
+					select top(50)
+						CONVERT(CHAR(10), is_date, 23) as is_date, ist_title, is_ill, iplace, CONVERT(CHAR(8), is_date, 112) as fmt_is_date,
+						convert( char(5), stime, 8 ) stime,
+						convert( char(5), etime , 8 ) etime,
+						replace(b.jisaname, '지회', '' ) jisaname,
+						case when ( cast(srcv_date as datetime) - getdate() +1  ) <= 0 then 'Y' else 'N' end as start_yn,
+						case when ( cast( ercv_date as datetime) - getdate() -1 ) <= 0 then 'Y' else 'N' end as end_yn,
+						case when cast( srcv_date as datetime) <= getdate()-1  and  cast(ercv_date as datetime) >= getdate()-1  then 'Y' else 'N' end as ing_yn
+					from TB_EDCT_SCHEDULE a, tb_apc_company_sub b
+					where a.ji_code = b.ji_code 
+					and a.use_yn = 'Y'
+					and CONVERT(CHAR(8), is_date, 112) >= ? + '00' and  CONVERT(CHAR(8), is_date, 112) <= ? +'31'
+					order by is_date desc
+				)a
+				order by is_date desc
+			]]>
+			</query>
+			<mapping>
+				<setProperty>inYyyyMm, inYyyyMm</setProperty>
+				<getProperty>
+					is_date, ist_title, is_ill, iplace,fmt_is_date,stime,etime,jisaname,start_yn,end_yn,ing_yn
+				</getProperty>
+			</mapping>
+		</sql>
+		
+
+		<sql id="getEduList">
+			<query>
+			<![CDATA[
+				select 
+					CONVERT(CHAR(10), is_date, 23) as is_date, ist_title, is_ill, iplace,CONVERT(CHAR(8), is_date, 112) as fmt_is_date
+				from TB_EDCT_SCHEDULE 
+				where CONVERT(CHAR(8), is_date, 112) = ? 
+				and use_yn = 'Y'
+				order by is_date desc
+			]]>
+			</query>
+			<mapping>
+				<setProperty>is_date</setProperty>
+				<getProperty>
+					is_date, ist_title, is_ill, iplace,fmt_is_date
+				</getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+
+	<input>
+		<block repeat="1">			
+			<field name="inYyyyMm" type="String"	size=""/>
+			<field name="is_date" type="String"	size=""/>
+			
+			
+		</block>
+	</input>
+
+	<output>		
+		<block id="edct_schedule" name="edct_schedule" repeat="1">
+            <field name='is_date'       type='String' size=''/>
+            <field name='ist_title'     type='String' size=''/>
+            <field name='is_ill'  		type='String' size=''/>
+            <field name='iplace'        type='String' size=''/>
+            <field name='fmt_is_date'        type='String' size=''/> 
+            <field name='stime'        type='String' size=''/>
+            <field name='etime'        type='String' size=''/>
+            <field name='jisaname'        type='String' size=''/>
+            <field name='start_yn'        type='String' size=''/>
+            <field name='end_yn'        type='String' size=''/>
+            <field name='ing_yn'        type='String' size=''/>
+        </block>
+	</output>
+</transaction>

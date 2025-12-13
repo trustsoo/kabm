@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[         
+
+/******************************************************************************** 
+ * Program ID		: 멤버관리 
+ * FileName		    : memberAction.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	public void idFinderSms(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("cmd", "ID_CHECK_SMS");			
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			String resultCode = "100";
+			if(output.size() > 0)
+			{
+				String user_ids = "";
+				for(int idx =0;idx< output.getCount("user_id");idx++)
+				{
+					if(idx == 0)
+						user_ids =  "["+output.getText("user_id",idx)+ "]";
+					else
+						user_ids =  user_ids + "," + "["+output.getText("user_id",idx)+ "]";
+				}
+				String subject = "[한국건물위생관리협회]아이디확인";
+				String sms_msg = "회원님 아이디는 다음과 같습니다. " + user_ids;
+				
+				sendSMS( subject, sms_msg,  input.getText("user_nm") , input.getText("tel_no")  );
+				
+				resultCode = "200";
+				
+			}else{
+				resultCode = "300";
+			}
+			String data = "{\"resultCode\":\""+resultCode+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+
+	public void idFinderEmail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("cmd", "ID_CHECK_EMAIL");			
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			String resultCode = "100";
+			if(output.size() > 0)
+			{	
+				Hashtable<String, String> mailArgs = new Hashtable<String, String>();
+				
+				String mail_title = "[한국건물위생관리협회]아이디확인 메일입니다.";
+				String content = "아이디 : [" + output.getText("user_id") + "]";
+				String title = input.getText("user_nm") + "회원님  아이디는 다음과 같습니다.";
+				mailArgs.put("title", title);
+				mailArgs.put("content", content);
+				
+				DataSet receiver = new DataSet();
+				receiver.put("email", input.getText("email"), 0);
+				receiver.put("name",input.getText("user_nm") , 0);
+				receiver.put("user_id",output.getText("user_id") , 0);
+				com.kabm.util.SendMailUtil mail = new com.kabm.util.SendMailUtil();
+				mail.setting("default_mail.html", mail_title, mailArgs, receiver);
+				mail.sendMail();
+				
+				resultCode = "200";
+				
+			}else{
+				resultCode = "300";
+			}
+			String data = "{\"resultCode\":\""+resultCode+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void passFinderSms(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("cmd", "PASS_CHECK_SMS");			
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			String resultCode = "100";
+			if(output.size() > 0)
+			{
+				String encKey = com.kabm.util.SitePropertyManager.getString("ENCRYPTION_KEY");
+				input.put("ENCRYPTION_KEY", encKey);
+				
+				String password = com.kabm.util.PasswordUtil.getPassword();
+				input.put("password", password);
+				input.put("cmd", "MODIFY_TMP_PASSWORD");
+				interact.execute( "/member/MemberMgr" , input);
+				
+				String subject = "[한국건물위생관리협회]비밀번호확인";
+				String sms_msg = "회원님 임시비밀번호는 다음과 같습니다. [" + password + "]";
+				
+				sendSMS( subject, sms_msg, input.getText("user_nm") , input.getText("tel_no") );
+		
+				resultCode = "200";
+				
+			}else{
+				resultCode = "300";
+			}
+			String data = "{\"resultCode\":\""+resultCode+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+
+	public void passFinderEmail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("cmd", "PASS_CHECK_EMAIL");			
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			String resultCode = "100";
+			if(output.size() > 0)
+			{	
+				String encKey = com.kabm.util.SitePropertyManager.getString("ENCRYPTION_KEY");
+				input.put("ENCRYPTION_KEY", encKey);
+				
+				String password = com.kabm.util.PasswordUtil.getPassword();
+				input.put("password", password);
+				input.put("cmd", "MODIFY_TMP_PASSWORD");
+				interact.execute( "/member/MemberMgr" , input);
+				
+				Hashtable<String, String> mailArgs = new Hashtable<String, String>();
+				
+				String mail_title = "[한국건물위생관리협회]비밀번호확인 메일입니다.";
+				String content = "임시비밀번호 : [" + password + "]";
+				String title = input.getText("user_nm") + "회원님  임시비밀번호는 다음과 같습니다.";
+				mailArgs.put("title", title);
+				mailArgs.put("content", content);
+				
+				DataSet receiver = new DataSet();
+				receiver.put("email", input.getText("email"), 0);
+				receiver.put("name",input.getText("user_nm") , 0);
+				receiver.put("user_id",output.getText("user_id") , 0);
+				com.kabm.util.SendMailUtil mail = new com.kabm.util.SendMailUtil();
+				mail.setting("default_mail.html", mail_title, mailArgs, receiver);
+				mail.sendMail();
+				
+				resultCode = "200";
+				
+			}else{
+				resultCode = "300";
+			}
+			String data = "{\"resultCode\":\""+resultCode+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void certSms(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			bind(req, input);	
+			
+			req.setAttribute("templet-bypass", "true");
+			try
+			{			
+				
+				String certNo =  com.kabm.util.PasswordUtil.getPassword();
+				
+				String subject = "[한국건물위생관리협회]본인확인";
+				String sms_msg = "인증번호는 다음과 같습니다. [" +certNo + "]";
+				
+				sendSMS( subject, sms_msg,  "본인확인" , input.getText("sms_tel_no")  );
+					
+				String data = "{\"resultCode\":\""+certNo+"\"}";
+				data = getJsonFormat(data);
+				responseJson(data, resp);
+				
+			} catch(Exception ex)
+			{	
+				responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+
+		public void certEmail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			bind(req, input);	
+			
+			req.setAttribute("templet-bypass", "true");
+			try
+			{			
+				
+				String certNo =  com.kabm.util.PasswordUtil.getPassword();
+					
+					Hashtable<String, String> mailArgs = new Hashtable<String, String>();
+					
+					String mail_title = "[한국건물위생관리협회]본인확인 메일입니다.";
+					String content = "인증번호 : [" + certNo + "]";
+					String title = "휴대전화 본인확인 인증번호";
+					mailArgs.put("title", title);
+					mailArgs.put("content", content);
+					
+					DataSet receiver = new DataSet();
+					receiver.put("email", input.getText("cert_email"), 0);
+					receiver.put("name","본인확인", 0);
+					receiver.put("user_id",certNo , 0);
+					com.kabm.util.SendMailUtil mail = new com.kabm.util.SendMailUtil();
+					mail.setting("default_mail.html", mail_title, mailArgs, receiver);
+					mail.sendMail();
+					
+				String data = "{\"resultCode\":\""+certNo+"\"}";
+				data = getJsonFormat(data);
+				responseJson(data, resp);
+				
+			} catch(Exception ex)
+			{	
+				responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	public void idConfirm(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			input.put("cmd", "MEM_INFO");			
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String data = "{\"user_id\":\""+output.getText("user_id")+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doCreate(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			String encKey = SitePropertyManager.getString("ENCRYPTION_KEY");
+			input.put("ENCRYPTION_KEY", encKey);
+			
+			input.put("cmd", "CREATE_MEMBER");
+			Logger.debug.println(">>>>>>>>>>>>>>>>>"+input);
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String data = "{\"user_id\":\""+output.getText("user_id")+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doAddInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			String cmd = "ADDINFO_MEMBER";
+			input.put("cmd", cmd);
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String data = "{\"user_id\":\""+output.getText("user_id")+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doModify(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			String cmd = "MODIFY_MEMBER";
+			input.put("cmd", cmd);
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String data = "{\"user_id\":\""+output.getText("user_id")+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doDeliveryModify(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			String cmd = "MODIFY_MEMBER_DELIVERY";
+			input.put("cmd", cmd);
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String data = "{\"user_id\":\""+output.getText("user_id")+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doPasswordModify(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			
+			jdf.framework.view.auth.User session_user = getUserObject(req , resp);
+			String user_id = "";
+			if(session_user != null )user_id = session_user.getId();
+			
+			String encKey = SitePropertyManager.getString("ENCRYPTION_KEY");
+			input.put("ENCRYPTION_KEY", encKey);
+			
+			input.put("user_id", user_id);
+			input.put("cmd", "MODIFY_PASSWORD");
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String data = "{\"user_id\":\""+output.getText("user_id")+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doIdModify(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			
+			jdf.framework.view.auth.User session_user = getUserObject(req , resp);
+			String user_id = "";
+			if(session_user != null )user_id = session_user.getId();
+			
+			input.put("user_id", user_id);
+			input.put("cmd", "MODIFY_USERID");
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			String data = "{\"user_id\":\""+output.getText("user_id")+"\"}";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	
+	public void memberReq(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();					
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			String cmd = "INSERT_MEMBER_REQ";
+			input.put("cmd", cmd);
+			interact.execute( "/member/MemberMgr" , input);
+			
+			String data = "";
+			data = getJsonFormat(data);
+			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

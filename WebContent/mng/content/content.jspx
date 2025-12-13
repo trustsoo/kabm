@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />	
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	    //우편번호 common/jusoPopup.jsp
+	    private final String MNGR_BANNER  	= "/mng/content/_banner.jsp"	; //배너관리
+	    private final String MNGR_SUBCOMP 	= "/mng/content/_subcomp.jsp"	; //지회관리
+	    private final String MNGR_QUESTION 	= "/mng/content/_question.jsp"	; //문의관리
+	    private final String MNGR_MANAGER 	= "/mng/content/_manager.jsp"	; //임원정보 관리
+	    private final String MNGR_POPUP     = "/mng/content/_popup.jsp"		; //팝업관리
+	    
+	    protected String getDefaultMethodName()
+		{
+			return "main"; 
+		}
+
+		//배너관리 View
+	    public void banner(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			setLimitCalendar("fromDate", "toDate", -12, req);
+			view.setViewPage(MNGR_BANNER);			
+		}
+	    
+		//지회관리 View
+	    public void subList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+	    	String thumb_url = "";
+			try
+			{
+				Config conf = Configuration.lookup("/file/thumb");
+				thumb_url = conf.getString("url");
+				
+			}catch(Exception e){}
+			req.setAttribute("thumb_url", thumb_url);
+			
+			view.setViewPage(MNGR_SUBCOMP);			
+		}
+
+		//문의관리 View
+		public void questionList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{	
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+			
+			
+			setLimitCalendar("fromDate", "toDate", -12, req);
+			req.setAttribute("input", input);
+			view.setViewPage(MNGR_QUESTION);			
+		}
+
+
+		//임원정보 View
+		public void managerList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			String thumb_url = "";
+			try
+			{
+				Config conf = Configuration.lookup("/file/thumb");
+				thumb_url = conf.getString("url");
+				
+			}catch(Exception e){}
+			req.setAttribute("thumb_url", thumb_url);
+			
+			view.setViewPage(MNGR_MANAGER);			
+		}
+		
+		
+
+		//팝업관리 View
+		public void popup(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{			
+			setLimitCalendar("fromDate", "toDate", -12, req); //검색조건
+			setLimitCalendar("start_dt", "end_dt", 1, req);  //게시기간
+
+			view.setViewPage(MNGR_POPUP);			
+		}
+
+
+
+
+		
+
+	    
+	]]>
+	</jsp:declaration>
+</jsp:root>

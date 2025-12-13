@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="PaymentMgr">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			  
+			
+			if( "INSERT_USER_LECTURE".equals(cmd) )
+			{
+				executeSQL(cmd, connection, input, output);
+				executeSQL("GET_USER_LECTURE_KEY", connection, input, output);
+			}else if( "SET_SELECT_CLASS".equals(cmd) )
+			{
+				DataSet all = new DataSet();
+				all.put( "status" , "9" );
+				all.put( "user_lecture_seq_no" , input.getText("user_lecture_seq_no") );
+				
+				executeSQL("UPDATE_USER_CLASS_STATUS", connection, all, output);
+				
+				DataSet ins = new DataSet();
+				for( int idx =0 ; idx < input.getCount("class_nos"); idx++)
+				{
+					ins = new DataSet();
+					ins.put( "status" , "0" );
+					ins.put( "class_no" , input.getText("class_nos", idx) );
+					ins.put( "user_lecture_seq_no" , input.getText("user_lecture_seq_no") );
+					executeSQL("UPDATE_USER_SELECT_CLASS", connection, ins, output);
+				}
+			}else{
+				executeSQL(cmd, connection, input, output);
+			}
+			
+			
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="GET_PAYMENT_LIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					lecture_seq_no,
+					status,
+					title,
+					lgd_oid,
+					lgd_tid,
+					lgd_paytype,
+					substring(lgd_paydate,1,4) +'.'+ substring(lgd_paydate,5,2)+'.' + substring(lgd_paydate,7,2) + ' ' + substring(lgd_paydate,9,2) + ':' + substring(lgd_paydate,11,2) + ':' +substring(lgd_paydate,13,2) lgd_paydate,
+					lgd_amount,
+					dbo.formatDateTime(issue_dt,'yyyy.mm.dd hh:mi:ss') issue_dt,
+					case YEAR(GETDATE()) - YEAR(issue_dt) when 0 then 'Y' else 'N' end as is_issue,
+					case datediff(d, GetDate(), GetDate()) when 0 then 'Y' else 'N' end as is_cancel,
+					user_lecture_seq_no,
+					lecture_status,
+					dbo.formatDateTime(last_modify_dt,'yyyy.mm.dd hh:mi:ss') last_modify_dt,
+					lgd_accountnum,
+					lgd_financename,
+					tot_cnt,
+					lecture_div
+				FROM
+				(	
+					select 
+						a.lecture_seq_no,
+						a.status,
+						c.title,
+						a.lgd_oid,
+						a.lgd_tid,
+						a.lgd_paytype,
+						a.lgd_paydate,
+						a.lgd_amount,
+						a.issue_dt,
+						b.user_lecture_seq_no,
+						b.status lecture_status,
+						a.last_modify_dt,
+						a.lgd_accountnum,
+						a.lgd_financename,
+						ROW_NUMBER() over( order by a.issue_dt desc) rnum,
+						COUNT(a.lgd_oid) over() tot_cnt,
+						c.lecture_div
+					from TB_CYBER_PRCHS a LEFT JOIN TB_CYBER_USER_LECTURE b
+					ON a.user_lecture_seq_no = b.user_lecture_seq_no
+					, TB_CYBER_LECTURE c
+					WHERE a.lecture_seq_no = c.lecture_seq_no 
+					AND a.user_seq_no = ?
+				)a	
+				where a.rnum > (?-1)*?	
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no,page_no,rnum</setProperty>
+				<getProperty>
+					lecture_seq_no,
+					status,
+					title,
+					lgd_oid,
+					lgd_tid,
+					lgd_paytype,
+					lgd_paydate,
+					lgd_amount,
+					issue_dt,
+					is_issue,
+					is_cancel,
+					user_lecture_seq_no,
+					lecture_status,
+					last_modify_dt,
+					lgd_accountnum,
+					lgd_financename,
+					tot_cnt,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_PAYMENT_PRCHS_INFO">
+			<query>
+			<![CDATA[
+				SELECT 
+					lecture_seq_no,
+					status,
+					title,
+					lgd_oid,
+					lgd_tid,
+					lgd_paytype,
+					substring(lgd_paydate,1,4) +'.'+ substring(lgd_paydate,5,2)+'.' + substring(lgd_paydate,7,2) + ' ' + substring(lgd_paydate,9,2) + ':' + substring(lgd_paydate,11,2) + ':' +substring(lgd_paydate,13,2) lgd_paydate,
+					lgd_amount,
+					dbo.formatDateTime(issue_dt,'yyyy.mm.dd hh:mi:ss') issue_dt,
+					case datediff(d, GetDate(), GetDate()) when 0 then 'Y' else 'N' end as is_cancel,
+					user_lecture_seq_no,
+					lecture_status,
+					dbo.formatDateTime(last_modify_dt,'yyyy.mm.dd hh:mi:ss') last_modify_dt,
+					lgd_accountnum,
+					lgd_financename,
+					post_zipcode,
+					post_addr,
+					post_req,
+					post_tel_no,
+					delv_no,
+					delv_corp,
+					lecture_div
+				FROM
+				(	
+					select 
+						a.lecture_seq_no,
+						a.status,
+						c.title,
+						a.lgd_oid,
+						a.lgd_tid,
+						a.lgd_paytype,
+						a.lgd_paydate,
+						a.lgd_amount,
+						a.issue_dt,
+						b.user_lecture_seq_no,
+						b.status lecture_status,
+						a.last_modify_dt,
+						a.lgd_accountnum,
+						a.lgd_financename,
+						a.post_zipcode,
+						a.post_addr,
+						a.post_req,
+						a.post_tel_no,
+						a.delv_no,
+						a.delv_corp,
+						c.lecture_div
+					from TB_CYBER_PRCHS a LEFT JOIN TB_CYBER_USER_LECTURE b
+					ON a.user_lecture_seq_no = b.user_lecture_seq_no
+					, TB_CYBER_LECTURE c
+					WHERE a.lecture_seq_no = c.lecture_seq_no 
+					AND a.lgd_oid = ?
+				)a
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>LGD_OID</setProperty>
+				<getProperty>
+					lecture_seq_no,
+					status,
+					title,
+					lgd_oid,
+					lgd_tid,
+					lgd_paytype,
+					lgd_paydate,
+					lgd_amount,
+					issue_dt,
+					is_cancel,
+					user_lecture_seq_no,
+					lecture_status,
+					last_modify_dt,
+					lgd_accountnum,
+					lgd_financename,
+					post_zipcode,
+					post_addr,
+					post_req,
+					post_tel_no,
+					delv_no,
+					delv_corp,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_PAYMENT_OFFLIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					USER_OFFLINE_SEQ_NO,
+					DCM_NO,
+					JCODE,
+					DTL_CODE,
+					(case when DTL_CODE = '02' then '신규' else '책임' end) DTL_CODE_NM ,
+					USER_SEQ_NO,
+					dbo.formatDateTime(JDATE,'yyyy.mm.dd hh:mi:ss') JDATE,					
+					dbo.formatDateTime(REG_DATE,'yyyy.mm.dd hh:mi:ss') REG_DATE,
+					dbo.formatDateTime(YDATE,'yyyy.mm.dd hh:mi:ss') YDATE,
+					IST_TITLE,IPLACE,IS_ILL,
+					30000 amount,
+					tot_cnt
+				FROM
+				(	
+
+					select 
+						USER_OFFLINE_SEQ_NO,
+						a.DCM_NO,
+						a.JCODE,
+						b.JDATE, 
+						a.DTL_CODE,
+						USER_SEQ_NO,
+						REG_DATE,
+						b.YDATE,
+						s.IST_TITLE,
+						s.IPLACE,
+						s.IS_ILL,
+						ROW_NUMBER() over( order by b.JDATE desc) rnum,
+						COUNT(a.USER_OFFLINE_SEQ_NO) over() tot_cnt
+					from TB_CYBER_USER_OFFLINE a
+					LEFT OUTER JOIN TB_EDCT_IST_ACT b
+					ON a.JCODE = b.JCODE ,
+					TB_EDCT_SCHEDULE s
+					WHERE USER_SEQ_NO = ?
+					AND a.dcm_no = s.dcm_no
+					and b.ydate is not null
+				)a
+				where a.rnum > (?-1)*?	
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no,page_no,rnum</setProperty>
+				<getProperty>
+					user_offline_seq_no,
+					dcm_no,
+					jcode,
+					dtl_code,dtl_code_nm,
+					user_seq_no,jdate,reg_date,ydate,
+					ist_title,iplace,is_ill,amount,
+					tot_cnt
+				</getProperty>
+			</mapping>
+		</sql>
+				
+		<sql id="INSERT_PAYMENT">
+			<query>
+			<![CDATA[
+				
+					insert into TB_CYBER_PRCHS
+					( USER_SEQ_NO,LGD_OID , LGD_AMOUNT ,LGD_PAYKEY ,LGD_PAYTYPE,ISSUE_DT,LECTURE_SEQ_NO,STATUS,LAST_MODIFY_DT,POST_ZIPCODE,POST_ADDR,POST_REQ,POST_TEL_NO)
+					values
+					( ?, ? , ? , ?, ?, getdate(), ? , '00' , getdate() ,
+					(select top 1 POST_ZIPCODE from tb_cyber_member where user_seq_no = ? ),
+					(select top 1 POST_ADDR from tb_cyber_member where user_seq_no = ? ),
+					(select top 1 POST_REQ from tb_cyber_member where user_seq_no = ? ),
+					(select top 1 POST_TEL_NO from tb_cyber_member where user_seq_no = ? )
+					
+					)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no, LGD_OID,LGD_AMOUNT,LGD_PAYKEY,LGD_PAYTYPE, lecture_seq_no,user_seq_no,user_seq_no,user_seq_no,user_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="UPDATE_PAYMENT">
+			<query>
+			<![CDATA[
+				update TB_CYBER_PRCHS set
+					LGD_RESPCODE             = ?,
+					LGD_RESPMSG              = ?,
+					LGD_TXNAME              = ?,
+					LGD_TID                 = ?,
+					LGD_PAYTYPE             = ?,
+					LGD_PAYDATE             = ?,
+					LGD_HASHDATA            = ?,
+					LGD_FINANCECODE         = ?,
+					LGD_FINANCENAME         = ?,
+					LGD_ESCROWYN            = ?,
+					LGD_TRANSAMOUNT         = ?,
+					LGD_EXCHANGERATE        = ?,
+					LGD_BUYER               = ?,
+					LGD_BUYERID             = ?,
+					LGD_BUYERPHONE          = ?,
+					LGD_BUYEREMAIL          = ?,
+					LGD_PRODUCTINFO         = ?,
+					LGD_CARDNUM             = ?,
+					LGD_CARDINSTALLMONTH    = ?,
+					LGD_CARDNOINTYN         = ?,
+					LGD_FINANCEAUTHNUM      = ?,
+					LGD_CASHRECEIPTNUM		= ?,
+					LGD_CASHRECEIPTSELFYN	= ?,
+					LGD_CASHRECEIPTKIND		= ?,
+					LGD_ACCOUNTNUM			= ?,
+					LGD_CASTAMOUNT			= ?,
+					LGD_CASCAMOUNT			= ?,
+					LGD_CASFLAG				= ?,
+					LGD_CASSEQNO			= ?,
+					STATUS                  = ?,
+					LAST_MODIFY_DT          = getdate()
+				WHERE LGD_OID = ?
+				AND LGD_PAYKEY = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					LGD_RESPCODE         ,  
+					LGD_RESPMSG          ,  
+					LGD_TXNAME          ,  
+					LGD_TID             ,  
+					LGD_PAYTYPE         ,  
+					LGD_PAYDATE         ,  
+					LGD_HASHDATA        ,  
+					LGD_FINANCECODE     ,  
+					LGD_FINANCENAME     ,  
+					LGD_ESCROWYN        ,  
+					LGD_TRANSAMOUNT     ,  
+					LGD_EXCHANGERATE    ,  
+					LGD_BUYER           ,  
+					LGD_BUYERID         ,  
+					LGD_BUYERPHONE      ,  
+					LGD_BUYEREMAIL      ,  
+					LGD_PRODUCTINFO     ,  
+					LGD_CARDNUM         ,  
+					LGD_CARDINSTALLMONTH,  
+					LGD_CARDNOINTYN     ,  
+					LGD_FINANCEAUTHNUM  ,
+					LGD_CASHRECEIPTNUM	,
+					LGD_CASHRECEIPTSELFYN,
+					LGD_CASHRECEIPTKIND	,
+					LGD_ACCOUNTNUM		,
+					LGD_CASTAMOUNT		,
+					LGD_CASCAMOUNT		,
+					LGD_CASFLAG			,
+					LGD_CASSEQNO		,  
+					status              ,
+					LGD_OID,
+					LGD_PAYKEY
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="UPDATE_PAYMENT_LECTURE">
+			<query>
+			<![CDATA[
+				update TB_CYBER_PRCHS set
+					USER_LECTURE_SEQ_NO     = ?,
+					STATUS                  = ?,
+					LAST_MODIFY_DT          = getdate()
+				WHERE LGD_OID = ?
+				AND LGD_TID = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					user_lecture_seq_no ,  
+					status              ,
+					LGD_OID,
+					LGD_TID
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="UPDATE_PAYMENT_STATUS">
+			<query>
+			<![CDATA[
+				update TB_CYBER_PRCHS set
+					STATUS                  = ?,
+					LAST_MODIFY_DT          = getdate()
+				WHERE LGD_OID = ?
+				AND LGD_PAYKEY = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					status              ,
+					LGD_OID,
+					LGD_PAYKEY
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="UPDATE_PAYMENT_CANCEL">
+			<query>
+			<![CDATA[
+				update TB_CYBER_PRCHS set
+					STATUS                  = ?,
+					CANCEL_DT          = getdate()
+				WHERE LGD_TID = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					status              ,
+					LGD_TID
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="MODIFY_PAYMENT_DELIVERY">
+			<query>
+			<![CDATA[
+				update TB_CYBER_PRCHS set
+					post_zipcode = ?,
+					post_addr = ?,
+					post_req = ?,
+					post_tel_no = ?
+				where LGD_OID = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>
+					post_zipcode,post_addr,post_req,post_tel_no,LGD_OID
+				</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="INSERT_USER_LECTURE">
+			<query>
+			<![CDATA[
+				INSERT INTO TB_CYBER_USER_LECTURE
+				( lecture_seq_no , user_seq_no , status , std_yyyy )
+				values
+				(? , ? , '00' , ISNULL( (select top 1 std_yyyy from tb_cyber_system where lecture_seq_no = ? and active_yn= 'Y'), dbo.formatDateTime( getdate() , 'yyyy' )) ) 
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					lecture_seq_no , user_seq_no, lecture_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_USER_LECTURE_KEY">
+			<query>
+				SELECT @@IDENTITY
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>user_lecture_seq_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="UPDATE_USER_LECTURE_STATUS">
+			<query>
+			<![CDATA[
+				update TB_CYBER_USER_LECTURE set
+					STATUS                  = ?
+				WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					status              ,
+					user_lecture_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="INSERT_USER_CLASS">
+			<query>
+			<![CDATA[
+				INSERT INTO TB_CYBER_USER_CLASS
+				( study_start_dt , status , lecture_seq_no, class_no, user_lecture_seq_no, user_seq_no )
+				select 
+					getdate(),
+					'0',
+					a.lecture_seq_no,
+					a.class_no,
+					b.user_lecture_seq_no,
+					b.user_seq_no
+				from tb_cyber_class a, tb_cyber_user_lecture b
+				where a.lecture_seq_no = b.lecture_seq_no
+				and b.user_lecture_seq_no = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					user_lecture_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="UPDATE_USER_CLASS_STATUS">
+			<query>
+			<![CDATA[
+				update TB_CYBER_USER_CLASS set
+					STATUS                  = ?
+				WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					status              ,
+					user_lecture_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="UPDATE_USER_SELECT_CLASS">
+			<query>
+			<![CDATA[
+				update TB_CYBER_USER_CLASS set
+					STATUS                  = ?
+				WHERE class_no = ?
+				AND user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>          
+					status,
+					class_no,
+					user_lecture_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="INSERT_PAYMENT_NOCASH">
+			<query>
+			<![CDATA[
+				
+					insert into TB_CYBER_PRCHS
+					( LGD_OID,USER_SEQ_NO, LGD_AMOUNT,LGD_PRODUCTINFO,LECTURE_SEQ_NO ,ISSUE_DT,
+					  STATUS,LAST_MODIFY_DT,LGD_RESPMSG,LGD_PAYTYPE,LGD_PAYDATE,
+					  LGD_BUYER,USER_LECTURE_SEQ_NO,POST_ZIPCODE,POST_ADDR,POST_REQ,POST_TEL_NO)	
+					select ?, ? , amount, title,lecture_seq_no , getdate()
+						  , '03' , getdate(),'결제성공','SC0050',dbo.formatDateTime(getdate(),'yyyymmddhhmiss'),							  
+					(select user_nm from tb_cyber_member where user_seq_no = ?) as user_nm,
+					?,
+					(select top 1 POST_ZIPCODE from tb_cyber_member where user_seq_no = ? ),
+					(select top 1 POST_ADDR from tb_cyber_member where user_seq_no = ? ),
+					(select top 1 POST_REQ from tb_cyber_member where user_seq_no = ? ),
+					(select top 1 POST_TEL_NO from tb_cyber_member where user_seq_no = ? )
+					from tb_cyber_lecture where lecture_seq_no =? 
+			]]>
+			</query>
+			<mapping>
+				<setProperty>LGD_OID,user_seq_no,user_seq_no,user_lecture_seq_no,user_seq_no,user_seq_no,user_seq_no,user_seq_no,lecture_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_PAYMENT_INFO">
+			<query>
+			<![CDATA[
+				select 
+					    a.user_lecture_seq_no,
+					    b.lecture_seq_no,
+						b.lgd_amount,
+						dbo.formatDateTime(b.issue_dt,'yyyy-mm-dd') ,
+						dbo.formatDateTime(b.last_modify_dt,'yyyy-mm-dd') last_modify_dt,
+						case when b.lgd_paytype = 'SC0050' then ISNULL(m.account_nm , m.user_nm )
+						else ISNULL(b.lgd_buyer , m.user_nm ) end as user_nm,
+						substring(lgd_paydate,1,4) +'-'+ substring(lgd_paydate,5,2)+'-' + substring(lgd_paydate,7,2) lgd_paydate,
+						c.lecture_div
+					from TB_CYBER_USER_LECTURE a , TB_CYBER_PRCHS b , TB_CYBER_MEMBER m, TB_CYBER_LECTURE c
+					WHERE a.user_lecture_seq_no = b.user_lecture_seq_no
+					AND a.lecture_seq_no = c.lecture_seq_no
+					AND a.user_seq_no = m.user_seq_no
+					AND b.user_lecture_seq_no = ?
+					AND b.status ='03'
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					user_lecture_seq_no,
+					lecture_seq_no,
+					lgd_amount,
+					issue_dt,
+					last_modify_dt,user_nm,
+					lgd_paydate,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_PAYMENT_INFO_BY_OID">
+			<query>
+			<![CDATA[
+				select 
+					    USER_SEQ_NO,LGD_OID , LGD_TID, LGD_AMOUNT ,LGD_PAYKEY ,LGD_PAYTYPE,
+					    ISSUE_DT,a.LECTURE_SEQ_NO,STATUS,LAST_MODIFY_DT,user_lecture_seq_no,
+					    (select tel_no from tb_cyber_member where user_seq_no = a.USER_SEQ_NO) as tel_no,
+					     (select user_nm from tb_cyber_member where user_seq_no = a.USER_SEQ_NO) as user_nm,
+						 b.lecture_div
+					from TB_CYBER_PRCHS a
+					left outer join TB_CYBER_LECTURE b on a.lecture_seq_no = b.lecture_seq_no
+					WHERE LGD_OID = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>LGD_OID</setProperty>
+				<getProperty>
+					user_seq_no, LGD_OID , LGD_TID, LGD_AMOUNT ,LGD_PAYKEY ,LGD_PAYTYPE,
+					issue_dt, lecture_seq_no, status,last_modify_dt,user_lecture_seq_no,
+					tel_no,user_nm,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_PAYMENT_OFFLINE_INFO">
+			<query>
+			<![CDATA[
+				select 
+					    a.USER_OFFLINE_SEQ_NO,
+						a.jcode,
+					    30000 amount,
+						dbo.formatDateTime(b.YDATE,'yyyy-mm-dd') YDATE,
+						m.user_nm 
+					from TB_CYBER_USER_OFFLINE a 
+					LEFT OUTER JOIN TB_EDCT_IST_ACT b
+					ON a.JCODE = b.JCODE 
+					, TB_CYBER_MEMBER m
+					WHERE a.user_seq_no = m.user_seq_no
+					and a.USER_OFFLINE_SEQ_NO = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_offline_seq_no</setProperty>
+				<getProperty>
+					user_offline_seq_no,
+					jcode,
+					amount,
+					ydate,
+					user_nm
+				</getProperty>
+			</mapping>
+		</sql>
+	</processor-info>
+
+	<input>
+		<block name="arg" repeat="1">			
+			<field name="rnum"  type="int"      size="" default="20"/>
+            <field name="page_no"     type="int"      size="" default="1"/>
+            <field name="user_seq_no"      type="int"   size="" />
+            <field name="lecture_seq_no"         type="int" size="" />
+            <field name="user_lecture_seq_no"    type="int" size="" />
+            <field name="status"                 type="String" size="" />
+            
+            <field name="user_class_seq_no"    type="int" size="" />
+            <field name="class_no"             type="int" size="" />
+            
+            <field name="LGD_OID"                type="String" size="" />
+			<field name="LGD_AMOUNT"             type="String" size="" />
+			<field name="LGD_PAYKEY"             type="String" size="" />
+			<field name="LGD_RESPCODE"           type="String" size="" />
+			<field name="LGD_RESPMSG"            type="String" size="" />
+			<field name="TX_RESPCODE"            type="String" size="" />
+			<field name="TX_RESPMSG"             type="String" size="" />
+			<field name="LGD_TXNAME"             type="String" size="" />
+			<field name="LGD_TID"                type="String" size="" />
+			<field name="LGD_PAYTYPE"            type="String" size="" />
+			<field name="LGD_PAYDATE"            type="String" size="" />
+			<field name="LGD_HASHDATA"           type="String" size="" />
+			<field name="LGD_FINANCECODE"        type="String" size="" />
+			<field name="LGD_FINANCENAME"        type="String" size="" />
+			<field name="LGD_ESCROWYN"           type="String" size="" />
+			<field name="LGD_TRANSAMOUNT"        type="String" size="" />
+			<field name="LGD_EXCHANGERATE"       type="String" size="" />
+			<field name="LGD_BUYER"              type="String" size="" />
+			<field name="LGD_BUYERID"            type="String" size="" />
+			<field name="LGD_BUYERPHONE"         type="String" size="" />
+			<field name="LGD_BUYEREMAIL"         type="String" size="" />
+			<field name="LGD_PRODUCTINFO"        type="String" size="" />
+			<field name="LGD_CARDNUM"            type="String" size="" />
+			<field name="LGD_CARDINSTALLMONTH"   type="String" size="" />
+			<field name="LGD_CARDNOINTYN"        type="String" size="" />
+			<field name="LGD_FINANCEAUTHNUM"     type="String" size="" />
+			
+			<field name="LGD_CASHRECEIPTNUM"     type="String" size="" />
+			<field name="LGD_CASHRECEIPTSELFYN"     type="String" size="" />
+			<field name="LGD_CASHRECEIPTKIND"     type="String" size="" />
+			<field name="LGD_ACCOUNTNUM"     type="String" size="" />
+			<field name="LGD_CASTAMOUNT"     type="String" size="" />
+			<field name="LGD_CASCAMOUNT"     type="String" size="" />
+			<field name="LGD_CASFLAG"     type="String" size="" />
+			<field name="LGD_CASSEQNO"     type="String" size="" />
+			
+			<field name="user_offline_seq_no"    type="int" size="" />
+			
+			<field name='post_zipcode' 		type='String'	size=''/>
+			<field name='post_addr' 		type='String'	size=''/>
+			<field name='post_req' 		type='String'	size=''/>
+			<field name='post_tel_no' 		type='String'	size=''/>
+			
+		</block>
+	</input>
+
+	<output>
+		<block repeat=''>
+			<field name='rnum'          type='int'      size=''/>      
+            <field name='tot_cnt'       type='int'      size=''/>      
+            <field name="user_seq_no" type="string"	size="" />	
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name="status" 		type="string"	size="" />
+			<field name='title' 		type='String'	size=''/>
+			<field name='lgd_oid' 		type='String'	size=''/>
+			<field name='lgd_tid' 		type='String'	size=''/>
+			<field name='lgd_paytype' 		type='String'	size=''/>
+			<field name='lgd_amount' 		type='String'	size=''/>
+			<field name='issue_dt' 		type='String'	size=''/>
+			<field name='last_modify_dt' 		type='String'	size=''/>
+			<field name='user_lecture_seq_no' 		type='String'	size=''/>
+			
+			<field name='user_class_seq_no' 		type='String'	size=''/>
+			<field name='user_nm' 		type='String'	size=''/>	
+			
+			<field name='user_offline_seq_no' 		type='String'	size=''/>			
+			<field name='jcode' 		type='String'	size=''/>			
+			<field name='amount' 		type='int'	size=''/>		
+			<field name='ydate' 		type='String'	size=''/>				
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+		<block name="payment_info" id="payment_info" repeat='9999999'>
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name="status" 		type="string"	size="" />
+			<field name='title' 		type='String'	size=''/>
+			<field name='lgd_oid' 		type='String'	size=''/>
+			<field name='lgd_tid' 		type='String'	size=''/>
+			<field name='lgd_paytype' 		type='String'	size=''/>
+			<field name='lgd_paydate' 		type='String'	size=''/>
+			<field name='lgd_amount' 		type='String'	size=''/>
+			<field name='issue_dt' 		type='String'	size=''/>
+			<field name='is_issue' 		type='String'	size=''/>
+			<field name='is_cancel' 		type='String'	size=''/>
+			<field name='last_modify_dt' 		type='String'	size=''/>
+			<field name='user_lecture_seq_no' 		type='String'	size=''/>
+			<field name='lecture_status' 		type='String'	size=''/>
+			<field name='tot_cnt'       type='int'      size=''/> 
+			<field name='user_seq_no' 		type='String'	size=''/>
+			<field name='tel_no' 		type='String'	size=''/>
+			<field name='user_nm' 		type='String'	size=''/>
+			<field name='LGD_OID' 		type='String'	size=''/>
+			<field name='LGD_TID' 		type='String'	size=''/>
+			<field name='LGD_AMOUNT' 		type='String'	size=''/>
+			<field name='LGD_PAYKEY' 		type='String'	size=''/>
+			<field name='LGD_PAYTYPE' 		type='String'	size=''/>
+			<field name='lgd_accountnum' 		type='String'	size=''/>
+			<field name='lgd_financename' 		type='String'	size=''/>
+			<field name='lgd_authkey' 		type='String'	size=''/>
+			
+			<field name='post_zipcode' 		type='String'	size=''/>
+			<field name='post_addr' 		type='String'	size=''/>
+			<field name='post_req' 		type='String'	size=''/>
+			<field name='post_tel_no' 		type='String'	size=''/>
+			<field name='delv_no' 		type='String'	size=''/>
+			<field name='delv_corp' 		type='String'	size=''/>
+			
+			<field name='lecture_div' 		type='String'	size=''/>
+			
+		</block>
+		<block name="payment_off" id="payment_off" repeat='9999999'>
+			<field name="user_offline_seq_no" type="string"	size="" />	
+			<field name="dcm_no" 		type="string"	size="" />
+			<field name='jcode' 		type='String'	size=''/>
+			<field name='dtl_code' 		type='String'	size=''/>
+			<field name='dtl_code_nm' 		type='String'	size=''/>
+			<field name='user_seq_no' 	type='String'	size=''/>
+			<field name='jdate' 		type='String'	size=''/>
+			<field name='reg_date' 		type='String'	size=''/>
+			<field name='ydate' 		type='String'	size=''/>
+			<field name='ist_title' 		type='String'	size=''/>
+			<field name='iplace' 		type='String'	size=''/>
+			<field name='is_ill' 		type='String'	size=''/>
+			<field name='amount' 		type='int'	size=''/>
+			<field name='tot_cnt' 		type='String'	size=''/>
+		</block>
+	</output>
+</transaction>

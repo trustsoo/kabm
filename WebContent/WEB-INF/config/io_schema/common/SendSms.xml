@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='SendSms' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="jdf.framework.core.log.Logger,
+										jdf.framework.core.util.*">
+		<![CDATA[
+			String cmd = input.getText("cmd");		
+			
+			executeSQL(cmd, connection, input, output);
+			
+
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="sendSMS">
+			<query>
+			   <![CDATA[
+			   		INSERT INTO TB_SMS_SEND
+					(CP_CODE, JI_CODE, SEND_SAWON_ID,CALLBACK, SUBJECT, SMS_MSG,DEST_INFO,DEST_COUNT,GAM_ID, SEND_STATE, NOW_DATE_TIME )
+					values
+					('6010', '0010', 0 ,? , ?, ? , ? , ?, null , '1', getdate() )	
+				]]>
+			</query>
+			<mapping>
+				<setProperty>callback,subject,sms_msg,dest_info,dest_count</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="sendMMS">
+			<query>
+			   <![CDATA[
+			   		INSERT INTO TB_MMS_SEND
+					(CP_CODE, JI_CODE, SEND_SAWON_ID,CALLBACK, SUBJECT, MMS_MSG,DEST_INFO,DEST_COUNT,GAM_ID, SEND_STATE, NOW_DATE_TIME )
+					values
+					('6010', '0010', 0 ,? , ?, ? , ? , ?, null , '1', getdate() )		   		
+				]]>
+			</query>
+			<mapping>
+				<setProperty>callback,subject,sms_msg,dest_info,dest_count</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+	
+	
+	<input>
+		<block name="arg" repeat="1">		
+			<field name='user_id' type='String'	size=''/>
+			<field name='subject' type='String'	size=''/>
+			<field name='sms_msg' type='String'	size=''/>
+			<field name='send_date' type='String'	size=''/>
+			<field name='callback' type='String'	size=''/>
+			<field name='dest_info' type='String'	size=''/>
+			<field name='dest_count' type='String'	size=''/>
+		</block>
+	</input>
+	
+	<output> 
+		<block id="" name="" repeat="">
+			<field name='hp_no' type='String' size=''/>
+			<field name='seq_no' type='String' size=''/>
+		</block>
+	</output>
+	
+</transaction>

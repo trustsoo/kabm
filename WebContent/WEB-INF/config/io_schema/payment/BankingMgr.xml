@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="BankingMgr">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			  
+			
+			executeSQL(cmd, connection, input, output);
+			
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		
+		<sql id="GET_BANKING_INFO">
+			<query>
+			<![CDATA[
+				
+			  SELECT user_seq_no
+			      ,std_yyyy
+			      ,lecture_seq_no
+			      ,account_nm
+			      ,bank_nm
+			      ,deposit_dt
+			      ,last_modify_dt
+			  FROM TB_CYBER_BANKING
+			  WHERE user_seq_no = ?
+			  AND std_yyyy = ?
+			  AND lecture_seq_no = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no,std_yyyy,lecture_seq_no</setProperty>
+				<getProperty>
+				   user_seq_no
+			      ,std_yyyy
+			      ,lecture_seq_no
+			      ,account_nm
+			      ,bank_nm
+			      ,deposit_dt
+			      ,last_modify_dt
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="INSERT_BANKING">
+			<query>
+			<![CDATA[
+					INSERT INTO TB_CYBER_BANKING
+					(user_seq_no,std_yyyy,lecture_seq_no,account_nm,bank_nm,deposit_dt,last_modify_dt)
+					VALUES
+					(? , ? , ? , ? , ? , ? , getdate() )
+			]]>
+			</query>
+			<mapping>
+				<setProperty>	user_seq_no,std_yyyy,lecture_seq_no,
+				    			account_nm,bank_nm,deposit_dt
+				    </setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="UPDATE_BANKING">
+			<query>
+			<![CDATA[
+				
+				UPDATE TB_CYBER_BANKING SET 
+						account_nm = ?,
+						bank_nm = ?,
+						deposit_dt = ?,
+						last_modify_dt=getdate()				
+				WHERE user_seq_no = ? 
+				  and std_yyyy = ? 
+				  and lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>account_nm,bank_nm,deposit_dt,
+				    		 user_seq_no,std_yyyy,lecture_seq_no
+				    </setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+	</processor-info>
+
+	<input>
+		<block name="arg" repeat="1">			
+			<field name="user_seq_no"            type="int"   size="" />
+            <field name="std_yyyy"               type="String" size="" />
+            <field name="lecture_seq_no"         type="int" size="" />
+            
+            <field name="account_nm"              type="String" size="" />
+            <field name="bank_nm"                 type="String" size="" />
+            <field name="deposit_dt"              type="String" size="" />
+            <field name="last_modify_dt"          type="String" size="" />
+		</block>
+	</input>
+
+	<output>
+		<block repeat=''>
+			<field name="user_seq_no"            type="int"   size="" />
+            <field name="std_yyyy"               type="String" size="" />
+            <field name="lecture_seq_no"      type="int" size="" />
+            
+            <field name="account_nm"              type="String" size="" />
+            <field name="bank_nm"                 type="String" size="" />
+            <field name="deposit_dt"              type="String" size="" />
+            <field name="last_modify_dt"          type="String" size="" />
+		</block>
+		
+	</output>
+</transaction>

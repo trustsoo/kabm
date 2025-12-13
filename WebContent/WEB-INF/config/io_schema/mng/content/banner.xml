@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='banner' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+           	//배너 리스트 조회
+            //if( "select_all".equals(cmd) ) 
+            //{
+            	executeSQL(cmd, connection, input, output);
+            //}           
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_banner_list">
+            <query>
+                <![CDATA[
+                    SELECT TOP (?) 
+                        seq_no, banner_div, use_yn, title, link, CONVERT(CHAR(10), reg_ddtm, 23) reg_ddtm, reg_emp_cd, emp_nm, banner_div_nm, rnum,tot_cnt,
+                        (select top(1) file_no from tb_kabm_attach_file where
+                        attach_div_cd ='attach_div_01'  and data_no = X.seq_no
+                        order by file_no desc
+                        ) AS file_no  
+					FROM ( 
+					    SELECT 
+                            ROW_NUMBER() OVER( ORDER BY seq_no desc ) AS rnum, 
+                            count(*) over() tot_cnt,                            
+                            A.*, 
+                            B.emp_nm,
+                            C.cd_nm banner_div_nm
+                        FROM tb_kabm_banner A 
+                        LEFT OUTER JOIN tb_kabm_emp B ON A.reg_emp_cd = B.emp_cd 
+                        LEFT OUTER JOIN TB_KABM_CODE C ON A.banner_div = C.cd 
+					  WHERE A.banner_div like '%' + ? + '%' and CONVERT(CHAR(8), A.reg_ddtm, 112) >= ? and  CONVERT(CHAR(8), A.reg_ddtm, 112) <=?
+                    ) x 
+                    WHERE rnum > (?-1) * ? 
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>row_per_page,in_banner_div,in_ddtm_from , in_ddtm_to, cur_pg, row_per_page </setProperty>
+                <getProperty>seq_no,banner_div,use_yn,title,link,reg_ddtm,reg_emp_cd, emp_nm,banner_div_nm,rnum, tot_cnt,file_no</getProperty>
+            </mapping>
+        </sql>
+        
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">   
+            
+            <field name='in_banner_div' type='string'    size=''/>
+            <field name='in_ddtm_from' type='string'    size=''/>
+            <field name='in_ddtm_to' type='string'    size=''/>
+            
+            <field name='cur_pg' type='int' size=''/>
+            <field name='row_per_page' type='int'   size=''/>
+        </block>
+    </input>
+    
+    <output>
+
+
+        <block id="property" name="property" repeat="1">
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+
+       <block id='banner_list' name='banner_list' 	repeat=''>
+        	<field name='seq_no' 		type='string' size=''/>
+			<field name='banner_div' 	type='string' size=''/>
+			<field name='use_yn' 		type='string' size=''/>
+			<field name='title' 		type='string' size=''/>
+			<field name='link' 			type='string' size=''/>	
+			<field name='reg_ddtm' 		type='string' size=''/>
+			<field name='reg_emp_cd' 	type='string' size=''/>
+			<field name='emp_nm' 	type='string' size=''/>
+            <field name='banner_div_nm' type='string' size=''/>
+            <field name='rnum' type='string'    size=''/>
+            <field name='tot_cnt' type='string' size=''/>
+            <field name='file_no' type='string' size=''/>  <!--file 번호 -->
+            
+            
+        </block>        
+        
+    </output>
+    
+</transaction>

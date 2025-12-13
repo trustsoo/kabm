@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.UUID" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	<jsp:declaration>
+	<![CDATA[
+	   
+
+    public void getAllBoardMngNo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+
+		
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("cmd", "boardAllList");
+			output = interact.execute("/community/boardMgr", input);
+			
+			String[] blockNames = new String[] { "cd_list" };
+			
+
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+			
+		} catch(Exception ex)
+		{
+			responseXML(
+					getXMLFormat(
+							HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+							ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+    
+    
+    public void doBoardList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+    {
+    	DataSet input = new DataSet();
+		 DataSet output = new DataSet();
+		 bind(req, input);
+		
+	 	 req.setAttribute("templet-bypass", "true");
+	 	 input.put("emp_no", getUserObject(req, resp).getId());
+		 try {
+			 
+			 if("".equals(input.getText("start_dt"))) input.put("start_dt", DateTime.getAdjustDate(DateTime.getFormatString("yyyyMMdd"), java.util.Calendar.MONTH, -2));
+			 if("".equals(input.getText("end_dt"))) input.put("end_dt", DateTime.getFormatString("yyyyMMdd"));
+			 
+			 input.put("start_dt", input.getText("start_dt").replace("-",""));
+			 input.put("end_dt", input.getText("end_dt").replace("-",""));
+			 
+			 if("".equals(input.getText("brd_mng_no")))
+				 input.put("brd_mng_no", "0");
+			 
+			 input.put("brd_div", "");
+			 input.put("cmd", "getBoard");
+			 output = interact.execute("/community/board", input);
+			 
+			 String[] blockNames = new String[] {"property", "board_list" };
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("board_row_per_page"));
+			 output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			 String result = getJson(output, blockNames);
+			 responseJson(result, resp);	
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+    }
+    
+    
+    public void doBoardAdd(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			 throws ServletException, IOException, Exception 
+		 {
+			 DataSet input = new DataSet();
+			 DataSet output = new DataSet();
+			 DataSet authput = new DataSet();
+			 
+			 boolean isAddOK = true;
+			 
+			 bind(req, input);
+				
+				
+			 req.setAttribute("templet-bypass", "true");
+			 try {
+				 
+				 if("".equals(input.getText("brd_no")))
+				 {
+					 input.put("brd_no", "-1");
+				 }
+				 
+				 
+				 if("".equals(input.getText("p_brd_no")))
+				 {
+					 input.put("p_brd_no", "-1"); 
+				 }
+				 
+				 String view_type = input.getText("view_type");
+				 
+				if("board_type_02".equals(view_type))
+				{
+					 makeScalrThumbNail(input,332 , 219);
+				}
+				if("board_type_04".equals(view_type))
+				{
+					 makeScalrThumbNail(input,320 , 202);
+				} 				
+				 
+				 input.put("rg_empl_no", getUserObject(req, resp).getId());
+				 
+				 
+				 input.put("cmd", "doBoardAdd");
+				 output = interact.execute("/community/board", input);
+				 
+				 String brd_mng_no = input.getText("brd_mng_no");
+				 
+				 String result = getJsonFormat("");
+				 responseJson(result, resp);
+				
+			 } catch (Exception ex) {
+				 responseJson(
+						 getJsonFormat(
+								 HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+								 ex.getMessage(), ""), resp);
+				 Logger.err.print(Utility.getStackTrace(ex));
+			 }
+		 }
+    
+    
+    public void doBoardRead(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			
+			input.put("emp_no", getUserObject(req, resp).getId());
+			input.put("cmd", "doBoardRead");
+			interact.execute("/community/board", input, output);
+			
+			String[] blockNames = new String[] { "board_detail"};
+
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			throw ex;				
+		}
+	}	 
+    
+    public void doDelBoard(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			
+			input.put("cmd", "delBoard");
+			interact.execute("/community/board", input, output);
+						
+			String result = getJsonFormat("");
+			 responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			throw ex;				
+		}
+	}	
+    
+    public void doSetNotice(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			
+			input.put("start_dt", input.getText("notice_start_dt").replace("-",""));
+			input.put("end_dt", input.getText("notice_end_dt").replace("-",""));
+			input.put("emp_no", getUserObject(req, resp).getId());
+			input.put("cmd", "setNotice");
+			interact.execute("/community/board", input, output);
+			
+			
+			
+			
+			String[] blockNames = new String[] { "board_detail"};
+
+			String result = getJsonFormat("");
+			 responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			throw ex;				
+		}
+	}	 
+    
+   
+    public void doDelNotice(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			
+			input.put("cmd", "delNotice");
+			interact.execute("/community/board", input, output);
+						
+			String[] blockNames = new String[] { "board_detail"};
+
+			String result = getJsonFormat("");
+			 responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			throw ex;				
+		}
+	}	
+    
+    
+	]]>
+	</jsp:declaration>
+</jsp:root>
+

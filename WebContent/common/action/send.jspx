@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="jdf.framework.core.io.FormatedEntity" />
+	
+	<jsp:directive.page import="jdf.framework.core.data.cci.Connection" />
+	<jsp:directive.page import="jdf.framework.core.data.cci.DefaultConnectionFactory" />
+	<jsp:directive.page import="jdf.framework.core.data.cci.Interaction" />
+
+		
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+	public void mailSend(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			String toMail = input.getText("to");
+			String toUserNm = input.getText("toName");
+			String content = input.getText("emailCntnt");
+			String title = input.getText("emailTtl");
+			jdf.framework.core.mail.Mail mail = new jdf.framework.core.mail.Mail();
+			mail.setRecipient(toMail);
+			mail.setSubject(title);
+			
+			String transHtmlContent = HtmlFormat.replaceStr(HtmlFormat.replaceStr(HtmlFormat.replaceStr(HtmlFormat.replaceStr(content, "&lt;", "<"), "&gt;", ">"), "&apos;", "'"), "&amp;", "&");
+			
+			//log(input.toString());
+			mail.setHtmlContent(transHtmlContent);
+			
+			mail.send();
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", ""), resp);
+			
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	
+	public void mailSendTemplete(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			String toMail = input.getText("to");
+			String toUserNm = input.getText("toName");
+			String content = input.getText("emailCntnt");
+			String title = input.getText("emailTtl");
+			
+			input.put("title" , title);
+			input.put("content" , content);
+			input.put("template" , "voc_default_mail.html");
+			
+			VocUtil.mailSendTemplate(input);
+			
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", ""), resp);
+			
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	
+	// SMS 문자발송
+	public void sendSMS(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) 
+			throws ServletException, IOException, Exception 
+	{
+				
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{	
+			String callbackNo = SitePropertyManager.getString("SMS_SENDER_NO");
+			
+			input.put("rg_empl_no", getUserObject(req, resp).getUser_seq_no() );
+			
+			if("S".equals(input.getText("sms_type")))
+			{
+				input.put("cmd", "send_SMS");	
+				
+				String smsCntnt = HtmlFormat.replaceStr(HtmlFormat.replaceStr(HtmlFormat.replaceStr(HtmlFormat.replaceStr(input.getText("sms_cntnt"), "&lt;", "<"), "&gt;", ">"), "&apos;", "'"), "&amp;", "&");
+				
+				input.put("sms_cntnt", smsCntnt);
+				
+			} else if("L".equals(input.getText("sms_type")))
+			{
+				input.put("cmd", "send_MMS");	
+				
+				String smsTtl = HtmlFormat.replaceStr(HtmlFormat.replaceStr(HtmlFormat.replaceStr(HtmlFormat.replaceStr(input.getText("lms_ttl"), "&lt;", "<"), "&gt;", ">"), "&apos;", "'"), "&amp;", "&");
+				String smsCntnt = HtmlFormat.replaceStr(HtmlFormat.replaceStr(HtmlFormat.replaceStr(HtmlFormat.replaceStr(input.getText("sms_cntnt"), "&lt;", "<"), "&gt;", ">"), "&apos;", "'"), "&amp;", "&");
+				
+				input.put("lms_ttl", smsTtl);
+				input.put("sms_cntnt", smsCntnt);
+			}
+			
+			input.put("callbackNo", StringFormater.replaceStr(callbackNo, "-", ""));
+			input.put("hp_no", StringFormater.replaceStr(input.getText("hp_no"), "-", ""));
+			interact.execute("/common/SendSms", input);
+			
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", ""), resp);
+			
+		} catch(Exception ex)
+		{		
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

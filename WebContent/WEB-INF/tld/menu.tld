@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+        "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+<!-- a tag library descriptor -->
+<taglib>
+    <tlibversion>1.0</tlibversion>
+    <jspversion>1.1</jspversion>
+    <shortname>first</shortname>
+    <uri></uri>
+    <info>A simple tab library for the examples</info>
+    <tag>
+        <name>list</name>
+        <tagclass>jdf.framework.view.menu.taglibs.ListTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+        <attribute>
+            <name>depth</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
+        <name>param</name>
+        <tagclass>jdf.framework.view.menu.taglibs.ParamTag</tagclass>
+        <bodycontent>empty</bodycontent>
+        <info>Tag with body and parameter</info>
+        <attribute>
+            <name>attr</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>scope</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>checkParent</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
+        <name>selected</name>
+        <tagclass>jdf.framework.view.menu.taglibs.SelectedTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    <tag>
+        <name>unselected</name>
+        <tagclass>jdf.framework.view.menu.taglibs.UnselectedTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    <tag>
+        <name>accessible</name>
+        <tagclass>jdf.framework.view.menu.taglibs.AccessibleTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    <tag>
+        <name>notAccessible</name>
+        <tagclass>jdf.framework.view.menu.taglibs.NotAccessibleTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    <tag>
+        <name>isFirst</name>
+        <tagclass>jdf.framework.view.menu.taglibs.IsFirstTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    <!-- tag>
+        <name>isNotFirst</name>
+        <tagclass>jdf.framework.view.menu.taglibs.IsNotFirstTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag-->
+    <tag>
+        <name>isLast</name>
+        <tagclass>jdf.framework.view.menu.taglibs.IsLastTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    <tag>
+        <name>isNotLast</name>
+        <tagclass>jdf.framework.view.menu.taglibs.IsNotLastTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    
+    <tag>
+        <name>isExistChild</name>
+        <tagclass>jdf.framework.view.menu.taglibs.IsExistChildrenTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    <tag>
+        <name>isNotExistChild</name>
+        <tagclass>jdf.framework.view.menu.taglibs.IsNotExistChildrenTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    
+    <tag>
+        <name>isSeparator</name>
+        <tagclass>jdf.framework.view.menu.taglibs.ISSeparator</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    
+    
+    
+    <tag>
+        <name>equals</name>
+        <tagclass>jdf.framework.view.menu.taglibs.EqualsTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+        <attribute>
+            <name>attr</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
+        <name>notEquals</name>
+        <tagclass>jdf.framework.view.menu.taglibs.NotEqualsTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+        <attribute>
+            <name>attr</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    <tag>
+        <name>content</name>
+        <tagclass>jdf.framework.view.menu.taglibs.ContentTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    <tag>
+        <name>header</name>
+        <tagclass>jdf.framework.view.menu.taglibs.HeaderTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>header presentation header</info>
+    </tag>
+    <tag>
+        <name>footer</name>
+        <tagclass>jdf.framework.view.menu.taglibs.FooterTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>footer presentation tag</info>
+    </tag>
+    
+    
+    <tag>
+        <name>when</name>
+        <tagclass>jdf.framework.view.menu.taglibs.WhenTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+        <attribute>
+            <name>test</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    
+    <tag>
+        <name>childAccessible</name>
+        <tagclass>jdf.framework.view.menu.taglibs.ChildAccessibleTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    
+    <!-- tag>
+        <name>childNotAccessible</name>
+        <tagclass>jdf.framework.view.menu.taglibs.ChildNotAccessibleTag</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag-->
+    
+    <tag>
+        <name>isSecureMenu</name>
+        <tagclass>jdf.framework.view.menu.taglibs.IsSecureMenu</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+    </tag>
+    
+    
+    <tag>
+        <name>isAuthMenu</name>
+        <tagclass>jdf.framework.view.menu.taglibs.IsAuthMenu</tagclass>
+        <bodycontent>JSP</bodycontent>
+        <info>Tag with body and parameter</info>
+        <attribute>
+            <name>attr</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+    
+</taglib>

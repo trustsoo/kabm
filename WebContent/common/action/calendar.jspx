@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.util.*" />
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+	public void list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet global_output = new DataSet();
+		DataSet person_output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			JSONObject jObject = new JSONObject();
+			JSONArray jArray = new JSONArray(); 
+			
+			String _start = input.getText("start");
+			String _end = input.getText("end");
+			
+			long startStamp = Long.parseLong(_start) * 1000;
+            long endStamp  = Long.parseLong(_end) * 1000;
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
+            
+            String start = sdf.format(startStamp);          
+            String end = sdf.format(endStamp);
+			
+			input.put("start_dt", start );
+			input.put("end_dt", end );
+			
+			input.put("cmd", "getGlobalEventsList");
+			global_output = interact.execute("/common/Calendar", input);
+			
+			
+			for(int idx=0; idx<global_output.getCount("seq_no"); idx++)
+			{
+				JSONObject atom = new JSONObject();
+				atom.put("id", global_output.getText("seq_no" , idx));
+				atom.put("title", global_output.getText("schdl_nm" , idx) );
+				
+				atom.put("start", global_output.getText("start_dt" , idx) );
+				atom.put("end", global_output.getText("end_dt" , idx) );
+				
+				atom.put("seq_no", global_output.getText("seq_no" , idx) );
+				
+				
+				String allDay = global_output.getText("is_allday" , idx);
+				if( allDay == null || "".equals( allDay) || "true".equals( allDay) )
+					atom.put("allDay", true);
+				else
+					atom.put("allDay", false);
+				
+				
+					atom.put("editable", false);
+				
+				if(!jArray.contains(atom))				
+					jArray.add(atom);
+			}
+			
+			
+			responseJson(jArray.toString(), resp);
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	
+	//일정리스트 조회.
+	public void getEventList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			String start_dt = input.getText("start_dt");
+			String end_dt = input.getText("end_dt");
+			
+			
+			String year_type = input.getText("year_type");
+			String month_type = input.getText("month_type");
+			String this_month_end = DateTime.getString(DateTime.getThisMonthEndDt(year_type,month_type ) , "yyyyMMdd");
+			
+			if(!"".equals(start_dt) && !"".equals(end_dt) )
+			{	
+				input.put("start_dt", start_dt + " 00:00:00");
+				input.put("end_dt",  end_dt + " 23:59:59" );
+			}else{
+				input.put("start_dt", year_type + month_type + "01 00:00:00");
+				input.put("end_dt",  this_month_end + " 23:59:59" );
+			}
+			
+			input.put("cmd", "getGlobalMainEventsList");
+			output = interact.execute("/common/Calendar", input);			
+			
+			String[] blockNames = new String[]{"property", "calendar_list"};
+			
+			String result = getJson(output, blockNames);
+			System.out.println(result);
+			responseJson(result, resp);	
+			
+		} catch(Exception ex)
+		{			
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	//일정리스트 조회.
+	public void getCalendarList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			String start_dt = input.getText("start_dt");
+			String end_dt = input.getText("end_dt");
+			
+			
+			String year_type = input.getText("year_type");
+			String month_type = input.getText("month_type");
+			String this_month_end = DateTime.getString(DateTime.getThisMonthEndDt(year_type,month_type ) , "yyyyMMdd");
+			
+			if(!"".equals(start_dt) && !"".equals(end_dt) )
+			{	
+				input.put("start_dt", start_dt + " 00:00:00");
+				input.put("end_dt",  end_dt + " 23:59:59" );
+			}else{
+				input.put("start_dt", year_type + month_type + "01 00:00:00");
+				input.put("end_dt",  this_month_end + " 23:59:59" );
+			}
+			
+			input.put("cmd", "getCalendarList");
+			output = interact.execute("/common/Calendar", input);			
+			
+			String[] blockNames = new String[]{"property", "calendar_list"};
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			
+			String result = getJson(output, blockNames);
+			System.out.println(result);
+			responseJson(result, resp);	
+			
+		} catch(Exception ex)
+		{			
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getCalendarInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			
+			input.put("cmd", "getCalendarInfo");
+			output = interact.execute("/common/Calendar", input);			
+			
+			String[] blockNames = new String[]{"property", "calendar_list"};
+			
+			String result = getJson(output, blockNames);
+			System.out.println(result);
+			responseJson(result, resp);	
+			
+		} catch(Exception ex)
+		{			
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	//일정 등록.
+    public void doEventAdd(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception 
+        {
+            DataSet input = new DataSet();
+            DataSet output = new DataSet();
+            bind(req, input);
+               
+            try {
+            	boolean isok = true;
+            	String schdl_div = input.getText("schdl_div");
+            	String schdl_type = input.getText("schdl_type");
+            	String ins_emp_info_yn = "N";
+            	
+            	if( schdl_div != null && "GLOBAL_SCHEDULE".equals(schdl_div)){
+            		if(schdl_type != null && "GLBL_HOLIDAY".equals(schdl_type)){
+            			
+            		}
+            		isok = false;
+            	}            	
+            	else 
+            		isok = false;
+            	
+            	input.put("emp_no", getUserObject(req, resp).getUser_seq_no());
+            	input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            	
+            	if( isok)
+            		output = interact.execute("/common/Calendar", input);
+                
+                String result = getXMLFormat(output.getText("seq_no"));
+                responseXML(result, resp);
+            } catch (Exception ex) {
+            	responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+    			Logger.err.print(Utility.getStackTrace(ex));
+            }
+        }
+    
+    //일정 삭제.
+    public void doEventDel(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception 
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();
+        bind(req, input);
+           
+        try {          
+            
+        	String schdl_div = input.getText("schdl_div");
+            if( schdl_div != null && "GLOBAL_SCHEDULE".equals(schdl_div))
+                input.put("cmd", "doGlobalEventDel");
+            
+            input.put("emp_no", getUserObject(req, resp).getUser_seq_no());
+            input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+            
+            output = interact.execute("/common/Calendar", input);
+
+            String result = getXMLFormat("");
+            responseXML(result, resp);
+        } catch (Exception ex) {
+        	responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+        }
+    }
+	]]>
+	</jsp:declaration>
+</jsp:root>	

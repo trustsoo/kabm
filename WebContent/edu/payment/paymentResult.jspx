@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[   
+
+/******************************************************************************** 
+ * Program ID		: 결제
+ * FileName		    : paymentCtrl.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/edu/payment/";
+	
+	private static final String JSP_PAY = "_pay";
+	private static final String JSP_VIRTUAL_RES=JSP_BASE+JSP_PAY+"_virtual_return.jsp";
+	
+	protected String getDefaultMethodName()
+	{
+		return "virtualResult"; 
+	}
+	
+	public void virtualResult(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			System.out.println( input.toString());
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_VIRTUAL_RES);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+			
+	
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

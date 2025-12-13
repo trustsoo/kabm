@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='question' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+           
+            //if( "select_all".equals(cmd) ) 
+            //{
+            	executeSQL(cmd, connection, input, output);
+            //}           
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_question_list">
+            <query>
+                <![CDATA[
+                SELECT TOP (?) 
+                    seq_no,name,tel_no,email,title,CONVERT(CHAR(10), reg_ddtm, 25) reg_ddtm,CONVERT(CHAR(10), answer_ddtm, 25)  answer_ddtm,answer_emp_cd,question_div, answer_emp_nm, question_div_nm, CASE 
+                      WHEN answer IS NULL THEN '미답변'
+                      WHEN len(answer) >= 1 THEN '답변완료'
+                      WHEN len(answer) < 1 THEN '미답변'
+                      END answer_yn_nm,rnum,tot_cnt
+                FROM 
+                (
+                                SELECT 
+                                            ROW_NUMBER() OVER( ORDER BY seq_no desc ) AS rnum, 
+                                            count(*) over() tot_cnt,                            
+                                            A.*, 
+                                            B.emp_nm answer_emp_nm,
+                                            C.cd_nm question_div_nm
+                                        FROM tb_kabm_question A 
+                                        LEFT OUTER JOIN tb_kabm_emp B ON A.answer_emp_cd = B.emp_cd 
+                                        LEFT OUTER JOIN TB_KABM_CODE C ON A.question_div = C.cd 
+                                      WHERE A.question_div like '%' + ? + '%' and CONVERT(CHAR(8), A.reg_ddtm, 112) >= ? and  CONVERT(CHAR(8), A.reg_ddtm, 112) <=?
+                ) x
+                WHERE rnum > (?-1) * ?
+
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>row_per_page,in_question_div,in_ddtm_from , in_ddtm_to, cur_pg, row_per_page </setProperty>
+                <getProperty>seq_no,name,tel_no,email,title,reg_ddtm,answer_ddtm,answer_emp_cd,question_div, answer_emp_nm, question_div_nm,answer_yn_nm,rnum,tot_cnt</getProperty>
+            </mapping>
+        </sql>
+
+        <sql id="select_question_item">
+            <query>
+                <![CDATA[                
+                    SELECT                                                           
+                                A.seq_no,A.name,A.tel_no,A.email,A.title,A.question,A.answer,CONVERT(CHAR(10), A.reg_ddtm, 25) reg_ddtm,
+                                A.answer_ddtm,A.answer_emp_cd,A.question_div, 
+                                B.emp_nm answer_emp_nm,
+                                C.cd_nm question_div_nm,
+                                CASE 
+                                  WHEN answer IS NULL THEN '미답변'
+                                  WHEN len(answer) >= 1 THEN '답변'
+                                  WHEN len(answer) < 1 THEN '미답변'
+                                  END answer_yn_nm
+                            FROM tb_kabm_question A 
+                            LEFT OUTER JOIN tb_kabm_emp B ON A.answer_emp_cd = B.emp_cd 
+                            LEFT OUTER JOIN TB_KABM_CODE C ON A.question_div = C.cd 
+                          WHERE A.seq_no = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>seq_no</setProperty>
+                <getProperty>seq_no,name,tel_no,email,title,question,answer,reg_ddtm,answer_ddtm,answer_emp_cd,question_div, answer_emp_nm, question_div_nm,answer_yn_nm</getProperty>
+            </mapping>
+        </sql>
+        
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">   
+            
+            <field name='in_question_div' type='string'    size=''/>
+            <field name='in_ddtm_from' type='string'    size=''/>
+            <field name='in_ddtm_to' type='string'    size=''/>
+            
+            <field name='cur_pg' type='int' size=''/>
+            <field name='row_per_page' type='int'   size=''/>
+            
+            <field name='seq_no' type='int'   size=''/>
+        </block>
+    </input>
+    
+    <output>
+        <block id="property" name="property" repeat="1">
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+
+       <block id='question_list' name='question_list' 	repeat=''>
+        	<field name='seq_no' 		type='string' size=''/>
+			<field name='name' 	        type='string' size=''/>
+			<field name='tel_no' 		type='string' size=''/>
+			<field name='email' 		type='string' size=''/>
+			<field name='title' 		type='string' size=''/>	
+			<field name='question' 		type='string' size=''/>
+			<field name='answer' 	    type='string' size=''/>
+			<field name='reg_ddtm' 	    type='string' size=''/>
+            <field name='answer_ddtm'   type='string' size=''/>
+            <field name='answer_emp_cd' type='string'    size=''/>
+            <field name='question_div'  type='string' size=''/>
+            <field name='answer_emp_nm' type='string' size=''/>
+            <field name='question_div_nm'       type='string' size=''/>
+            <field name='answer_yn_nm'       type='string' size=''/>
+            <field name='rnum'          type='string' size=''/>
+            <field name='tot_cnt'       type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

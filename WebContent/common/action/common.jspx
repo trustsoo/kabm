@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="com.kabm.filter.JDFContext"/>	
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+	public void getCorpList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		try
+		{	
+			input.put("search_gbn_hcode" , "20");
+			input.put("cmd", "GET_CORP_LIST");			
+			DataSet output = interact.execute( "/common/CommonMgr" , input);
+			
+			String[] blockNames = new String[] {"property", "corp_info" };
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);	
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));
+			String message = ex.getMessage();
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, message, ""), resp);
+		}
+	}
+	
+	public void getMemCorpList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		try
+		{			
+			input.put("cmd", "GET_CORP_LIST");			
+			DataSet output = interact.execute( "/common/CommonMgr" , input);
+			
+			String[] blockNames = new String[] {"property", "corp_info" };
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);	
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));
+			String message = ex.getMessage();
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, message, ""), resp);
+		}
+	}
+	
+	public void getDeptListJsTree(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		
+		try
+		{
+
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("cmd", "getDeptList");
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			output = interact.execute("/organization/Dept", input);
+			String[] blockNames = new String[]{"dept_list"};
+			String result = getJsTreeJson(output, blockNames);
+			responseJson(result, resp);
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+
+	public void getDeptEmpListJsTree(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			if("".equals(input.getText("rtrmnt_yn")))
+				input.put("cmd", "getDeptUserListAll");
+			else if("N".equals(input.getText("rtrmnt_yn")))
+				input.put("cmd", "getDeptUserList");
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			output = interact.execute("/organization/Dept", input);
+			String[] blockNames = new String[]{"dept_list"};
+			String result = getJsTreeJson(output, blockNames);
+			responseJson(result, resp);
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getDeptEmpListJsTreeSearch(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception {
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		
+		try {
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("cmd", "getDeptUserListSearch");
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			output = interact.execute("/organization/Dept", input);
+			
+			String[] blockNames = new String[]{"dept_list_search"};
+			String result = getJsTreeJsonSearch(output, blockNames);
+			responseJson(result, resp);
+		} catch(Exception ex) {
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getDeptEmpListJsTreeWithoutSysMgr(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			if("".equals(input.getText("rtrmnt_yn")))
+				input.put("cmd", "getDeptUserListAllWithoutSysMgr");
+			else if("N".equals(input.getText("rtrmnt_yn")))
+				input.put("cmd", "getDeptUserList");
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			output = interact.execute("/organization/Dept", input);
+			String[] blockNames = new String[]{"dept_list"};
+			String result = getJsTreeJson(output, blockNames);
+			responseJson(result, resp);
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getEmpList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			input.put("cmd", "getEmpList");
+			output = interact.execute( "/organization/Dept" , input);			
+			String[] blockNames = new String[]{"emp_list"};
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	
+	public void getGroupList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		
+		try
+		{
+			
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("cmd", "GET_GROUP_LIST");
+			
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			
+			if("".equals(input.getText("use_yn"))) input.put("use_yn", "");
+			
+			output = interact.execute("/user/Group", input);
+			
+			String[] blockNames = new String[]{"group_list"};
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		}
+	}
+	
+	
+	public void getGroupListCate(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		
+		try
+		{
+			
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("cmd", "GET_GROUP_LIST_CATE");
+			
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			
+			if("".equals(input.getText("use_yn"))) input.put("use_yn", "");
+			
+			output = interact.execute("/user/Group", input);
+			
+			String[] blockNames = new String[]{"group_list"};
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+		}
+	}
+	
+	
+	public void suggestEmpList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	   		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{	
+			req.setAttribute("templet-bypass", "true");
+			
+			String result = com.kabm.util.SyllablesLoader.searchJson(com.kabm.filter.JDFContext.MAP_EMPINFO_KEY, getUserObject(req, resp).getCmpnyNo(), input.getText("q"));
+			//log(result);
+			responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void suggestMenuListByMenuNo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+   		throws ServletException, IOException, Exception
+   	{
+    	DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		req.setAttribute("templet-bypass", "true");
+		bind(req, input);
+		try
+		{	
+			req.setAttribute("templet-bypass", "true");
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			if("".equals(input.getText("q")) || input.getText("q").length() <= 1) return;
+			
+			String result = null;
+			
+			jdf.framework.view.menu.bean.MenuMgrBean mgr = jdf.framework.view.menu.bean.MenuMgrBean.getInstance(req, false);
+			jdf.framework.view.menu.entity.WebSiteMenu menu = mgr.getWebSiteMenu();
+			List<jdf.framework.view.menu.entity.MenuItem> menuList =menu.getMenuListById(input.getText("q"));
+			
+			/*for(jdf.framework.view.menu.entity.MenuItem item : menuList)
+			{
+				log(item.toString());
+			}*/
+			
+			
+			DataSet userMenu = (DataSet)getUserObject(req, resp).getAttribute("menu_dataset");
+			
+			
+			
+			JSONObject jObject = new JSONObject();
+			JSONArray jArray = new JSONArray(); 
+			
+			for(jdf.framework.view.menu.entity.MenuItem item : menuList)
+			{
+				
+				boolean isContainUserMenu = false;
+				for(int idx=0; idx<userMenu.getMaxDataSize(); idx++)
+				{
+					if(item.getId().equals(userMenu.getText("menu_id", idx)))
+					{
+						isContainUserMenu = true;
+						break;
+					}
+				}
+				
+				//Logger.debug.println(item.getId());
+				
+				int userMenuIdx = userMenu.findValueIndex("menu_id", item.getId());
+				
+				JSONObject atom = new JSONObject();
+				atom.put("menu_id", item.getId());
+				atom.put("menu_nm", item.getName());
+				atom.put("menu_url", item.getUrl());
+				atom.put("popup_yn", item.getPopupYN());
+				
+				/*if(item.getId().equals("10100"))
+				{
+					Logger.debug.println(">>>>>>>>>>>>>>>>>"+item.isVisiable()+","+userMenuIdx);
+				}*/
+				
+				
+				if(!jArray.contains(atom) && item.isVisiable() && isContainUserMenu)				
+					jArray.add(atom);
+			}
+			
+			jObject.put("menuList", jArray);
+			jObject.put("count", menuList.size());
+			
+			responseJson(jObject.toString(), resp);
+			
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+   	} 
+	
+	
+
+	public void getWeekOfMonthList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{		
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			
+			req.setAttribute("templet-bypass", "true");
+			input.put("cmpny_no", getUserObject(req, resp).getCmpnyNo());
+			input.put("cmd", "getWeekOfMonths");
+			output = interact.execute("/common/Calendar", input);
+			String[] blockNames = new String[]{"week_list"};
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);			
+			
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+
+	public void sencr(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{		
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		try
+		{
+			String plainKey = SitePropertyManager.getString("ENCRYPTION_KEY");
+            input.put("ENCRYPTION_KEY", plainKey);
+            int plainKeyLen = plainKey.length();
+            byte[] encryptKeyBytes = new byte[32];
+            String data = input.getText("s");
+            jdf.framework.core.util.encrypt.KISA_SHA256.SHA256_Encrpyt( plainKey.getBytes(), plainKeyLen, encryptKeyBytes );                    
+            data = jdf.framework.core.util.encrypt.CipherUtil.hexToString(jdf.framework.core.util.encrypt.CipherUtil.encode(encryptKeyBytes, data.getBytes("utf-8")));
+            responseJson(getJsonFormat("\""+data+"\""), resp);
+			
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getOfflineEduList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			
+			input.put("is_date", DateTime.getShortDateString() );
+			input.put("cmd", "GET_OFFLINE_EDU_LIST");			
+			DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+			
+			String[] blockNames = new String[] { "property","offline_info" };
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);	
+			
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+
+]]>
+	</jsp:declaration>
+</jsp:root>
+	

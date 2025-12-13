@@ -1,0 +1,1271 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="EstimateMgr">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			
+			if(cmd.equals("GET_ESTIMATE_LIST"))
+            {
+				String srch_text = input.getText("title");
+	            
+	            StringBuffer addWhere = new StringBuffer();
+		        if ( srch_text!=null && !srch_text.equals("") )
+	            {
+	                addWhere.append("and title like N'%" + srch_text + "%' ");
+	            }
+	            input.put("addWhere", addWhere.toString() );
+	        }
+	        
+	        if( "SET_NEW_RESULT".equals(cmd)){
+	        
+	        	DataSet in = new DataSet();            	
+            	in.put( "status", "3");
+            	in.put( "estimate_cnt", 1);
+            	in.put( "estimate_point", 100);
+            	in.put( "estimate_pass_yn", "Y");
+            	in.put( "user_class_seq_no" , input.getText("user_class_seq_no") );
+            	executeSQL("SET_STATUS_END", connection, in, output);
+            	
+            	in.put( "user_lecture_seq_no", input.getText("user_lecture_seq_no")) ;
+            	executeSQL("GET_END_CNT", connection, in, output);
+            	int _cnt = output.getInt("tot_cnt");
+            	
+            	if( _cnt == 0 )
+            	{
+	            	in.put( "status", "03");
+	            }else{	            	
+            		in.put( "status", "01");
+	            }	            
+            	executeSQL("SET_LECTURE_STATUS", connection, in, output);
+	            output.put("status", in.getText("status"));
+            	
+            }else if( "GET_ANSWER_CHECK".equals(cmd)){
+	        	
+	        	executeSQL("DELETE_ESTIMATE_RESULT_ONE", connection, input, output);
+	        	
+            	executeSQL("SET_ESTIMATE_RESULT", connection, input, output);
+	            
+            	executeSQL("GET_ANSWER_CHECK", connection, input, output);
+            }else if( "SET_ESTIMATE_RESULT".equals(cmd)){
+	        
+	        	executeSQL("DELETE_ESTIMATE_RESULT", connection, input, output);
+	        	
+				DataSet in = new DataSet();            	
+            	
+				for(int idx=0; idx< input.getCount("estimate_seq_no"); idx++)
+				{
+					String estimate_seq_no = input.getText("estimate_seq_no" ,idx);
+					String answer_str = input.getText("answr_ctnt_"+estimate_seq_no);
+					if( answer_str == null || "".equals(answer_str) )answer_str = "0";
+					in.put( "estimate_seq_no" , estimate_seq_no ,idx);
+					in.put( "answer", answer_str , idx);
+					in.put( "user_class_seq_no" , input.getText("user_class_seq_no") ,idx);
+				}
+            	executeSQL(cmd, connection, in, output);
+            	
+            	in = new DataSet();
+            	in.put( "user_lecture_seq_no", input.getText("user_lecture_seq_no")) ;
+            	in.put( "user_class_seq_no", input.getText("user_class_seq_no")) ;
+            	executeSQL("GET_POINT", connection, in, output);
+            	int _point = output.getInt("point"); 
+            	
+            	executeSQL("GET_CNT", connection, in, output);
+            	int _estimate_cnt = output.getInt("estimate_cnt");
+            	System.out.println( _estimate_cnt );
+            	executeSQL("GET_CHECK_POINT", connection, in, output);
+            	int _ch_point = output.getInt("estimate_pass_point"); 
+            	String estimate_pass_yn = "N";
+            	if( _ch_point <= _point) estimate_pass_yn = "Y";
+            	
+            	if( "Y".equals(estimate_pass_yn ))
+            	{
+            		in.put( "status", "3");
+            		in.put( "estimate_cnt", _estimate_cnt +1);
+            	}else{
+            		if( _estimate_cnt >= 4 )
+	           		{
+	            		in.put( "status", "4");
+	            		in.put( "estimate_cnt", _estimate_cnt +1);          		
+	            	}else{
+	            		in.put( "status", "1");
+	            		in.put( "estimate_cnt", _estimate_cnt +1);
+	            	}
+            	}
+            	in.put( "estimate_point", _point);
+            	in.put( "estimate_pass_yn", estimate_pass_yn);
+            	executeSQL("SET_STATUS_END", connection, in, output);
+            	            	
+                in.put( "user_lecture_seq_no", input.getText("user_lecture_seq_no")) ;
+            	executeSQL("GET_END_CNT", connection, in, output);
+            	int _cnt = output.getInt("tot_cnt");
+            	
+            	if( _cnt == 0 )
+            	{
+	            	in.put( "user_lecture_seq_no", input.getText("user_lecture_seq_no")) ;
+	            	in.put( "status", "03");
+	            	executeSQL("SET_LECTURE_STATUS", connection, in, output);
+	            }else{
+	            	
+            		if( _estimate_cnt >= 4 )
+            		{
+	            		if( "Y".equals(estimate_pass_yn ))
+	            			in.put( "status", "01");
+	            		else
+	            			in.put( "status", "09");
+	            	}else{
+	            		if( "Y".equals(estimate_pass_yn ))
+	            			in.put( "status", "01");
+	            		else
+	            			in.put( "status", "01");
+	            	}	
+	            	executeSQL("SET_LECTURE_STATUS", connection, in, output);
+	            }
+            	
+            }else if("SET_EXAM_LIST".equals(cmd) || "SET_EXAM_SELECT_LIST".equals(cmd) ){
+            	
+            	executeSQL(cmd, connection, input, output);
+            	
+            	DataSet inn = new DataSet();
+            	inn.put("user_class_seq_no" , input.getText("user_class_seq_no") );
+            	executeSQL("GET_EXAM_LIST", connection, inn, output);
+            
+            }else if("SET_STATUS_START".equals(cmd)){
+            	
+            	executeSQL(cmd, connection, input, output);
+            	
+            	DataSet inn = new DataSet();
+            	inn.put("user_lecture_seq_no" , input.getText("user_lecture_seq_no") );
+            	inn.put("user_class_seq_no" , input.getText("user_class_seq_no") );
+            	inn.put( "status", "02");
+            	executeSQL("SET_LECTURE_STATUS", connection, inn, output);
+            
+            }else{
+			
+				executeSQL(cmd, connection, input, output);
+			}	
+			
+			
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="GET_ESTIMATE_LIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					user_lecture_seq_no,
+					lecture_seq_no,
+					status,
+					case status when '00' then '수강전' 
+					            when '01' then '수강중' 
+					            when '02' then '평가중'
+					            when '03' then '완료' 
+					            when '09' then '실격'
+					else '삭제' END AS status_nm ,
+					certication_file_path,
+					certication_file_path_proof,
+					title,
+					dbo.formatDateTime(start_dt,'yyyy.mm.dd') start_dt,
+					dbo.formatDateTime(end_dt,'yyyy.mm.dd') end_dt,
+					tot_cnt,
+                    cls_status,
+                    case ISNULL(cls_status,'0') 
+						when '0' then '수강전' 
+						when '1' then '수강중' 
+						when '2' then '평가중'
+						when '3' then '완료'
+						when '4' then '실격'
+						else '삭제' 
+						END AS cls_status_nm ,
+                    ISNULL(estimate_pass_yn,'N') estimate_pass_yn,
+                    ISNULL(estimate_cnt,0) estimate_cnt,
+                    user_class_seq_no,
+                    class_no,
+                    std_yyyy,start_dd,end_dd,std_end_dd,
+                    case when ( cast( user_lecture_end_dt as datetime) - getdate()  ) < 0 then
+					'Y' else 'N' end as end_yn,
+					case when ( cast( std_end_dd + ' 23:59:59' as datetime) - getdate()  ) < 0 then
+					'Y' else 'N' end as teminate_yn,
+					case when ISNULL(end_dt, '') = '' then 'Y'  
+					when ( cast( end_dt as datetime)+7  - getdate()  ) < 0 then
+					'Y' else 'N' end as close_yn,
+					user_lecture_start_dt,
+					user_lecture_end_dt,
+					lecture_div
+				FROM
+				(	
+					select 
+						a.user_lecture_seq_no,
+						a.lecture_seq_no,
+						a.status,
+						a.certication_file_path,
+						a.certication_file_path_proof,
+						c.title,
+						d.start_dt,
+						e.estimate_end_dt end_dt,
+                        e.status cls_status,
+                        e.estimate_pass_yn,
+                        e.estimate_cnt,
+                        e.user_class_seq_no,
+                        e.class_no,
+						ROW_NUMBER() over( order by a.user_lecture_seq_no desc) rnum,
+						COUNT(a.user_lecture_seq_no) over() tot_cnt,
+                        s.std_yyyy,
+						s.start_dd,
+						s.end_dd,
+						s.std_end_dd,
+						a.user_lecture_start_dt as user_lecture_start_dd,
+						dbo.formatDateTime( (case a.status when '00' then getdate() else a.user_lecture_start_dt end),'yyyy.mm.dd HH:MI') user_lecture_start_dt,
+						dbo.formatDateTime( case when (cast(s.std_end_dd as int) - cast( dbo.formatDateTime( (case a.status when '00' then getdate() else a.user_lecture_start_dt end)+(13 + ISNULL(a.extend_cnt,0) * 13 ) ,'yyyymmdd') as int)) < 0 
+						then  s.std_end_dd + ' 23:59:59'
+						else  (case a.status when '00' then getdate() else a.user_lecture_start_dt end)+(13 + ISNULL(a.extend_cnt,0) * 13 ) end ,'yyyy.mm.dd HH:MI') as user_lecture_end_dt,
+						c.lecture_div
+					from TB_CYBER_USER_LECTURE a 
+					LEFT JOIN TB_CYBER_LECTURE c 
+					ON a.lecture_seq_no = c.lecture_seq_no
+					LEFT JOIN ( select user_lecture_seq_no , min( t.study_start_dt) start_dt , max( t.estimate_end_dt ) end_dt 
+					            from TB_CYBER_USER_CLASS t where status <> '9'
+					            group by user_lecture_seq_no) d
+					ON a.user_lecture_seq_no = d.user_lecture_seq_no
+                    LEFT JOIN TB_CYBER_USER_CLASS e
+                    ON a.curr_class_no = e.user_class_seq_no
+					LEFT JOIN TB_CYBER_SYSTEM s
+                    ON a.lecture_seq_no = s.lecture_seq_no
+                    AND a.std_yyyy = s.std_yyyy
+					WHERE a.user_seq_no = ?
+					AND a.status <> '99'
+					$addWhere
+				)a	
+				where a.rnum > (?-1)*?	
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no,page_no,rnum</setProperty>
+				<getProperty>
+					user_lecture_seq_no,
+					lecture_seq_no,
+					status,
+					status_nm,
+					certication_file_path,
+					certication_file_path_proof,
+					title,
+					start_dt,
+					end_dt,
+					tot_cnt,
+					cls_status,cls_status_nm,estimate_pass_yn,
+                    estimate_cnt,
+                    user_class_seq_no,
+                    class_no,
+                    std_yyyy,start_dd,end_dd,std_end_dd,end_yn,teminate_yn,close_yn,
+                    user_lecture_start_dt,user_lecture_end_dt,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_CERT_LIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					user_lecture_seq_no,
+					lecture_seq_no,
+					status,
+					case status when '00' then '수강전' 
+					            when '01' then '수강중' 
+					            when '02' then '평가중'
+					            when '03' then '완료' 
+					            when '09' then '실격'
+					else '삭제' END AS status_nm ,
+					certication_file_path,
+					certication_file_path_proof,
+					title,
+					dbo.formatDateTime(start_dt,'yyyy.mm.dd') start_dt,
+					dbo.formatDateTime(end_dt,'yyyy.mm.dd') end_dt,
+					dbo.formatDateTime(end_dt,'yyyy년 mm월 dd일') end_dt_ko,
+					floor(convert(float, end_dt +3)) float_end_dt,
+					--float_end_dt,
+					addr,
+					corp_addr,
+					corp_nm,
+					building_nm,
+					building_addr,
+					tot_cnt,
+					reg_dt, mod_dt,
+					std_yyyy,
+					down_dt,
+					cert_building_nm,cert_addr_nm,cert_addr,
+					ISNULL((select top 1 proc_yn from tb_survey_cust s where s.user_lecture_seq_no = a.user_lecture_seq_no ),'N') survey_yn,
+					lecture_div
+				FROM
+				(	
+					select 
+						a.user_lecture_seq_no,
+						a.lecture_seq_no,
+						a.status,
+						a.certication_file_path,
+						a.certication_file_path_proof,
+						a.std_yyyy,
+						c.title,
+						d.start_dt,
+						case when ( cast( s.end_dd + ' 23:59:59' as datetime) - e.estimate_end_dt  ) < 0 then
+					cast( s.end_dd + ' 00:00:00' as datetime)  else e.estimate_end_dt end as end_dt,						
+						m.addr,
+						mb.cp_addr + ' '+ mb.cp_jibun corp_addr,
+						mb.company corp_nm,
+						m.building_nm,
+						m.building_addr,
+                        ROW_NUMBER() over( order by a.user_lecture_seq_no desc) rnum,
+						COUNT(a.user_lecture_seq_no) over() tot_cnt,
+						ISNULL( CONVERT( varchar , t.reg_dt ,120) , 'N') reg_dt,
+                        ISNULL( CONVERT( varchar , t.mod_dt ,120) , 'N') mod_dt,
+                        ISNULL( CONVERT( varchar , t.down_dt ,120) , 'N') down_dt,
+                        t.building_nm cert_building_nm,
+						t.addr_nm cert_addr_nm,
+						t.addr cert_addr,
+						c.lecture_div
+					from TB_CYBER_USER_LECTURE a 
+					LEFT JOIN TB_CYBER_LECTURE c 
+					ON a.lecture_seq_no = c.lecture_seq_no
+					LEFT JOIN ( select user_lecture_seq_no , min( t.study_start_dt) start_dt , max( t.estimate_end_dt ) end_dt 
+					            from TB_CYBER_USER_CLASS t where status <> '9'
+					            group by user_lecture_seq_no) d
+					ON a.user_lecture_seq_no = d.user_lecture_seq_no
+                    LEFT JOIN TB_CYBER_USER_CLASS e
+                    ON a.curr_class_no = e.user_class_seq_no
+					LEFT JOIN TB_CYBER_MEMBER m
+					LEFT JOIN tb_mb_master mb 
+					ON m.cp_code = mb.cp_code
+					and m.ill_no = mb.ill_no
+                    ON a.user_seq_no = m.user_seq_no
+                    LEFT OUTER JOIN TB_CYBER_CERT t
+                    ON a.user_lecture_seq_no = t.user_lecture_seq_no
+                    LEFT OUTER JOIN TB_CYBER_SYSTEM s
+					ON a.STD_YYYY = s.std_yyyy and a.LECTURE_SEQ_NO = s.LECTURE_SEQ_NO
+					WHERE a.user_seq_no = ?
+					AND a.status = '03'
+				)a	
+				where a.rnum > (?-1)*?	
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no,page_no,rnum</setProperty>
+				<getProperty>
+					user_lecture_seq_no,
+					lecture_seq_no,
+					status,
+					status_nm,
+					certication_file_path,
+					certication_file_path_proof,
+					title,
+					start_dt,
+					end_dt,end_dt_ko,
+					float_end_dt,
+					addr,
+					corp_addr,
+					corp_nm,
+					building_nm,
+					building_addr,
+					tot_cnt,
+					reg_dt,
+					mod_dt,
+					std_yyyy,
+					down_dt,
+					cert_building_nm,cert_addr_nm,cert_addr,
+					survey_yn,
+					lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_CLASS_LIST">
+			<query>
+			<![CDATA[
+				
+					select 
+						a.user_class_seq_no,
+						dbo.formatDateTime(a.study_start_dt,'yyyy.mm.dd') study_start_dt,
+						dbo.formatDateTime(a.study_end_dt,'yyyy.mm.dd') study_end_dt,
+						dbo.formatDateTime(a.estimate_start_dt,'yyyy.mm.dd') estimate_start_dt,
+						dbo.formatDateTime(a.estimate_end_dt,'yyyy.mm.dd') estimate_end_dt,
+                        a.status,
+                        case ISNULL(a.status,'0') 
+						when '0' then '수강전' 
+						when '1' then '수강중' 
+						when '2' then '평가중'
+						when '3' then '완료'
+						when '4' then '실격'
+						else '삭제' 
+						END AS status_nm ,
+						c.title,
+						a.lecture_seq_no,
+                        a.class_no,
+                        a.user_lecture_seq_no,
+                        b.lecture_div
+					from TB_CYBER_USER_CLASS a 
+					LEFT JOIN TB_CYBER_CLASS c ON a.lecture_seq_no = c.lecture_seq_no and a.class_no = c.class_no
+					LEFT JOIN TB_CYBER_LECTURE b ON a.lecture_seq_no = b.lecture_seq_no
+                    WHERE a.user_lecture_seq_no = ?
+                    AND a.status <> '9'
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					    user_class_seq_no,
+                        study_start_dt,
+                        study_end_dt,
+                        estimate_start_dt,
+                        estimate_end_dt,
+                        status,
+                        status_nm,
+						title,
+						lecture_seq_no,
+                        class_no,
+                        user_lecture_seq_no,
+                        lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_EXAM_LIST">
+			<query>
+			<![CDATA[
+				
+					select
+						a.estimate_seq_no,
+						a.exam_seq_no,
+						a.user_class_seq_no,
+						a.exam_no exam_num,
+						b.exam_no,
+						b.exam_title,
+						b.exam_type,
+						b.lecture_seq_no,
+						b.class_no,
+						c.answer,
+						b.chart_path,
+						b.exam_open_time
+					from tb_cyber_estimate a
+					left join tb_cyber_exam_bank b
+					on a.exam_seq_no = b.exam_seq_no
+					left outer join tb_cyber_answer c
+					on a.estimate_seq_no = c.estimate_seq_no
+					where a.user_class_seq_no =?
+					order by a.exam_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty>
+					    estimate_seq_no,
+						exam_seq_no,
+						user_class_seq_no,
+						exam_num,
+						exam_no,
+						exam_title,
+						exam_type,
+						lecture_seq_no,
+						class_no,
+						answer,
+						chart_path,
+						exam_open_time
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_EXAM_ALL_LIST">
+			<query>
+			<![CDATA[
+				
+					select
+						a.exam_seq_no,
+						a.exam_no,
+						a.exam_title,
+						a.exam_type,
+						a.lecture_seq_no,
+						a.class_no
+					from tb_cyber_exam_bank a , tb_cyber_user_class b
+					where a.lecture_seq_no = b.lecture_seq_no
+					and a.class_no = b.class_no
+					and b.user_class_seq_no =?
+					and isnull( use_yn , 'Y') = 'Y'
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty>
+					    exam_seq_no,
+						exam_no,
+						exam_title,
+						exam_type,
+						lecture_seq_no,
+						class_no
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_EXAM_RANDOM_LIST">
+			<query>
+			<![CDATA[
+				
+					select top(10)
+						a.exam_seq_no,
+						a.exam_no,
+						a.exam_title,
+						a.exam_type,
+						a.lecture_seq_no,
+						a.class_no
+					from  (
+						select
+							a.exam_seq_no,
+							a.exam_no,
+							a.exam_title,
+							a.exam_type,
+							a.lecture_seq_no,
+							a.class_no,
+							a.EXAM_OPEN_TIME,
+							b.USER_CLASS_SEQ_NO,
+							newid() id,
+							ROW_NUMBER() OVER (PARTITION BY EXAM_OPEN_TIME Order by newid()  ) as Seq
+						from tb_cyber_exam_bank a , tb_cyber_user_class b
+						where a.lecture_seq_no = b.lecture_seq_no
+						and a.class_no = b.class_no
+						and b.user_class_seq_no =1
+						and isnull( use_yn , 'Y') = 'Y' 
+					) a
+					where seq = 1
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty>
+					    exam_seq_no,
+						exam_no,
+						exam_title,
+						exam_type,
+						lecture_seq_no,
+						class_no
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_ITEM_LIST">
+			<query>
+			<![CDATA[
+				
+					select
+						a.exam_seq_no,
+						a.item_seq_no,
+						a.item_no,
+						a.item_nm,
+						a.check_yn
+					from tb_cyber_exam_item a
+					where a.exam_seq_no = ?
+					order by item_seq_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty>exam_seq_no</setProperty>
+				<getProperty>
+					    exam_seq_no,
+					    item_seq_no,
+						item_no,
+						item_nm,
+						check_yn
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_EXAM_SELECT_LIST">
+			<query>
+			<![CDATA[
+				
+					insert into TB_CYBER_ESTIMATE( exam_seq_no , user_class_seq_no ,exam_no )
+					select
+						a.exam_seq_no,
+						a.user_class_seq_no,
+						ROW_NUMBER() OVER( order by a.EXAM_OPEN_TIME )  no
+					from  (
+						select
+							a.exam_seq_no,
+							a.EXAM_OPEN_TIME,
+							b.user_class_seq_no,
+							newid() id,
+							ROW_NUMBER() OVER (PARTITION BY EXAM_OPEN_TIME Order by newid()  ) as seq
+						from tb_cyber_exam_bank a , tb_cyber_user_class b
+						where a.lecture_seq_no = b.lecture_seq_no
+						and a.class_no = b.class_no
+						and b.user_class_seq_no = ?
+						and isnull( use_yn , 'Y') = 'Y' 
+					) a
+					where seq = 1
+					
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_EXAM_LIST">
+			<query type="batch">
+			<![CDATA[
+				
+					insert into TB_CYBER_ESTIMATE( exam_seq_no , user_class_seq_no ,exam_no )
+					values( ? , ? , ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>exam_seq_no,user_class_seq_no,exam_num</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_ESTIMATE_RESULT">
+			<query type="batch">
+			<![CDATA[
+				
+					insert into TB_CYBER_ANSWER( estimate_seq_no , answer , user_class_seq_no)
+					values( ? , ? , ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>estimate_seq_no,answer,user_class_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="DELETE_ESTIMATE">
+			<query>
+			<![CDATA[
+				
+					delete from TB_CYBER_ESTIMATE where user_class_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="DELETE_ESTIMATE_RESULT">
+			<query>
+			<![CDATA[
+				
+					delete from TB_CYBER_ANSWER where user_class_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="DELETE_ESTIMATE_RESULT_ONE">
+			<query>
+			<![CDATA[
+				
+					delete from TB_CYBER_ANSWER where estimate_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>estimate_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_STATUS_START">
+			<query>
+			<![CDATA[
+				
+					UPDATE TB_CYBER_USER_CLASS SET status = ?,
+					estimate_start_dt = ( case ISNULL(estimate_start_dt,'') when '' then getdate() else estimate_start_dt end ),
+					study_end_dt = (case ISNULL(study_end_dt,'') when '' then getdate() else study_end_dt end)
+					WHERE user_class_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>status,user_class_seq_no</setProperty>
+				<getProperty>
+					    
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_STATUS_END">
+			<query>
+			<![CDATA[
+				
+					UPDATE TB_CYBER_USER_CLASS SET status = ?,
+					estimate_end_dt = (case ISNULL(estimate_end_dt,'') when '' then getdate() else estimate_end_dt end),
+					estimate_cnt = ?,
+					estimate_point = ?,
+					estimate_pass_yn = ?
+					WHERE user_class_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>status,estimate_cnt,estimate_point,estimate_pass_yn,user_class_seq_no</setProperty>
+				<getProperty>
+					    
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_CLASS_STATUS">
+			<query>
+			<![CDATA[
+				
+					UPDATE TB_CYBER_USER_CLASS SET status = ?
+					WHERE user_class_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>status,user_class_seq_no</setProperty>
+				<getProperty>
+					    
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_LECTURE_STATUS">
+			<query>
+			<![CDATA[
+				
+					UPDATE TB_CYBER_USER_LECTURE SET status = ?, curr_class_no = ?
+					WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>status,user_class_seq_no,user_lecture_seq_no</setProperty>
+				<getProperty>
+					    
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_LECTURE_START_DT">
+			<query>
+			<![CDATA[
+				
+					UPDATE TB_CYBER_USER_LECTURE SET 
+					user_lecture_start_dt = ( CASE WHEN user_lecture_start_dt IS NULL THEN getdate() ELSE user_lecture_start_dt END )
+					WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					    
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_END_CNT">
+			<query>
+			<![CDATA[
+				
+					select 
+						count(a.user_lecture_seq_no) tot_cnt
+					from TB_CYBER_USER_CLASS a 
+					LEFT JOIN TB_CYBER_CLASS c 
+					ON a.lecture_seq_no = c.lecture_seq_no and
+                    a.class_no = c.class_no
+                    WHERE a.user_lecture_seq_no = ?
+                    AND a.status <> '9'
+                    AND ISNULL(a.estimate_pass_yn,'N') != 'Y'
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					    tot_cnt
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_CNT">
+			<query>
+			<![CDATA[
+				
+					select
+					ISNULL(a.estimate_cnt,0) estimate_cnt
+					from tb_cyber_user_class a
+					where a.user_class_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty>
+					    estimate_cnt
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_POINT">
+			<query>
+			<![CDATA[
+				
+					select
+					ISNULL(sum(1) , 0 ) point
+					from tb_cyber_answer a, tb_cyber_estimate b, tb_cyber_exam_item c
+					where a.estimate_seq_no = b.estimate_seq_no 
+					and b.exam_seq_no = c.exam_seq_no
+					and a.answer = c.item_seq_no
+					and c.check_yn = 'Y'
+					and a.user_class_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty>
+					    point
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_CHECK_POINT">
+			<query>
+			<![CDATA[
+				
+					select
+					ISNULL(b.estimate_pass_point,50) estimate_pass_point
+					from tb_cyber_user_class a, tb_cyber_class b
+					where a.class_no = b.class_no
+					and a.lecture_seq_no = b.lecture_seq_no
+					and a.user_class_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_class_seq_no</setProperty>
+				<getProperty>
+					    estimate_pass_point
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_PROCESS_CLASS_LIST">
+			<query>
+			<![CDATA[
+				
+					select
+						user_class_seq_no,
+					    class_no,
+					    ISNULL(estimate_pass_yn, 'N') estimate_pass_yn
+					from tb_cyber_user_class a,
+					(select top 1 user_lecture_seq_no , lecture_seq_no
+					 from tb_cyber_user_lecture t where user_seq_no = ?
+					 order by user_lecture_seq_no desc ) b
+					where a.user_lecture_seq_no = b.user_lecture_seq_no 
+					and a.status <> '9'
+					order by class_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no</setProperty>
+				<getProperty>
+					    user_class_seq_no,
+					    class_no,
+					    estimate_pass_yn
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_PROCESS_STATUS">
+			<query>
+			<![CDATA[
+				
+				select top 1 status, 
+        			case when ( cast( x.user_lecture_end_dt as datetime) - getdate()  ) < 0 then
+					'Y' else 'N' end as end_yn
+				from ( 
+					select 
+						a.status,
+					    a.user_lecture_seq_no,
+						dbo.formatDateTime( a.user_lecture_start_dt+(13 + ISNULL(a.extend_cnt,0) * 13 ) ,'yyyy.mm.dd HH:MI') as user_lecture_end_dt						
+					from TB_CYBER_USER_LECTURE a, TB_CYBER_SYSTEM s,TB_CYBER_LECTURE c
+					WHERE a.lecture_seq_no = c.lecture_seq_no
+					AND a.status in ( '01' , '02' , '09' )
+					AND c.use_yn = 'Y'
+					AND a.user_lecture_seq_no in (select top 1 user_lecture_seq_no 
+									 from tb_cyber_user_lecture t where user_seq_no = ? 
+									 order by user_lecture_seq_no desc )
+				    AND a.lecture_seq_no = s.lecture_seq_no
+					AND a.std_yyyy = s.std_yyyy
+				    AND s.start_dd <= dbo.formatDateTime( getdate() , 'yyyymmdd') 
+					AND s.std_end_dd  >= dbo.formatDateTime( getdate() , 'yyyymmdd') 
+									 
+				) x
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no</setProperty>
+				<getProperty>
+					    status,end_yn
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_ANSWER_CHECK">
+			<query>
+			<![CDATA[
+				
+					select
+						a.exam_seq_no,
+						a.check_yn
+					from tb_cyber_exam_item a
+					where a.exam_seq_no = ?
+					and a.item_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>exam_seq_no,item_seq_no</setProperty>
+				<getProperty>
+					   exam_seq_no, check_yn
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_TERM_EXTEND">
+			<query>
+			<![CDATA[
+				
+					UPDATE TB_CYBER_USER_LECTURE SET extend_cnt = isnull( extend_cnt, 0) 
+					+ (((cast( getdate()  - (case status when '00' then getdate() else user_lecture_start_dt end ) as int)-13)/13)+2 )
+					WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>
+					    
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="SET_CERT_INFO">
+			<query>
+			<![CDATA[
+				
+					INSERT INTO TB_CYBER_CERT
+		           (
+		           user_lecture_seq_no
+		           ,lecture_seq_no
+		           ,user_seq_no
+		           ,user_id
+		           ,ssn
+		           
+		           ,user_nm
+		           ,building_nm		           
+		           ,tel_no
+		           ,addr
+		           ,corp_nm
+		           
+		           ,addr_nm
+		           ,end_dt
+		           ,float_end_dt
+		           ,cert_div
+		           ,reg_dt
+		           )
+					values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, getdate()    )
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no,lecture_seq_no	,user_seq_no ,user_id,ssn		           
+						           ,user_nm	,building_nm,tel_no,addr,corp_nm		           
+						           ,addr_nm	,end_dt ,float_end_dt ,cert_div
+		            </setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="UPDATE_CERT_INFO">
+			<query>
+			<![CDATA[
+				
+					UPDATE TB_CYBER_CERT SET 
+					down_dt = getdate()
+					WHERE user_lecture_seq_no = ?
+					AND user_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no, user_id</setProperty>
+				<getProperty>
+					    
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_CERT_INFO">
+			<query>
+			<![CDATA[
+				
+					SELECT 
+			           a.user_lecture_seq_no
+			           ,a.lecture_seq_no
+			           ,a.user_seq_no
+			           ,user_id
+			           ,ssn		           
+			           ,user_nm
+			           ,building_nm		           
+			           ,tel_no
+			           ,addr
+			           ,corp_nm		           
+			           ,addr_nm
+			           ,end_dt
+			           ,float_end_dt
+			           ,cert_div
+			           ,ISNULL( CONVERT( varchar , a.reg_dt ,120) , 'N') reg_dt
+                       ,ISNULL( CONVERT( varchar , mod_dt ,120) , 'N') mod_dt
+                       ,ISNULL( CONVERT( varchar , down_dt ,120) , 'N') down_dt
+					   ,ISNULL( b.std_yyyy , '$std_yyyy') std_yyyy
+					   ,lecture_div
+		           FROM TB_CYBER_CERT a 
+				   LEFT OUTER JOIN TB_CYBER_USER_LECTURE b ON a.user_lecture_seq_no = b.user_lecture_seq_no 
+				   LEFT OUTER JOIN TB_CYBER_LECTURE c ON b.lecture_seq_no = c.lecture_seq_no
+				   WHERE a.user_lecture_seq_no = ?
+		           AND a.user_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no,user_id
+		            </setProperty>
+				<getProperty>user_lecture_seq_no,lecture_seq_no	,user_seq_no ,user_id,ssn		           
+						           ,user_nm	,building_nm,tel_no,addr,corp_nm		           
+						           ,addr_nm	,end_dt ,float_end_dt ,cert_div
+						           ,reg_dt,mod_dt,down_dt
+						           ,std_yyyy,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_EXTRA_CERT_INFO">
+			<query>
+			<![CDATA[
+				
+					select 
+					 c.user_lecture_seq_no,
+			 		 c.lecture_seq_no,
+					 a.user_seq_no,
+					 a.user_id,
+					(case when len(ssn) > 6 then substring(ssn, 0, 7) + '-' + substring(ssn , 7, 13) else ssn end) ssn,
+					user_nm,
+					building_nm,
+					tel_no,
+					addr,
+					(case when a.cp_code is null or a.cp_code = '' then a.CORP_NM else b.company end) as corp_nm,
+					b.cp_addr + ' '+ isnull(b.cp_jibun,'') as addr_nm,
+					dbo.formatDateTime( e.estimate_end_dt,'yyyy년 mm월 dd일')  end_dt,
+					--replace( convert( varchar(10) , e.estimate_end_dt , 120) , '-' , '.') end_dt,
+					floor(convert(float, e.estimate_end_dt +3)) float_end_dt,
+					'1' cert_div,
+					ISNULL( CONVERT( varchar , getdate() ,120) , 'N') reg_dt,
+					ISNULL( c.std_yyyy , dbo.formatDateTime(GETDATE(),'yyyy') ) std_yyyy,
+					lecture_div
+				from tb_cyber_member a
+					LEFT OUTER JOIN tb_mb_master b 
+					ON a.cp_code = b.cp_code
+					and a.ill_no = b.ill_no 
+					,tb_cyber_user_lecture c
+					LEFT OUTER JOIN TB_CYBER_LECTURE d ON c.lecture_seq_no = d.lecture_seq_no
+					,TB_CYBER_USER_CLASS e
+				where a.user_seq_no = c.user_seq_no 
+				and c.USER_LECTURE_SEQ_NO = ?
+				and c.curr_class_no = e.user_class_seq_no
+		        AND a.user_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no,user_id
+		            </setProperty>
+				<getProperty>user_lecture_seq_no,lecture_seq_no	,user_seq_no ,user_id,ssn		           
+						           ,user_nm	,building_nm,tel_no,addr,corp_nm		           
+						           ,addr_nm	,end_dt ,float_end_dt ,cert_div
+						           ,reg_dt
+						           ,std_yyyy,lecture_div
+				</getProperty>
+			</mapping>
+		</sql>
+	</processor-info>
+
+	<input>
+		<block name="arg" repeat="1">			
+			<field name="lecture_seq_no" type="int"	size="" />
+			<field name="rnum"  type="int"      size="" default="20"/>
+            <field name="page_no"     type="int"      size="" default="1"/>
+            <field name="addWhere"      type="string"   size="" />
+            <field name="user_seq_no"      type="int"   size="" />
+            
+            <field name="user_lecture_seq_no" type="int"	size="" />	
+            <field name="user_class_seq_no" type="int"	size="" />	
+            <field name="exam_seq_no" type="int"	size="" />
+            
+            <field name="estimate_seq_no" type="int"	size="" />
+            <field name="item_seq_no" type="int"	size="" />
+            <field name="answer" type="string"	size="" />
+            
+            <field name="status" type="string"	size="" />
+       
+            <field name="exam_num" type="int"	size="" />
+            
+            <field name="estimate_cnt" type="int"	size="" />
+            <field name="estimate_point" type="int"	size="" />
+            <field name="estimate_pass_yn" type="string"	size="" />
+            
+            <field name="strExamSeqNo" type="string"	size="" />
+            
+            
+            <field name="user_id" type="string"	size="" />
+            <field name="ssn" type="string"	size="" />
+            <field name="user_nm" type="string"	size="" />
+            <field name="building_nm" type="string"	size="" />
+            <field name="tel_no" type="string"	size="" />
+            <field name="addr" type="string"	size="" />
+            <field name="corp_nm" type="string"	size="" />
+            <field name="addr_nm" type="string"	size="" />
+            <field name="end_dt" type="string"	size="" />
+            <field name="float_end_dt" type="string"	size="" />
+            <field name="cert_div" type="string"	size="" />
+            <field name="std_yyyy" type="string"	size="" />
+            
+		</block>
+	</input>
+
+	<output>
+		<block repeat=''>
+			<field name='rnum'          type='int'      size=''/>      
+            <field name='tot_cnt'       type='int'      size=''/>
+            <field name='point'       type='int'      size=''/>      
+            <field name="estimate_pass_point" type="int"	size="" />
+            <field name="estimate_cnt" type="int"	size="" />
+            
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name="title" 		type="string"	size="" />
+			<field name="status" 		type="string"	size="" />
+			<field name="certication_file_path" 		type="string"	size="" />
+			<field name='start_dt' 		type='String'	size=''/>
+			<field name='end_dt' 		type='String'	size=''/>
+			
+			<field name="user_class_seq_no" 	type="string"	size=""/>	
+			<field name="study_start_dt" 		type="string"	size=""/>	
+			<field name="study_end_dt" 			type="string"	size=""/>
+			<field name="estimate_start_dt" 	type="string"	size=""/>
+			<field name='estimate_end_dt' 		type='String'	size=""/>
+			<field name='class_no' 				type='String'	size=''/>
+			<field name='user_lecture_seq_no' 	type='String'	size=''/>
+		</block>
+		<block id="property" name="property" repeat="1">
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+		<block name="estimate_info" id="estimate_info" repeat='9999999'>
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name='user_lecture_seq_no' 	type='String'	size=''/>
+			<field name="title" 		type="string"	size="" />
+			<field name="status" 		type="string"	size="" />
+			<field name="status_nm" 		type="string"	size="" />
+			<field name="certication_file_path" 		type="string"	size="" />
+			<field name="certication_file_path_proof" 		type="string"	size="" />
+			<field name='start_dt' 		type='String'	size=''/>
+			<field name='end_dt' 		type='String'	size=''/>
+			<field name='tot_cnt' 		type='String'	size=''/> 
+			
+			<field name='cls_status' 		type='String'	size=''/>
+			<field name='cls_status_nm' 		type='String'	size=''/>
+			<field name='estimate_pass_yn' 		type='String'	size=''/>
+			<field name='estimate_cnt' 		type='String'	size=''/>
+			<field name='user_class_seq_no' 		type='String'	size=''/>
+			<field name='class_no' 		type='String'	size=''/>
+			<field name='std_yyyy' 		type='String'	size=''/> 
+			<field name='start_dd' 		type='String'	size=''/> 
+			<field name='end_dd' 		type='String'	size=''/> 
+			<field name='std_end_dd' 		type='String'	size=''/>
+			<field name='end_yn' 		type='String'	size=''/>
+			<field name='teminate_yn' 		type='String'	size=''/>
+			<field name='close_yn' 		type='String'	size=''/>
+			<field name='scode' 		type='String'	size=''/>
+			<field name='user_lecture_start_dt' 		type='String'	size=''/>
+			<field name='user_lecture_end_dt' 		type='String'	size=''/>
+			<field name='lecture_div' 		type='String'	size=''/>
+		</block>
+		
+		<block name="cert_down_info" id="cert_down_info" repeat='1'>
+			<field name="user_lecture_seq_no" type="string"	size="" />	
+			<field name='lecture_seq_no' 	type='String'	size=''/>
+			<field name="user_seq_no" 		type="string"	size="" />
+			<field name="user_id" 		type="string"	size="" />
+			<field name="ssn" 		type="string"	size="" />
+			
+			<field name="user_nm" 		type="string"	size="" />
+			<field name="building_nm" 		type="string"	size="" />
+			<field name='tel_no' 		type='String'	size=''/>
+			<field name='addr' 		type='String'	size=''/>
+			<field name='corp_nm' 		type='String'	size=''/>
+			
+			<field name='addr_nm' 		type='String'	size=''/>
+			<field name='end_dt' 		type='String'	size=''/> 			
+			<field name='float_end_dt' 		type='String'	size=''/>
+			<field name='cert_div' 		type='String'	size=''/>
+			
+			<field name='reg_dt' 		type='String'	size=''/>
+			<field name='mod_dt' 		type='String'	size=''/>
+			<field name='down_dt' 		type='String'	size=''/>
+			<field name='std_yyyy' 		type='String'	size=''/>
+			<field name='lecture_div' 		type='String'	size=''/>
+		</block>
+		
+		<block name="cert_info" id="cert_info" repeat='9999999'>
+			<field name="lecture_seq_no" type="string"	size="" />	
+			<field name='user_lecture_seq_no' 	type='String'	size=''/>
+			<field name="title" 		type="string"	size="" />
+			<field name="status" 		type="string"	size="" />
+			<field name="status_nm" 		type="string"	size="" />
+			<field name="certication_file_path" 		type="string"	size="" />
+			<field name="certication_file_path_proof" 		type="string"	size="" />
+			<field name='start_dt' 		type='String'	size=''/>
+			<field name='end_dt' 		type='String'	size=''/>
+			<field name='end_dt_ko' 		type='String'	size=''/>
+			<field name='float_end_dt' 		type='int'	size=''/>
+			<field name='tot_cnt' 		type='String'	size=''/> 
+			
+			<field name='building_addr' 		type='String'	size=''/>
+			<field name='building_nm' 		type='String'	size=''/>
+			<field name='corp_nm' 		type='String'	size=''/>
+			<field name='addr' 		type='String'	size=''/>
+			<field name='corp_addr' 		type='String'	size=''/>
+			
+			<field name='reg_dt' 		type='String'	size=''/>
+			<field name='mod_dt' 		type='String'	size=''/>
+			<field name='down_dt' 		type='String'	size=''/>
+			
+			<field name='cert_building_nm' 		type='String'	size=''/>
+			<field name='cert_addr_nm' 		type='String'	size=''/>
+			<field name='cert_addr' 		type='String'	size=''/>
+			<field name='std_yyyy' 		type='String'	size=''/>
+			<field name='survey_yn' 		type='String'	size=''/>
+			<field name='lecture_div' 		type='String'	size=''/>
+		</block>
+		<block name="class_info" id="class_info" repeat='9999999'>
+			<field name="user_class_seq_no" 	type="string"	size=""/>	
+			<field name="study_start_dt" 		type="string"	size=""/>	
+			<field name="study_end_dt" 			type="string"	size=""/>
+			<field name="estimate_start_dt" 	type="string"	size=""/>
+			<field name='estimate_end_dt' 		type='String'	size=""/>
+			<field name="status" 				type="string"	size=""/>
+			<field name="status_nm"				type="string"	size=""/>
+			<field name="title" 				type="string"	size=""/>
+			<field name='lecture_seq_no' 		type='String'	size=''/>
+			<field name='class_no' 				type='String'	size=''/>
+			<field name='user_lecture_seq_no' 	type='String'	size=''/>
+			<field name='lecture_div' 		type='String'	size=''/>
+		</block>		
+		<block name="exam_info" id="exam_info" repeat='9999999'>
+			<field name="estimate_seq_no" 	type="string"	size=""/>	
+			<field name="exam_seq_no" 		type="string"	size=""/>	
+			<field name="user_class_seq_no" type="string"	size=""/>
+			<field name="exam_num" 			type="string"	size=""/>
+			<field name="exam_no" 			type="string"	size=""/>
+			<field name='exam_title' 		type='String'	size=""/>
+			<field name="exam_type" 		type="string"	size=""/>
+			<field name="lecture_seq_no" 	type="string"	size=""/>
+			<field name='class_no' 			type='String'	size=''/>
+			<field name='answer' 			type='String'	size=''/>
+			<field name='chart_path' 		type='String'	size=''/>
+			<field name='exam_open_time' 	type='String'	size=''/>
+			<field name='lecture_div' 		type='String'	size=''/>
+		</block>
+		<block name="item_info" id="item_info" repeat='9999999'>
+			<field name="exam_seq_no" 		type="string"	size=""/>	
+			<field name="item_seq_no" 		type="string"	size=""/>
+			<field name="item_no" 			type="string"	size=""/>
+			<field name='item_nm' 			type='String'	size=""/>
+			<field name="check_yn" 			type="string"	size=""/>	
+		</block>					
+	</output>
+</transaction>

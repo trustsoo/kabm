@@ -1,0 +1,1688 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='board' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>		
+		<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+		<script language="java" import="jdf.framework.core.log.Logger,
+										jdf.framework.core.util.*">
+		<![CDATA[
+			String cmd = input.getText("cmd");		
+			String dynamic_sql = "";
+			if("createJobBoard".equals(cmd))
+			{
+				String content = input.getText("cntnt");
+				
+				if("-1".equals(input.getText("brd_no")))
+				{	
+					if("-1".equals(input.getText("p_brd_no")))				
+					{
+						executeSQL("newBoard", connection, input, output);
+						
+						input.put("ins_brd_no", output.getText("ins_brd_no"));						
+					} else
+					{
+						executeSQL("newAnswerBoard", connection, input, output);
+					}					
+				} 
+				else
+				{
+					input.put("ins_brd_no", input.getText("brd_no"));
+					executeSQL("updateBoard", connection, input, output);					
+				}
+							
+				executeSQL("addJob", connection, input, output);		
+								
+				if (input.getCount("file_nm") > 0) {
+		            DataSet fileInfo = new DataSet();
+		            DataSet fileInfoOut = new DataSet();
+		            for (int i = 0, ic = input.getCount("file_nm"); i < ic; i++) {
+		                fileInfo.put("file_nm", input.getText("file_nm", i), i);
+		                fileInfo.put("file_path", input.getText("file_path", i), i);
+		                fileInfo.put("file_size", input.getText("file_size", i), i);
+		                fileInfo.put("ext_nm", input.getText("ext_nm", i), i);
+		                fileInfo.put("user_file_nm", input.getText("user_file_nm", i), i);
+		                fileInfo.put("attach_div_cd", input.getText("attach_div_cd"), i);
+		                fileInfo.put("data_no", input.getText("ins_brd_no"), i);
+		            }
+		
+		            fileInfo.put("cmd", "create");
+		            executeTxBL("/common/Attach", fileInfo, fileInfoOut);
+		        }
+			}
+			else if("doBoardAdd".equals(cmd))
+			{
+				
+				String content = input.getText("board_txt");
+				
+				if("-1".equals(input.getText("brd_no")))
+				{	
+					if("-1".equals(input.getText("p_brd_no")))				
+					{
+						executeSQL("newBoard", connection, input, output);
+						
+						input.put("ins_brd_no", output.getText("ins_brd_no"));						
+					} else
+					{
+						executeSQL("newAnswerBoard", connection, input, output);
+					}					
+				} 
+				else
+				{
+					input.put("ins_brd_no", input.getText("brd_no"));
+					executeSQL("updateBoard", connection, input, output);					
+				}
+				
+				
+				
+				if (input.getCount("file_nm") > 0) {
+		            DataSet fileInfo = new DataSet();
+		            DataSet fileInfoOut = new DataSet();
+		            for (int i = 0, ic = input.getCount("file_nm"); i < ic; i++) {
+		                fileInfo.put("file_nm", input.getText("file_nm", i), i);
+		                fileInfo.put("file_path", input.getText("file_path", i), i);
+		                fileInfo.put("file_size", input.getText("file_size", i), i);
+		                fileInfo.put("ext_nm", input.getText("ext_nm", i), i);
+		                fileInfo.put("user_file_nm", input.getText("user_file_nm", i), i);
+		                fileInfo.put("attach_div_cd", input.getText("attach_div_cd"), i);
+		                fileInfo.put("data_no", input.getText("ins_brd_no"), i);
+		            }
+		
+		            fileInfo.put("cmd", "create");
+		            System.err.println(fileInfo);
+		            executeTxBL("/common/Attach", fileInfo, fileInfoOut);
+		        }
+				
+				
+			}
+			else if("doBoardRead".equals(cmd))
+			{
+				if(!input.getText("brd_no").equals("-1")){
+					//if(!"".equals(input.getText("emp_no")))
+					
+					executeSQL("add_read_hst", connection, input, output);
+					
+					input.put("pre_brd_no", output.getText("pre_brd_no"));
+					input.put("next_brd_no", output.getText("next_brd_no"));
+					
+					executeSQL(cmd, connection, input, output);
+				}else{
+					output.put("grp_seq_no", input.getText("grp_seq_no"));
+					output.put("grp_order", input.getText("grp_order"));
+					output.put("lvl", input.getText("lvl"));
+				}
+			} 	
+			else if("doAuthCheck".equals(cmd))
+			{
+				executeSQL("doReadAuthCheck", connection, input, output);
+				executeSQL("doanswerAuthCheck", connection, input, output);
+			} else if("getBoard".equals(cmd))
+			{
+				String start_dt = input.getText("start_dt");
+				String end_dt = input.getText("end_dt");
+				if(!"".equals(start_dt) && !"".equals(end_dt) )
+				{
+					dynamic_sql = " AND a.reg_ddtm between CONVERT(DATETIME, '"+start_dt+"'+' 00:00:00') AND CONVERT(DATETIME, '"+end_dt+"'+' 23:59:59') ";
+					
+				} else
+				{
+					dynamic_sql = "";
+				}
+				input.put("dynamic_sql", dynamic_sql);
+				
+				String notice_yn = input.getText("notice_yn");
+				String sqlNoticeYn = "";
+				
+				if("Y".equals(notice_yn))	sqlNoticeYn = " and notice_div is not null ";
+				else if("N".equals(notice_yn))	sqlNoticeYn = " and notice_div is null ";
+				
+				input.put("sqlNoticeYn" ,sqlNoticeYn );
+				
+				executeSQL(cmd, connection, input, output);
+			} else if("getNoticeList".equals(cmd))
+			{
+				String srch_type = input.getText("search_type");
+				String srch_text = input.getText("search_txt");
+				if("ttl".equals(srch_type))
+				{
+					dynamic_sql = " b.ttl like '%'+'"+srch_text+"'+'%'";
+					
+				} else
+				{
+					dynamic_sql = " 0 = 0";
+				}
+				input.put("dynamic_sql", dynamic_sql);
+				executeSQL(cmd, connection, input, output);
+			} else if("deleteJob".equals(cmd))
+			{
+				executeSQL("delJob", connection, input, output);
+				executeSQL("delBoard", connection, input, output);
+			}
+			else if("delBoard".equals(cmd))
+			{
+				executeSQL("doCommentDelAll", connection, input, output);
+				executeSQL("delBoard", connection, input, output);
+			}	
+			else
+			{
+				executeSQL(cmd, connection, input, output);
+			}
+			
+				
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="delJob">
+			<query>
+				DELETE FROM tb_kabm_recruit WHERE brd_no = ?
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="delBoard">
+			<query>
+				DELETE FROM tb_kabm_board WHERE brd_no = ?
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id='job_detail'>
+			<query>
+			<![CDATA[			
+				SELECT  
+				    a.brd_mng_no,
+				    c.brd_nm,
+				    d.recruit_div,
+				    a.ttl,
+				    d.job_title,
+				    d.career_yn,
+				    b.sex,
+					a.brd_no, a.reg_emp_cd , b.user_nm, b.email, a.cntnt,
+					a.reg_ddtm reg_dt,
+					b.TEL_NO, d.age
+				FROM tb_kabm_board a, tb_cyber_member b, tb_kabm_board_mngr c, tb_kabm_recruit d
+				WHERE a.reg_emp_cd = b.user_id
+				AND a.BRD_MNG_NO = c.BRD_MNG_NO
+				and a.brd_no = d.brd_no				
+				AND a.brd_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty>brd_mng_no, brd_nm, recruit_div, ttl,job_title, career_yn, gender, brd_no, user_id, user_nm, email, cntnt, reg_dt, tel_no, age</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		
+		<sql id='job_list'>
+			<query>
+			<![CDATA[
+			SELECT TOP (?)
+						num, a.brd_nm, a.brd_no, a.ttl, a.job_title, 
+						a.user_nm, CONVERT(varchar(10), a.reg_dt,120) AS reg_dt, 
+						a.grp_seq_no, a.grp_order, a.lvl, a.p_brd_no, a.reg_emp_cd,	
+						tot_cnt,
+						recruit_div,
+						career_yn,
+						email,
+						sex gender,
+						brd_mng_no
+					FROM
+					(
+						SELECT  
+						    a.brd_mng_no,
+						    a.ttl,
+						    c.brd_nm,
+						    d.recruit_div,
+						    d.job_title,
+						    d.career_yn,
+						    b.sex,
+							a.brd_no, a.reg_emp_cd , b.user_nm, b.email,
+							a.reg_ddtm reg_dt, a.grp_seq_no, a.grp_order, a.lvl, a.p_brd_no, 
+							ROW_NUMBER() OVER(order by a.brd_mng_no desc, a.reg_ddtm desc) num, 
+							count(*) over() tot_cnt
+						FROM tb_kabm_board a, tb_cyber_member b, tb_kabm_board_mngr c, tb_kabm_recruit d
+						WHERE a.reg_emp_cd = b.user_id
+						AND a.BRD_MNG_NO = c.BRD_MNG_NO
+						and a.brd_no = d.brd_no
+						AND a.grp_seq_no > 0 
+						AND a.del_yn = 'N'
+						AND a.grp_order > 0
+						AND a.brd_mng_no = ?
+						AND d.recruit_div = ?								
+						AND ( CASE ?
+								WHEN '' THEN '1'
+								ELSE d.job_title 
+							  END
+							  LIKE
+							  CASE ?
+								WHEN '' THEN '1'
+								ELSE '%'+?+'%'
+							  END
+							  OR
+							  CASE ?
+								WHEN '' THEN '1'
+								ELSE cntnt 
+							  END
+							  LIKE
+							  CASE ?
+								WHEN '' THEN '1'
+								ELSE '%'+?+'%'
+							  END	
+							)	
+						
+					) a
+					WHERE num > (? -1) * ? 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>board_row_per_page, brd_mng_no, recruit_div, search_word, search_word, search_word, search_word, search_word, search_word,
+							 cur_pg, board_row_per_page 
+							 </setProperty>
+				<getProperty>num, brd_nm, brd_no, ttl, job_title,
+						user_nm, reg_dt, 
+						grp_seq_no, grp_order, lvl, p_brd_no, reg_emp_cd,	
+						tot_cnt,
+						recruit_div,
+						career_yn,
+						email,
+						gender,
+						brd_mng_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="addJob">
+			<query>
+			<![CDATA[
+				MERGE INTO tb_kabm_recruit a
+					 USING (SELECT ? AS brd_no) b
+					 ON (a.brd_no = b.brd_no)
+					 WHEN MATCHED THEN
+					 UPDATE SET
+					 	career_yn = ?,
+					 	job_title = ?,
+					 	age  = ?
+					 WHEN NOT MATCHED THEN
+					 INSERT
+					 (brd_no, recruit_div, career_yn, job_title, age)
+					 values
+					 (?, ?, ?, ?, ?);
+			]]>
+			</query>
+			<mapping>
+				<setProperty>ins_brd_no, career_yn, job_title, age,
+							ins_brd_no,recruit_div, career_yn, job_title, age</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getBoardReplyInfo">
+			<query>
+			   <![CDATA[
+					SELECT						
+						brd_no AS p_brd_no, '[RE] '+ ttl AS ttl, grp_seq_no,  grp_order, lvl
+					FROM tb_kabm_board 
+					WHERE brd_no = ?					
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty>p_brd_no, ttl, grp_seq_no, grp_order, lvl</getProperty>
+			</mapping>
+		</sql>
+
+		<sql id="getBoardOwner">
+			<query>
+			   <![CDATA[
+					SELECT emp_no FROM tb_kabm_board WHERE brd_no = ?					
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty>rg_empl_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getBoard">
+			<query>
+			   <![CDATA[			   
+			   SELECT TOP (?)
+					num, a.brd_nm, a.brd_no, a.ttl, a.cntnt, 
+					a.emp_nm, CONVERT(varchar(10), a.reg_dt,120) AS reg_dt, 
+					a.grp_seq_no, a.grp_order, a.lvl, a.p_brd_no, a.reg_emp_cd,					
+				    (SELECT COUNT(*) FROM tb_kabm_board_read_hst WHERE brd_no = a.brd_no) AS read_count,
+					ISNULL( (SELECT top 1 'read' FROM tb_kabm_board_read_hst WHERE brd_no = a.brd_no AND emp_cd = ?), 'new') AS read_yn,
+					tot_cnt,
+					(SELECT COUNT(*) FROM  dbo.tb_kabm_board_read_hst
+								WHERE brd_no = a.brd_no
+					 ) read_cnt,
+					 email,
+					 brd_mng_no,
+					 notice_start_dt,notice_end_dt,
+					 (select top(1) cd_nm from tb_kabm_code where div_cd = 'notice_div' and cd = notice_div ) notice_div_nm,
+					 imp_yn,brd_div,
+					 (select top(1) cd_nm from tb_kabm_code where div_cd = 'file_div' and cd = brd_div ) brd_div_nm
+				FROM
+				(
+					SELECT  
+					    a.brd_mng_no,
+					    a.brd_div,
+					    c.brd_nm,
+						a.brd_no, a.ttl, a.cntnt, a.reg_emp_cd , b.emp_nm, b.email,
+						a.reg_ddtm reg_dt, a.grp_seq_no, a.grp_order, a.lvl, a.p_brd_no, 
+						CONVERT(VARCHAR(10), n.start_dt, 120) notice_start_dt, CONVERT(VARCHAR(10), n.end_dt, 120) notice_end_dt, n.notice_div,
+						ISNULL(imp_yn, 'N') imp_yn,
+						ROW_NUMBER() OVER(order by ISNULL(a.imp_yn,'N') desc, a.reg_ddtm desc) num, 
+						count(*) over() tot_cnt
+					FROM tb_kabm_board a
+					LEFT OUTER JOIN tb_kabm_notice n
+					ON a.brd_no = n.brd_no
+					, tb_kabm_emp b, tb_kabm_board_mngr c
+					WHERE a.reg_emp_cd = b.emp_cd
+					AND a.BRD_MNG_NO = c.BRD_MNG_NO
+					AND a.grp_seq_no > 0 
+					AND a.del_yn = 'N'
+					AND a.grp_order > 0
+					AND (CASE ?
+							WHEN '0' THEN '0'
+							ELSE a.brd_mng_no
+						END		
+						=
+						CASE ?
+							WHEN '0' THEN '0'
+							ELSE ?
+						END
+					)
+					$dynamic_sql
+					$sqlNoticeYn	
+					AND (CASE ?
+							WHEN '' THEN '1'
+							ELSE b.emp_nm
+						END		
+						LIKE
+						CASE ?
+							WHEN '' THEN '1'
+							ELSE '%'+?+'%'
+						END)					
+					AND ( CASE ?
+							WHEN '' THEN '1'
+							ELSE ttl 
+						  END
+						  LIKE
+						  CASE ?
+							WHEN '' THEN '1'
+							ELSE '%'+?+'%'
+						  END
+						  OR
+						  CASE ?
+							WHEN '' THEN '1'
+							ELSE cntnt 
+						  END
+						  LIKE
+						  CASE ?
+							WHEN '' THEN '1'
+							ELSE '%'+?+'%'
+						  END	
+						)
+					AND (CASE ?
+							WHEN '' THEN '1'
+							ELSE a.brd_div
+						END		
+						=
+						CASE ?
+							WHEN '' THEN '1'
+							ELSE ?
+						END)				
+					
+				) a
+				WHERE num > (? -1) * ?
+			    order by num;
+				]]>
+			</query>
+			<mapping>
+				<setProperty>board_row_per_page, emp_no, brd_mng_no,brd_mng_no,brd_mng_no, 
+							 p_reg_nm, p_reg_nm, p_reg_nm,
+							 search_word, search_word, search_word, search_word, search_word, search_word,
+							 brd_div,brd_div,brd_div,
+							 cur_pg, board_row_per_page 
+							 </setProperty>
+				<getProperty>num, brd_nm, brd_no, ttl, cntnt, emp_nm, reg_dt, grp_seq_no, grp_order, lvl, p_brd_no, 
+							 emp_no, read_count, read_yn, tot_cnt, read_cnt, email,brd_mng_no,
+							 notice_start_dt,notice_end_dt,notice_div_nm,imp_yn,
+							 brd_div,brd_div_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getAlbumBoard">
+			<query>
+			   <![CDATA[			   
+			   SELECT TOP (?)
+					num, a.brd_nm, a.brd_no, a.ttl, 
+					a.emp_nm, CONVERT(varchar(10), a.reg_dt,120) AS reg_dt, 
+					a.grp_seq_no, a.grp_order, a.lvl, a.p_brd_no, a.reg_emp_cd,					
+				    (SELECT COUNT(*) FROM tb_kabm_board_read_hst WHERE brd_no = a.brd_no) AS read_count,					
+					tot_cnt, email, file_no, file_nm, file_path,brd_mng_no
+				FROM
+				(
+					
+					SELECT  
+					    c.brd_nm,
+						a.brd_no, a.ttl, a.reg_emp_cd , b.emp_nm, b.email,
+						a.reg_ddtm reg_dt, a.grp_seq_no, a.grp_order, a.lvl, a.p_brd_no, 
+						ROW_NUMBER() OVER(order by a.reg_ddtm desc) num, 
+						count(*) over() tot_cnt, d.file_no, d.file_nm, d.file_path,a.brd_mng_no
+					FROM tb_kabm_board a
+					LEFT JOIN tb_kabm_emp b ON a.reg_emp_cd = b.emp_cd
+					LEFT JOIN tb_kabm_board_mngr c ON a.BRD_MNG_NO = c.BRD_MNG_NO
+					LEFT JOIN  tb_kabm_attach_file d ON a.brd_no = d.data_no AND d.attach_div_cd = 'attach_div_03'
+					WHERE 1=1					
+					AND a.grp_seq_no > 0 
+					AND a.del_yn = 'N'
+					AND a.grp_order > 0
+					AND a.brd_mng_no = ?					
+					
+				) a
+				WHERE num > (? -1) * ?
+			    order by num 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>board_row_per_page, brd_mng_no, cur_pg, board_row_per_page 
+							 </setProperty>
+				<getProperty>num, brd_nm, brd_no, ttl, emp_nm, reg_dt, grp_seq_no, grp_order, lvl, p_brd_no, emp_no, read_count, tot_cnt, email, file_no,file_nm, file_path,brd_mng_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getBoardMngr">
+			<query>
+			   <![CDATA[
+					SELECT brd_mng_no, brd_nm,
+                    	   (SELECT COUNT(brd_mng_no) FROM tb_kabm_board b WHERE b.brd_mng_no = a.brd_mng_no AND b.del_yn = 'N') article_cnt
+                    FROM (
+                    	SELECT
+                    		   brd_mng_no, brd_nm
+                        FROM tb_kabm_board_mngr
+                        ORDER BY brd_mng_no
+                    ) a
+				]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>brd_mng_no, brd_nm, article_cnt</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="issueBrdNo">
+			<query>
+			   <![CDATA[
+					SELECT @@IDENTITY
+				]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>brd_no</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="newBoard">
+			<query type="storedprocedure">		
+			<![CDATA[
+				{ call sp_ins_board(?, ?, ?, ?, ?, ?, ?) }
+			]]>
+			</query>
+	
+			<mapping-procedure>			
+				<param seq="1" mode="in" type="INTEGER">brd_mng_no</param>
+				<param seq="2" mode="in" type="VARCHAR">cntnt</param>
+				<param seq="3" mode="in" type="VARCHAR">rg_empl_no</param>
+				<param seq="4" mode="in" type="VARCHAR">ttl</param>
+				<param seq="5" mode="in" type="VARCHAR">brd_div</param>
+				<param seq="6" mode="in" type="VARCHAR">imp_yn</param>
+				<param seq="7" mode="out" type="INTEGER">ins_brd_no</param>				
+			</mapping-procedure>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+		
+		<!-- sql id="newBoard">
+			<query>
+			   <![CDATA[
+					INSERT INTO tb_kabm_board
+					(brd_mng_no, cntnt, grp_seq_no, grp_order, lvl, emp_no, ttl, reg_dt, p_brd_no, rpl_req_dd, rpl_req_limit_dd)
+					VALUES
+					(?, ?, ?, 999999, 1, ?, ?, getdate(), ?, ?, ?)
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no, board_txt, ins_brd_no, rg_empl_no, board_title, ins_brd_no, start_dt, end_dt</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql-->
+		
+		<sql id="getPre_Next_BrdNo">
+			<query>
+			   <![CDATA[
+					SELECT 
+						CASE grp_order
+							WHEN 999999 THEN
+								ISNULL((SELECT TOP 1
+											                    --다음 글그룹의 마지막 grp_order의 글
+										                        brd_no
+										                FROM tb_kabm_board a
+										                WHERE a.del_yn = 'N'
+										                AND a.brd_mng_no = ?
+										                AND grp_seq_no > r_brd.grp_seq_no
+										                ORDER BY BRD_MNG_NO, REG_DT), -1)
+							ELSE
+								 (SELECT TOP 1
+										                        --같은 글그룹의 이전 grp_order의 글
+										                        brd_no
+										                FROM tb_kabm_board a
+										                WHERE a.del_yn = 'N'
+										                AND a.brd_mng_no = ?
+										                AND grp_seq_no = r_brd.grp_seq_no
+										                AND grp_order = r_brd.grp_order+1
+										                ORDER BY BRD_MNG_NO, REG_DT)
+						END as pre_brd_no,
+									CASE r_brd.next_order
+										WHEN -1 THEN
+											ISNULL((
+													SELECT TOP 1 --이전 그룹의 첫번째 글
+														brd_no
+													FROM tb_kabm_board a
+													WHERE a.del_yn = 'N'
+													AND a.brd_mng_no = ?
+													AND grp_seq_no < r_brd.grp_seq_no
+													ORDER BY BRD_MNG_NO DESC, REG_DT DESC), -1)
+										ELSE
+											(SELECT TOP 1					                        
+										                          brd_no
+										                    FROM tb_kabm_board a
+										                    WHERE a.del_yn = 'N'
+										                    AND a.brd_mng_no = ?
+										                    AND grp_seq_no = r_brd.grp_seq_no
+										                    AND grp_order = r_brd.grp_order-1
+										                    ORDER BY BRD_MNG_NO, REG_DT)
+										END as next_brd_no
+					FROM
+					(
+						SELECT
+							g.grp_seq_no,
+							g.grp_order,
+							ISNULL((SELECT t.grp_order FROM tb_kabm_board t WHERE t.grp_seq_no = g.grp_seq_no AND t.grp_order = g.grp_order-1 AND t.del_yn = 'N'), -1) as next_order
+						FROM
+						(  
+							SELECT 
+									grp_seq_no,
+									grp_order
+							FROM tb_kabm_board
+							WHERE brd_no = ?
+							AND del_yn = 'N'
+						) g
+					) r_brd
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no, brd_mng_no, brd_mng_no, brd_mng_no, brd_no</setProperty>
+				<getProperty>pre_brd_no, next_brd_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doBoardRead">
+			<query>
+			   <![CDATA[
+					SELECT a.brd_mng_no, a.brd_no, ttl, cntnt, 
+							(CASE WHEN (SELECT count(*) FROM tb_kabm_attach_file WHERE data_no = a.brd_no and attach_div_cd ='attach_div_03') > 0 
+									THEN 'Y' 
+									ELSE 'N' END) AS is_exist_file,
+							a.reg_emp_cd,
+							grp_seq_no, grp_order, lvl,							
+					        CONVERT(VARCHAR(10),a.reg_ddtm, 120) as reg_dt,
+					        (SELECT emp_nm FROM tb_kabm_emp WHERE emp_cd= a.reg_emp_cd) as emp_nm,
+							brd_div, b.view_type, b.fileupload_yn, b.comment_yn,
+							CONVERT(VARCHAR(10), c.start_dt, 120) notice_start_dt, CONVERT(VARCHAR(10), c.end_dt, 120) notice_end_dt, c.notice_div, CONVERT(VARCHAR(10), c.notice_ddtm, 120) notice_ddtm, c.notice_emp_cd, d.emp_nm notice_emp_nm,
+							(
+								select 
+								COUNT(*) 
+								from dbo.tb_kabm_board_read_hst
+								where brd_no = a.brd_no
+							) read_cnt,
+							d.email, ISNULL(imp_yn, 'N') imp_yn
+					FROM tb_kabm_board a
+						INNER JOIN tb_kabm_board_mngr b 
+							ON a.brd_mng_no = b.brd_mng_no 
+						LEFT OUTER JOIN tb_kabm_notice c
+							ON a.brd_no = c.brd_no
+						LEFT OUTER JOIN tb_kabm_emp d
+							ON c.notice_emp_cd = d.emp_cd
+					WHERE a.brd_no = ?					
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty>brd_mng_no, brd_no, ttl, cntnt, is_exist_file, emp_no, grp_seq_no, grp_order, lvl, reg_dt, emp_nm,
+							brd_div, view_type,fileupload_yn,comment_yn,notice_start_dt,notice_end_dt,notice_div,notice_ddtm, notice_emp_cd, notice_emp_nm, read_cnt, email,imp_yn</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="updateBoard">
+			<query>
+			   <![CDATA[
+					UPDATE tb_kabm_board
+					SET ttl = ?,
+						cntnt = ?,
+						brd_div = ?,
+						upd_emp_cd = ?,
+						imp_yn = ?,
+						upd_ddtm = getdate(),
+						brd_mng_no = ?
+					WHERE brd_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>ttl, cntnt, brd_div, rg_empl_no, imp_yn, brd_mng_no, brd_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doBoardCheck">
+			<query>
+			   <![CDATA[
+				   SELECT 
+				   	ISNULL( (SELECT 1 
+				   		FROM
+				   		(			   
+							SELECT TOP(1) 
+								1 AS child_cnt
+							FROM tb_kabm_board
+	            			WHERE p_brd_no = ?
+							AND brd_no <> ?            
+							AND del_yn = 'N'
+						) a), 0)
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no, brd_no</setProperty>
+				<getProperty>child_cnt</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doBoardDel">
+			<query>
+			   <![CDATA[
+					UPDATE tb_kabm_board
+					SET del_yn = 'Y'
+					WHERE brd_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="newAnswerBoard">
+			<query type="storedprocedure">		
+			<![CDATA[
+				{ call sp_answer_board(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }
+			]]>
+			</query>
+	
+			<mapping-procedure>			
+				<param seq="1" mode="in" type="INTEGER">ins_brd_no</param>
+				<param seq="2" mode="in" type="INTEGER">brd_mng_no</param>
+				<param seq="3" mode="in" type="VARCHAR">board_txt</param>
+				<param seq="4" mode="in" type="VARCHAR">board_title</param>
+				<param seq="5" mode="in" type="INTEGER">p_brd_no</param>
+				<param seq="6" mode="in" type="VARCHAR">rg_empl_no</param>
+				<param seq="7" mode="in" type="INTEGER">grp_seq_no</param>
+				<param seq="8" mode="in" type="INTEGER">grp_order</param>
+				<param seq="9" mode="in" type="INTEGER">lvl</param>
+				<param seq="10" mode="in" type="VARCHAR">brd_div</param>
+			</mapping-procedure>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doCommentRead">
+			<query>
+			   <![CDATA[
+				SELECT
+					rnum, last_page, cmnt_no, cntnt,  convert(varchar(16), reg_dt, 120) AS reg_dt,
+					(SELECT user_nm FROM TB_CYBER_MEMBER b WHERE b.user_id = a.user_id) AS user_nm, user_id
+				FROM
+				(
+				SELECT
+				        ROW_NUMBER() OVER(order by brd_no desc, cmnt_no desc) rnum, 
+						CEILING(COUNT(*) over()/?) last_page, cmnt_no, 
+						cntnt, reg_dt, 
+						user_id
+				FROM tb_kabm_board_comment
+				WHERE brd_no = ?
+				) a				
+                WHERE rnum BETWEEN (?-1)*?+1 AND ?*?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>board_comment_page_cnt, brd_no, pre_page, board_comment_page_cnt, pre_page, board_comment_page_cnt</setProperty>
+				<getProperty>rnum, last_page, cmnt_no, cntnt, reg_dt, user_nm, user_id</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doCommentDel">
+			<query>
+			   <![CDATA[
+					DELETE tb_kabm_board_comment
+					WHERE cmnt_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>use_cmnt_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doCommentDelAll">
+			<query>
+			   <![CDATA[
+					DELETE tb_kabm_board_comment
+					WHERE brd_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doCommentAdd">
+			<query>
+			   <![CDATA[
+					INSERT INTO tb_kabm_board_comment
+					(brd_no, cntnt, reg_dt, user_id)
+					VALUES
+					(?, ?, getdate(), ?)
+				]]>
+			</query>
+			<mapping>
+				<setProperty>use_brd_no, use_cntnt, use_emp_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>		
+		
+		<sql id="add_read_hst">
+			<query>
+				<![CDATA[
+					INSERT INTO tb_kabm_board_read_hst
+					(brd_no, emp_cd, reg_ddtm)
+					VALUES
+					(?, ?, getdate())
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no, emp_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="add_answer_auth">
+			<query type="batch">
+			<![CDATA[
+				INSERT INTO tb_kabm_board_rpl_auth
+				(brd_no, data_flag, data_no)
+				VALUES
+				(?, ?, ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>answer_brd_no, answer_data_flag, answer_data_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="add_noti_hst">
+			<query type="batch">
+			<![CDATA[
+				INSERT INTO tb_kabm_board_noti_hst
+				( brd_no, emp_no)
+				VALUES
+				( ?, ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no, emp_nms</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="add_read_auth">
+			<query type="batch">
+			<![CDATA[
+				INSERT INTO tb_kabm_board_read_auth
+				(brd_no, data_flag, data_no)
+				VALUES
+				(?, ?, ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>read_brd_no, read_data_flag, read_data_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="add_noti_config">
+			<query type="batch">
+			<![CDATA[
+				INSERT INTO tb_kabm_board_noti_config
+				(brd_no, data_flag, data_no)
+				VALUES
+				(?, ?, ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>read_brd_no, read_data_flag, read_data_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doAuthRead">
+			<query>
+			   <![CDATA[
+                    SELECT 'rpl' AS data_gubun, data_flag, data_no, 
+					       CASE WHEN data_flag='D' 
+					            THEN (SELECT dept_nm FROM tb_dept WHERE dept_no = data_no) 
+					            WHEN data_flag='U' 
+					            THEN (SELECT emp_nm FROM tb_emp WHERE emp_no = data_no)
+					            WHEN data_flag='G' 
+					            THEN (SELECT grp_nm FROM tb_group WHERE grp_no = data_no)
+					       END AS data_nm
+					FROM tb_kabm_board_rpl_auth
+                    WHERE brd_no = ?
+					UNION ALL
+                    SELECT 'read' AS data_gubun, data_flag, data_no, 
+					       CASE WHEN data_flag='D' 
+					            THEN (SELECT dept_nm FROM tb_dept WHERE dept_no = data_no) 
+					            WHEN data_flag='U' 
+					            THEN (SELECT emp_nm FROM tb_emp WHERE emp_no = data_no)
+					            WHEN data_flag='G' 
+					            THEN (SELECT grp_nm FROM tb_group WHERE grp_no = data_no)
+					       END AS data_nm
+					FROM tb_kabm_board_read_auth
+                    WHERE brd_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no, brd_no</setProperty>
+				<getProperty>data_gubun, data_flag, data_no, data_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="delanswerAuth">
+			<query>
+			   <![CDATA[
+					DELETE tb_kabm_board_rpl_auth
+					WHERE brd_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="delReadAuth">
+			<query>
+			   <![CDATA[
+					DELETE tb_kabm_board_read_auth
+					WHERE brd_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="checkReadAuth">
+			<query>
+			   <![CDATA[
+					SELECT data_gubun, data_no
+					FROM
+					(					
+						SELECT 'U' AS data_gubun, emp_no AS data_no
+						FROM tb_emp
+						WHERE emp_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+						UNION
+						--열람주체 : 부서에 소속된 직원조회
+						SELECT 'U' AS gubun, emp_no
+						FROM tb_emp
+						WHERE dept_no IN (
+							select root_dept_no from sf_get_dept_root(?, ?)
+						)
+						UNION
+						--열람주체 : 그룹에 소속된 직원조회
+						SELECT 'U' AS gubun, emp_no
+						FROM tb_emp
+						WHERE emp_no IN (
+								SELECT
+									user_no
+								FROM tb_group_user_map
+								WHERE grp_no IN (SELECT * FROM FUNC_SPLIT(?, ','))                                
+						)
+						UNION ALL
+						--열람주체 : 직접 지정된 부서와 그 하위부서 조회
+						select 'D', root_dept_no from sf_get_dept_root(?, ?)                                
+						UNION ALL
+						--열람주체 : 직접 지정된 그룹 조회
+						SELECT
+							'G' AS gubun, grp_no
+						FROM tb_group
+						WHERE grp_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+					
+					) x
+				]]>
+			</query>
+			<mapping>
+				<setProperty>read_user_infos, read_dept_infos, read_group_infos, read_dept_infos, read_group_infos</setProperty>
+				<getProperty>data_gubun, data_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doFallRead">
+			<query>
+			   <![CDATA[
+					SELECT dept_nm AS fall_nm
+					FROM tb_dept
+					WHERE dept_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+					UNION ALL
+					SELECT emp_nm
+					FROM tb_emp
+					WHERE emp_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+					UNION ALL
+					SELECT grp_nm
+					FROM tb_group
+					WHERE grp_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+				]]>
+			</query>
+			<mapping>
+				<setProperty>fall_dept_List, fall_user_List, fall_group_List</setProperty>
+				<getProperty>fall_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doBelongUserRead">
+		
+			<query>
+			   <![CDATA[
+					SELECT *
+					FROM
+					(
+					    SELECT emp_no
+					    FROM tb_emp
+					    WHERE dept_no IN (
+					                      select root_dept_no from sf_get_dept_root(?, ?)          
+					                     )
+					    UNION
+					    SELECT emp_no
+					    FROM tb_emp
+					    WHERE emp_no IN (
+					                      SELECT
+					                          user_no
+					          			  FROM tb_group_user_map
+					                      WHERE grp_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+					                     )
+					     UNION
+					     SELECT emp_no
+					     FROM tb_emp
+					     WHERE emp_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+					) x
+					WHERE emp_no <> ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>read_dept_infos, read_group_infos, read_user_infos, rg_empl_no</setProperty>
+				<getProperty>emp_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getBoardReadAuthDept">
+			<query>
+			<![CDATA[
+				 SELECT data_no
+		         FROM tb_kabm_board_read_auth
+			     WHERE brd_no = ?
+			     AND data_flag = 'D'
+			]]>
+			
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty>data_no</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="getBoardRplAuthDept">
+			<query>
+			<![CDATA[
+				 SELECT data_no
+	                 FROM tb_kabm_board_rpl_auth
+			     WHERE brd_no = ?
+			     AND data_flag = 'D'
+			]]>
+			
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty>data_no</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		
+		<sql id="doReadAuthCheck">
+			<query>
+			   <![CDATA[
+			   WITH INC_DEPTS AS(
+			   		SELECT a.dept_no, a.p_dept_no FROM tb_dept a
+			   		WHERE a.dept_no IN (
+		                SELECT data_no
+		  		              FROM tb_kabm_board_read_auth
+		  					    WHERE brd_no = ?
+		  					    AND data_flag = 'D'            
+            		)
+			   		UNION ALL
+			   		SELECT b.dept_no, b.p_dept_no FROM tb_dept b, INC_DEPTS c			   		
+			   		WHERE c.dept_no = b.p_dept_no
+			   )			   
+			   SELECT 'Y' AS read_auth_exist
+			   FROM(
+						SELECT 
+			   				emp_no
+						FROM tb_emp
+						WHERE dept_no IN (select distinct dept_no from INC_DEPTS)
+						UNION
+						SELECT 
+						       user_no 
+						FROM tb_group_user_map
+						WHERE grp_no IN 
+						          (
+						              SELECT data_no
+						              FROM tb_kabm_board_read_auth
+						              WHERE brd_no = ?
+						              AND data_flag = 'G'
+						          )
+						UNION
+						SELECT 
+						       data_no
+						FROM tb_kabm_board_read_auth
+						WHERE brd_no = ?
+						AND data_flag = 'U'
+						UNION
+						SELECT 
+						       data_no
+						FROM tb_kabm_board_read_auth
+						WHERE brd_no = ?
+						AND data_flag = 'W'
+					) x
+			   WHERE emp_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no, brd_no, brd_no, brd_no, emp_no</setProperty>
+				<getProperty>read_auth_exist</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="doanswerAuthCheck">
+			<query>
+			   <![CDATA[
+			   WITH INC_DEPTS AS(
+			   		SELECT a.dept_no, a.p_dept_no FROM tb_dept a
+			   		WHERE a.dept_no IN (
+		                SELECT data_no
+		  		              FROM tb_kabm_board_read_auth
+		  					    WHERE brd_no = ?
+		  					    AND data_flag = 'D'            
+            		)
+			   		UNION ALL
+			   		SELECT b.dept_no, b.p_dept_no FROM tb_dept b, INC_DEPTS c			   		
+			   		WHERE c.dept_no = b.p_dept_no
+			   )	
+			   SELECT 'Y' AS answer_auth_exist
+			   FROM(
+			   			SELECT 
+			   				emp_no
+						FROM tb_emp
+						WHERE dept_no IN (select distinct dept_no from INC_DEPTS)
+						UNION
+						SELECT 
+						       user_no 
+						FROM tb_group_user_map
+						WHERE grp_no IN 
+						          (
+						              SELECT data_no
+						              FROM tb_kabm_board_rpl_auth
+						              WHERE brd_no = ?
+						              AND data_flag = 'G'
+						          )
+						UNION
+						SELECT 
+						       data_no
+						FROM tb_kabm_board_rpl_auth
+						WHERE brd_no = ?
+						AND data_flag = 'U'
+						UNION
+						SELECT 
+						       data_no
+						FROM tb_kabm_board_read_auth
+						WHERE brd_no = ?
+						AND data_flag = 'W'
+					) x
+			   WHERE emp_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no, brd_no, brd_no, brd_no, emp_no</setProperty>
+				<getProperty>answer_auth_exist</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id='setNotice'>
+			<query>
+			<![CDATA[
+				MERGE INTO tb_kabm_notice a
+				 USING (SELECT ? AS brd_no) b
+				 ON (a.brd_no = b.brd_no)
+				 WHEN MATCHED THEN
+				 UPDATE SET
+				 	start_dt = CONVERT(DATETIME, ?+' 00:00:00'),
+				 	end_dt = CONVERT(DATETIME, ?+' 23:59:59'),
+				 	notice_div  = ?
+				 WHEN NOT MATCHED THEN
+				 INSERT
+				 (brd_no, start_dt, end_dt, notice_ddtm, notice_div, notice_emp_cd)
+				 values
+				 (?, CONVERT(DATETIME, ?+' 00:00:00'), CONVERT(DATETIME, ?+' 23:59:59'), GETDATE(), ?, ?);
+			]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no, start_dt, end_dt, notice_div, 
+							brd_no, start_dt, end_dt, notice_div, emp_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id='delNotice'>
+			<query>
+			<![CDATA[
+				delete tb_kabm_notice where brd_no = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>brd_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getNoticeList">
+		<query>
+		<![CDATA[
+			SELECT TOP(?)
+			    brd_mng_no,
+				brd_no,
+				ttl,
+				CONVERT(VARCHAR(10), a.reg_ddtm, 120) reg_ddtm,				
+				emp_nm,
+				notice_div_nm,
+				imp_yn,		
+				num, 
+				tot_cnt
+			FROM
+			(
+				select 
+					b.brd_mng_no,
+					b.brd_no,
+					b.ttl,
+					b.reg_ddtm,
+					b.reg_emp_cd,
+					c.emp_nm,
+					d.cd_nm notice_div_nm,
+					ISNULL(b.imp_yn, 'N') imp_yn,
+					ROW_NUMBER() OVER(order by ISNULL(b.imp_yn,'N') desc, b.brd_no desc) num, 
+					count(*) over() tot_cnt
+				from tb_kabm_notice a
+					inner join tb_kabm_board b 
+						on a.brd_no = b.brd_no
+					inner join tb_kabm_emp c
+						on b.reg_emp_cd = c.emp_cd
+					inner join tb_kabm_code d
+						on a.notice_div = d.cd and d.div_cd = 'notice_div'
+				where GETDATE() between start_dt and end_dt
+				and b.del_yn ='N'
+				and $dynamic_sql
+			) a
+			WHERE num > (?-1) * ?
+		]]>
+		</query>
+		<mapping>
+			<setProperty>board_row_per_page, cur_pg, board_row_per_page</setProperty>
+			<getProperty>brd_mng_no,brd_no, ttl, reg_ddtm, emp_nm, notice_div_nm,imp_yn, num, tot_cnt</getProperty>
+			
+		</mapping>
+		</sql>
+		
+		<sql id="getSearchList">
+			<query>
+			   <![CDATA[			   
+			   SELECT TOP (?)
+					num, a.brd_nm, a.brd_no, a.ttl, 
+					a.emp_nm, CONVERT(varchar(10), a.reg_dt,120) AS reg_dt, 
+					a.grp_seq_no, a.grp_order, a.lvl, a.p_brd_no, a.reg_emp_cd,					
+				    tot_cnt,
+					 email,
+					 brd_mng_no,					 
+					 imp_yn,cntnt
+				FROM
+				(
+					SELECT  
+					    a.brd_mng_no,
+					    c.brd_nm,
+						a.brd_no, a.ttl, a.reg_emp_cd , b.emp_nm, b.email,
+						a.reg_ddtm reg_dt, a.grp_seq_no, a.grp_order, a.lvl, a.p_brd_no, 
+						ISNULL(imp_yn, 'N') imp_yn,cntnt,
+						ROW_NUMBER() OVER(order by ISNULL(a.imp_yn,'N') desc, a.reg_ddtm desc) num, 
+						count(*) over() tot_cnt
+					FROM tb_kabm_board a
+					, tb_kabm_emp b, tb_kabm_board_mngr c
+					WHERE a.reg_emp_cd = b.emp_cd
+					AND a.BRD_MNG_NO = c.BRD_MNG_NO
+					AND a.brd_mng_no in (8,9,10,17)
+					AND a.grp_seq_no > 0 
+					AND a.del_yn = 'N'
+					AND a.grp_order > 0						
+					AND ( a.ttl LIKE '%'+?+'%'
+							  OR
+						  a.cntnt LIKE '%'+?+'%'
+						 )	
+				) a
+				WHERE num > (? -1) * ?
+			    order by num;
+				]]>
+			</query>
+			<mapping>
+				<setProperty>row_per_page, search_word,search_word,board_cur_pg, row_per_page 
+							 </setProperty>
+				<getProperty>num, brd_nm, brd_no, ttl, emp_nm, reg_dt, grp_seq_no, grp_order, lvl, p_brd_no, 
+							 emp_no, tot_cnt, email,brd_mng_no, imp_yn,cntnt</getProperty>
+			</mapping>
+		</sql>
+		
+		</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='board_comment_page_cnt' type='int'	size='' />
+			<field name='list_view_count' type='int'	size='' />
+			<field name='brd_no' type='int'	size='' />
+			<field name='pre_page' type='int'	size='' />
+			<field name='p_brd_no' type='int'	size='' />
+			<field name='ins_brd_no' type='int'	size='' />
+			<field name='brd_mng_no' type='int'	size='' />
+			<field name='board_txt' type='string'	size='' />
+			<field name='rg_empl_no' type='string'	size='' />
+			<field name='board_title' type='string'	size='' />
+			<field name='grp_seq_no' type='string'	size='' />
+			<field name='grp_order' type='string'	size='' />
+			<field name='lvl' type='string'	size='' />
+			<field name='use_brd_no' type='int'	size='' />
+			<field name='use_cntnt' type='string'	size='' />
+			<field name='use_cmnt_no' type='int'	size='' />
+			<field name='use_emp_no' type='string'	size='' />
+			<field name='start_dt' type='string'	size='' />
+			<field name='end_dt' type='string'	size='' />
+			<field name='p_reg_nm' type='string'	size='' />
+			<field name='search_word' type='string'	size='' />
+			<field name='emp_no' type='string'	size='' />
+			<field name='answer_brd_no' type='string'	size='' />
+			<field name='answer_data_flag' type='string'	size='' />
+			<field name='answer_data_no' type='string'	size='' />
+			<field name='read_brd_no' type='string'	size='' />
+			<field name='read_data_flag' type='string'	size='' />
+			<field name='read_data_no' type='string'	size='' />
+			<field name='read_dept_infos' type='string'	size='' />
+			<field name='read_user_infos' type='string'	size='' />
+			<field name='read_group_infos' type='string'	size='' />
+			<field name='fall_dept_List' type='string'	size='' />
+			<field name='fall_user_List' type='string'	size='' />
+			<field name='fall_group_List' type='string'	size='' />
+			<field name='emp_nms' type='string'	size='' />
+			
+			<field name='pre_brd_no' type='string'	size='' />
+			<field name='next_brd_no' type='string'	size='' />
+			
+			<field name='cur_pg' type='int'	size='' />
+			<field name='board_row_per_page' type='int'	size='' />
+			<field name='board_cur_pg' type='int'	size='' />
+			<field name='row_per_page' type='int'	size='' />
+			
+			<field name='comment_yn' type='string'	size='' />
+			<field name='brd_div' type='string'	size='' />
+			<field name='cntnt' type='string'	size='' />
+			<field name='ttl' type='string'	size=''/>
+			<field name='user_id' type='string'	size=''/>
+			
+			
+			<field name='start_dt' type='string'	size=''/>
+			<field name='end_dt' type='string'	size=''/>
+			<field name='notice_div' type='string'	size=''/>
+			<field name='dynamic_sql' type='string'	size=''/>
+			
+			<field name='recruit_div' type='string'	size=''/>
+			<field name='career_yn' type='string'	size=''/>
+			<field name='job_title' type='string'	size=''/>
+			<field name='age' type='string'	size=''/> 
+			<field name='gender' type='string'	size=''/> 
+			<field name='sqlNoticeYn' type='string'	size=''/> 
+			<field name='imp_yn' type='string'	size='' />
+		</block>
+	</input>
+	
+	<output> 
+		
+		<block id="" name="" repeat="">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+			<field name='num' type='int'	size='' />
+			<field name='brd_no' type='int'	size=''/>
+			<field name='ttl' type='string'	size=''/>
+			<field name='emp_nm' type='string'	size=''/>
+			<field name='reg_dt' type='string'/>
+			<field name='grp_seq_no' type='int'/>
+			<field name='grp_order' type='int'/>
+			<field name='lvl' type='int'/>
+			<field name='p_brd_no' type='int'/>
+			<field name='emp_no' type='int'/>
+			<field name='comment_cnt' type='string'/>
+			<field name='read_count' type='string'/>
+			<field name='reg_man' type='string'	size=''/>
+			<field name='cntnt' type='string'	size=''/>
+			<field name='is_exist_file' type='string'	size=''/>
+			<field name='rpl_req_dd' type='string'	size=''/>
+			<field name='rpl_req_limit_dd' type='string'	size=''/>
+			<field name='child_cnt' type='int'	size=''/>
+			<field name='rnum' type='int'	size=''/>
+			<field name='last_page' type='int'	size=''/>
+			<field name='cmnt_no' type='int'	size=''/>
+			<field name='brd_mng_no' type='int'	size=''/>
+			<field name='brd_nm' type='string'	size=''/>
+			<field name='article_cnt' type='int'	size=''/>
+			<field name='read_auth_yn' type='string'	size='' />
+			<field name='rpl_auth_yn' type='string'	size=''/>
+			<field name='write_auth_yn' type='string'	size=''/>
+			<field name='data_gubun' type='string'	size='' />
+			<field name='data_flag' type='string'	size='' />
+			<field name='data_no' type='int'	size=''/>
+			<field name='data_nm' type='string'	size=''/>
+			<field name='fall_nm' type='string'	size='' />
+			<field name='read_auth_exist' type='string'	size='' />
+			<field name='answer_auth_exist' type='string'	size='' />
+			<field name='read_yn' type='string'/>
+			<field name='reg_dt' type='string'	size=''/>
+			<field name='emp_nm' type='string'	size=''/>
+			
+			<field name='pre_ttl' type='string'	size=''/>
+			<field name='pre_brd_no' type='string'	size=''/>
+			<field name='next_ttl' type='string'	size=''/>
+			<field name='next_brd_no' type='string'	size=''/>
+			<field name='rg_empl_no' type='string'	size='' />
+			
+			<field name='dept_nos' type='string'	size='' />
+			<field name='brd_div' type='string'	size='' />
+			<field name='brd_nm' type='string'	size='' />
+			<field name='fileupload_yn' type='string'	size='' />
+			<field name='comment_yn' type='string'	size='' />
+			<field name='notice_start_dt' type='string'	size='' />
+			<field name='notice_end_dt' type='string'	size='' />
+			<field name='notice_div' type='string'	size='' />
+			<field name='notice_ddtm' type='string'	size='' />
+			<field name='notice_emp_nm' type='string'	size='' />
+			<field name='notice_emp_cd' type='string'	size='' />
+			<field name='notice_div_nm' type='string'	size='' />
+			
+			<field name='read_cnt' type='string'	size='' />
+			<field name='email' type='string'	size='' />
+			<field name='file_no' type='string'	size='' />
+			
+			<field name='recruit_div' type='string'	size=''/>
+			<field name='career_yn' type='string'	size=''/>
+			<field name='job_title' type='string'	size=''/>
+			<field name='age' type='string'	size=''/>
+			<field name='user_nm' 			type='String'	size='' />
+			<field name='user_id' 			type='String'	size='' />
+			<field name='tel_no' 			type='String'	size='' />
+			<field name='age' 			type='String'	size='' />
+			
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+		</block>
+		
+		<block id='board_list' name='board_list' repeat='9999999'>
+			<field name='num' 			type='int'	size='' />
+			<field name='brd_no' 		type='int'	size='' properties="isUnique:true"/>
+			<field name='ttl' 			type='string'	size=''/>
+			<field name='emp_nm' 		type='string'	size=''/>
+			<field name='reg_dt' 		type='string'/>
+			<field name='grp_seq_no' 	type='int'/>
+			<field name='grp_order' 	type='int'/>
+			<field name='lvl' 			type='int'/>
+			<field name='p_brd_no' 		type='int'/>
+			<field name='emp_no' 		type='int'/>
+			<field name='read_count' 	type='string'/>
+			<field name='read_yn' 		type='string'/>
+			<field name='brd_div' 		type='string'	size='' />
+			<field name='brd_div_nm'    type='string'	size='' />
+			<field name='brd_nm' 		type='string'	size='' />
+			<field name='read_cnt' 		type='string'	size='' />
+			<field name='email' 		type='string'	size='' />
+			<field name='file_no' type='string'	size='' />
+			<field name='file_nm' type='string'	size='' />			
+			<field name='file_path' type='string'	size='' />
+			<field name='brd_mng_no' type='string'	size='' />
+			<field name='notice_start_dt' type='string'	size='' />
+			<field name='notice_end_dt' type='string'	size='' />
+			<field name='notice_div_nm' type='string'	size='' />
+			<field name='brd_mng_no' type='string'	size='' />
+			<field name='imp_yn' type='string'	size='' />
+			<field name='cntnt' type='string'	size='' />
+		</block>
+		
+		<block id='job_list' name='job_list' repeat='9999999'>
+			<field name='num' 			type='String'	size='' />
+			<field name='brd_nm' 			type='String'	size='' />
+			<field name='brd_no' 			type='String'	size='' />
+			<field name='ttl' 			type='String'	size='' />
+			<field name='job_title' 			type='String'	size='' />
+			<field name='user_nm' 			type='String'	size='' />
+			<field name='reg_dt' 			type='String'	size='' />
+			<field name='grp_seq_no' 			type='String'	size='' />
+			<field name='grp_order' 			type='String'	size='' />
+			<field name='lvl' 			type='String'	size='' />
+			<field name='p_brd_no' 			type='String'	size='' />
+			<field name='reg_emp_cd' 			type='String'	size='' />
+			<field name='recruit_div' 			type='String'	size='' />
+			<field name='career_yn' 			type='String'	size='' />
+			<field name='email' 			type='String'	size='' />
+			<field name='gender' 			type='String'	size='' />
+			<field name='brd_mng_no' 			type='String'	size='' />			
+		</block>
+		
+		
+		<block id='board_detail' name='board_detail' repeat='1'>
+			<field name='brd_no' type='String'	size=''/>
+			<field name='ttl' type='string'	size=''/>
+			<field name='cntnt' type='string'	size=''/>
+			<field name='is_exist_file' type='string'	size=''/>			
+			<field name='grp_seq_no' type='string'/>
+			<field name='grp_order' type='string'/>
+			<field name='lvl' type='string'/>
+			<field name='reg_dt' type='string'/>
+			<field name='emp_nm' type='string'/>
+			<field name='brd_div' type='string'	size='' />
+			<field name='brd_div_nm' type='string'	size='' />
+			<field name='brd_mng_no' type='string'	size='' />
+			<field name='view_type' type='string'	size='' />	
+			<field name='fileupload_yn' type='string'	size='' />	
+			<field name='notice_start_dt' type='string'	size='' />
+			<field name='notice_end_dt' type='string'	size='' />
+			<field name='notice_div' type='string'	size='' />
+			<field name='notice_ddtm' type='string'	size='' />
+			<field name='notice_emp_nm' type='string'	size='' />
+			<field name='read_cnt' type='string'	size='' />
+			<field name='email' type='string'	size='' />
+			<field name='imp_yn' type='string'	size='' />
+		</block>
+		
+		<block id='alltype_board_list' name='alltype_board_list' repeat='9999999'>
+			<field name='num' type='int'	size='' />
+			<field name='brd_no' type='int'	size='' properties="isUnique:true"/>
+			<field name='ttl' type='string'	size=''/>
+			<field name='reg_man' type='string'	size=''/>
+			<field name='reg_dt' type='string'/>
+			<field name='grp_seq_no' type='int'/>
+			<field name='grp_order' type='int'/>
+			<field name='lvl' type='int'/>
+			<field name='p_brd_no' type='int'/>
+			<field name='emp_no' type='int'/>
+			<field name='comment_cnt' type='string'/>
+		</block>
+		
+		<block id='board_info' name='board_info' repeat='9999999'>
+			<field name='brd_no' type='int'	size='' properties="isUnique:true"/>
+			<field name='ttl' type='string'	size=''/>
+			<field name='cntnt' type='string'	size=''/>
+			<field name='is_exist_file' type='string'	size=''/>
+			<field name='rpl_req_dd' type='string'	size=''/>
+			<field name='rpl_req_limit_dd' type='string'	size=''/>
+			<field name='emp_no' type='int'	size=''/>
+			<field name='grp_seq_no' type='string'	size=''/>
+			<field name='grp_order' type='string'	size=''/>
+			<field name='lvl' type='string'	size=''/>
+			<field name='pre_ttl' type='string'	size=''/>
+			<field name='pre_brd_no' type='string'	size=''/>
+			<field name='next_ttl' type='string'	size=''/>
+			<field name='next_brd_no' type='string'	size=''/>
+			<field name='reg_dt' type='string'	size=''/>
+			<field name='emp_nm' type='string'	size=''/>
+			<field name='start_dd' type='string'	size=''/>
+			<field name='end_dd' type='string'	size=''/>
+			<field name='emer_yn' type='string'	size=''/>
+			<field name='div_cd' type='string'	size=''/>
+			<field name='code_cd' type='string'	size=''/>
+			<field name='brd_div' type='string'	size='' />
+			<field name='brd_div_nm' type='string'	size='' />
+			<field name='read_cnt' type='string'	size='' />
+		</block>
+		
+		<block name='notice_list'>
+			<field name='brd_no' type='string'	size='' />
+			<field name='ttl' type='string'	size='' />
+			<field name='reg_ddtm' type='string'	size='' />
+			<field name='emp_nm' type='string'	size='' />
+			<field name='num' type='string'	size='' />
+			<field name='brd_div' type='string'	size='' />
+			<field name='notice_div_nm' type='string'	size='' />
+			<field name='brd_mng_no' type='string'	size='' />
+			<field name='imp_yn' type='string'	size='' />
+		</block>
+		
+		<block id='check_info' name='check_info' repeat='9999999'>
+			<field name='child_cnt' type='int'	size='' properties="isUnique:true"/>
+		</block>
+		
+		<block id='comment_info' name='comment_info' repeat='9999999'>
+			<field name='rnum' type='int'	size=''/>
+			<field name='last_page' type='int'	size=''/>
+			<field name='cmnt_no' type='int'	size='' properties="isUnique:true"/>
+			<field name='cntnt' type='string'	size=''/>
+			<field name='reg_dt' type='string'	size=''/>
+			<field name='user_nm' type='string'	size=''/>
+			<field name='user_id' type='string'	size=''/>
+		</block>
+		
+		<block id='getBoardMngr_list' name='getBoardMngr_list' repeat='9999999'>
+			<field name='brd_mng_no' type='int'	size='' properties="isUnique:true"/>
+			<field name='brd_nm' type='string'	size=''/>
+			<field name='article_cnt' type='int'	size=''/>
+		</block>
+		
+
+		
+		<block id='auth_info' name='auth_info' repeat='9999999'>
+			<field name='data_gubun' type='string'	size='' />
+			<field name='data_flag' type='string'	size='' />
+			<field name='data_no' type='int'	size=''/>
+			<field name='data_nm' type='string'	size=''/>
+		</block>
+		
+		<block id='fall_nm_info' name='fall_nm_info' repeat='9999999'>
+			<field name='fall_nm' type='string'	size='' />
+		</block>
+		
+		<block id='read_auth_exist' name='read_auth_exist' repeat='9999999'>
+			<field name='read_auth_exist' type='string'	size='' />
+		</block>
+		
+		<block id='answer_auth_exist' name='answer_auth_exist' repeat='9999999'>
+			<field name='answer_auth_exist' type='string'	size='' />
+		</block>
+		
+		<block id='none_read_emp_list' name='none_read_emp_list' repeat='9999999'>
+			<field name='login_id' type='string'	size='' />
+			<field name='emp_nm' type='string'	size='' />
+		</block>
+		
+		<block id='unread_board_list' name='unread_board_list' repeat='9999999'>
+			<field name='num' type='int'	size='' />
+			<field name='brd_no' type='int'	size='' properties="isUnique:true"/>
+			<field name='ttl' type='string'	size=''/>
+			<field name='emp_nm' type='string'	size=''/>
+			<field name='reg_dt' type='string'/>
+			<field name='grp_seq_no' type='int'/>
+			<field name='grp_order' type='int'/>
+			<field name='lvl' type='int'/>
+			<field name='p_brd_no' type='int'/>
+			<field name='emp_no' type='int'/>
+			<field name='comment_cnt' type='string'/>
+			<field name='read_count' type='string'/>
+			<field name='tot_cnt' type='string'/>
+		</block>
+
+	</output>
+	
+</transaction>

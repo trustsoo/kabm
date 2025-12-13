@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.xml.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.page import="com.kabm.filter.JDFContext" />
+	<jsp:directive.page import="jdf.framework.core.data.ResourceException" />
+	<jsp:directive.page import="jdf.framework.view.auth.PermissionException" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	
+	protected String getDefaultMethodName()
+	{
+		return "doLogin"; 
+	}
+	
+	
+	public void doLogin(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet output2 = new DataSet();
+		bind(req, input);
+		
+		User session_user = null;
+		User user = null;
+
+		String flag = null;
+		String message = null;
+		try
+		{
+			session_user = new User();
+			user = new com.kabm.filter.auth.DbmsAuthCheckerUser();
+			user.logout(req, resp);
+			user.login(req, resp);
+			session_user = (User)(new SessionAttributes(req) ).getAttribute(User.SESSION_KEY);
+			
+			String close_yn = "N";
+			String tmp_pass_yn = "N";
+			String user_nm = "";
+			String corp_nm = "";
+			String corp_addr = "";
+			if( session_user != null)
+			{
+				input.put("user_seq_no", session_user.getUser_seq_no());
+				input.put("cmd", "GET_PROCESS_STATUS");
+				output = interact.execute("/edu/EstimateMgr", input);
+				
+				close_yn = session_user.getDataSet().getText("close_yn");
+				tmp_pass_yn = session_user.getDataSet().getText("tmp_pass_yn");
+				user_nm = session_user.getName();
+				corp_nm = session_user.getDataSet().getText("corp_nm");
+				corp_addr = session_user.getDataSet().getText("corp_addr");
+				corp_nm = replaceCDATA2(corp_nm);
+				corp_addr = replaceCDATA2(corp_addr);
+				
+			}
+			flag ="success";
+
+			String url = input.getText("url");
+			if(url.equals(req.getContentType() + "/index.jsp"))
+			{
+				url = "";
+			}
+			String data = "<info><url>"+url+"</url><status>"+output.getText("status")+"</status><end_yn>"+output.getText("end_yn")+"</end_yn><close_yn>"+close_yn+"</close_yn><tmp_pass_yn>"+tmp_pass_yn+"</tmp_pass_yn><user_nm>"+user_nm+"</user_nm><corp_nm>"+corp_nm+"</corp_nm><corp_addr>"+corp_addr+"</corp_addr></info>";
+			String result = getXMLFormat( data );
+			responseXML(result, resp);
+
+		} catch(PermissionException pex)
+		{
+			if(pex.getPermissionCode() == -1)	//권한없음.
+			{
+				flag = "fail";
+				message ="권한이 없습니다.";
+			} else if(pex.getPermissionCode() == -2)	//등록되지 않음.
+			{
+				flag = "fail";
+				message ="등록된 사용자가 아니거나 비밀번호가 올바르지 않습니다.";
+			}
+			Logger.warn.println(Utility.getStackTrace(pex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, message, ""), resp);
+			
+		} catch(Exception ex)
+		{
+			if(ex instanceof ResourceException)
+			{
+				ResourceException sqlex = (ResourceException)ex;
+				message = "입력한 정보가 올바르지 않습니다.";
+
+				if(sqlex.getErrorCode() == 20409)
+					message = "비밀번호 오류입니다.";
+			} else
+			{
+				message = "로그인 실패";
+			}
+			flag = "fail";
+			
+			Logger.warn.println(Utility.getStackTrace(ex));
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, message, ""), resp);
+
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

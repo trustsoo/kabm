@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='statistics_page' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+        <property name="sqlLogMode" value="bind"/>
+        <property name="isPrint" value="Y"/>
+       
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="1">
+            <query>
+                <![CDATA[
+                   select menu_id , menu_nm, total_cnt from 
+                   (    
+                       select 
+                            A.menu_id,         
+                            max(B.menu_nm) as menu_nm,               
+                            sum(A.pv) as total_cnt
+                        from 
+                            tb_kabm_stat_menu A
+                            LEFT OUTER JOIN tb_kabm_menu B ON A.menu_id = B.menu_id 
+                        where yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) >= ? and  
+                              yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) <= ?
+                        group by A.menu_id
+                    ) a
+					order by a.total_cnt desc
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>in_ddtm_from , in_ddtm_to</setProperty>
+                <getProperty>menu_id, menu_nm, total_cnt</getProperty>
+            </mapping>
+        </sql>
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">   
+            <field name='in_ddtm_from' type='string'    size=''/>
+            <field name='in_ddtm_to' type='string'    size=''/>
+        </block>
+    </input>
+    
+    <output>
+       <block id='statics_list' name='statics_list'     repeat=''>
+            <field name='menu_id'      type='string' size=''/>
+            <field name='menu_nm'     type='string' size=''/>
+            <field name='total_cnt'     type='string' size=''/>
+        </block> 
+    </output>
+    
+</transaction>

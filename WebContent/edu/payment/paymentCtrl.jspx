@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[   
+
+/******************************************************************************** 
+ * Program ID		: 결제
+ * FileName		    : paymentCtrl.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/edu/payment/";
+	
+	private static final String JSP_BILL = "_bill";
+	private static final String JSP_PAY = "_pay";
+	private static final String JSP_PAYMENT = "_payment";
+	
+	private static final String JSP_PAYMENT_LIST=JSP_BASE+JSP_PAYMENT+"_list.jsp";
+	
+	private static final String JSP_OFFLINE_LIST=JSP_BASE+JSP_PAYMENT+"_offline.jsp";
+	
+	private static final String JSP_BILL_VIEW=JSP_BASE+JSP_BILL+"_view.jsp";
+	
+	private static final String JSP_BILL_WRITE=JSP_BASE+JSP_BILL+"_write.jsp";
+	
+	private static final String JSP_PAY_MEM_DELIVERY=JSP_BASE+JSP_PAY+"_delivery.jsp";
+	private static final String JSP_PAY_MEM_DELIVERY_MODIFY=JSP_BASE+JSP_PAY+"_delivery_modify.jsp";
+	
+	private static final String JSP_PAY_REQ_CROSS=JSP_BASE+JSP_PAY+"_req_crossplatform.jsp";
+	private static final String JSP_PAY_REQ_CERT=JSP_BASE+JSP_PAY+"_certKey.jsp";
+	private static final String JSP_PAY_REQ=JSP_BASE+JSP_PAY+"_req.jsp";
+	private static final String JSP_PAY_RES=JSP_BASE+JSP_PAY+"_res.jsp";
+	private static final String JSP_PAY_CANCEL=JSP_BASE+JSP_PAY+"_cancel.jsp";
+	private static final String JSP_PAY_RESULT=JSP_BASE+JSP_PAY+"_result.jsp";
+	private static final String JSP_PAY_CASH_PAY=JSP_BASE+JSP_PAY+"_cash_pay.jsp";
+	
+	
+	public void viewPaymentList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		boolean isMobile = isMobile(req);
+		if( isMobile ) resp.sendRedirect("/mobile/edu/payment/paymentCtrl.jspx?cmd=viewPaymentList");
+		else{
+			try
+			{	
+				User session_user = getUserObject(req, resp);
+				DataSet s_userData = session_user.getDataSet();
+				input.put("s_user_ip", session_user.getIp());			
+				input.put("s_emp_no", session_user.getId());
+				input.put("s_emp_name", session_user.getName());						
+				input.put("s_email", session_user.getEmail());
+				input.put("s_user_seq_no", session_user.getUser_seq_no());
+				
+				if( "".equals(input.getText("page_no")))
+					input.put("page_no" , "1");
+				
+				
+				input.put("user_id", session_user.getId());
+				input.put("cmd", "MEM_INFO");			
+				DataSet output = interact.execute( "/member/MemberMgr" , input);
+				
+				req.setAttribute("output", output);
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_PAYMENT_LIST);
+				
+			} catch(Exception ex)
+			{	
+				Logger.warn.println(Utility.getStackTrace(ex));	
+			}
+		}	
+	}
+			
+	public void viewPaymentOffline(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			User session_user = getUserObject(req, resp);
+			DataSet s_userData = session_user.getDataSet();
+			input.put("s_user_ip", session_user.getIp());			
+			input.put("s_emp_no", session_user.getId());
+			input.put("s_emp_name", session_user.getName());						
+			input.put("s_email", session_user.getEmail());
+			input.put("s_user_seq_no", session_user.getUser_seq_no());
+			
+			if( "".equals(input.getText("page_no")))
+				input.put("page_no" , "1");
+			
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_OFFLINE_LIST);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void paymentDelivery(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			jdf.framework.view.auth.User session_user = getUserObject(req , resp);
+			String user_id = "";
+			if(session_user != null )user_id = session_user.getId();
+			
+			input.put("user_id", user_id);
+			input.put("cmd", "MEM_INFO");			
+			output = interact.execute( "/member/MemberMgr" , input);
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			String mod_yn  = input.getText("mod_yn");
+			
+			if( mod_yn != null && "Y".equals(mod_yn))
+				view.setViewPage(JSP_PAY_MEM_DELIVERY_MODIFY);
+			else
+				view.setViewPage(JSP_PAY_MEM_DELIVERY);
+				
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+
+	public void paymentReq(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			//view.setViewPage(JSP_PAY_REQ);
+			view.setViewPage(JSP_PAY_REQ_CROSS);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void paymentCertKey(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_REQ_CERT);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+
+	public void paymentRes(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_RES);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void paymentCancel(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_CANCEL);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void paymentResult(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_RESULT);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void paymentCash(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_CASH_PAY);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+
+	public void viewBill(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			input.put("cmd", "GET_PAYMENT_INFO");
+			executeBL( "/payment/PaymentMgr" , input,output);
+			String issue_dt = output.getText("issue_dt");
+			String[] issue_arr = issue_dt.split("-");
+			System.out.println( issue_dt+ ":" +issue_arr.length );
+			if( issue_arr.length == 3)
+			{
+				output.put("issue_yyyy", issue_arr[0]);
+				output.put("issue_mm", issue_arr[1]);
+				output.put("issue_dd", issue_arr[2]);
+			}
+			output.put("fmtPrice" , stramt(output.getText("lgd_amount")));
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_BILL_VIEW);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void writeBill(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			User session_user = getUserObject(req, resp);
+			
+			input.put("user_seq_no", session_user.getUser_seq_no() );
+			input.put("cmd", "GET_BANKING_INFO");
+			executeBL( "/payment/BankingMgr" , input,output);
+			
+			int cnt = output.getCount("user_seq_no");
+			String mode = "C";
+			if( cnt > 0 ) mode = "U";
+			input.put("mode", mode);
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_BILL_WRITE);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public String stramt(String amt)
+	{
+		String tmpamt ="";
+		amt = "000000000000" + amt;
+		int j=0;
+		for(int i=amt.length();i>0;i--) {
+			j++;
+			if (!amt.substring(i-1,i).equals("0")) {
+			if (j%4==2) tmpamt ="십"+tmpamt;
+			if (j%4==3) tmpamt ="백"+tmpamt;
+			if (j>1 && (j%4)==0) tmpamt ="천"+tmpamt;
+			}
+			if (j==5 && Integer.parseInt(amt.substring(amt.length()-8,amt.length()-4))>0) tmpamt ="만"+tmpamt;
+			if (j==9 && Integer.parseInt(amt.substring(amt.length()-12,amt.length()-8))>0) tmpamt ="억"+tmpamt;
+			if (j==13 && Integer.parseInt(amt.substring(amt.length()-16,amt.length()-12))>0) tmpamt ="조"+tmpamt;
+			if (amt.substring(i-1,i).equals("1")) tmpamt ="일"+tmpamt;
+			if (amt.substring(i-1,i).equals("2")) tmpamt ="이"+tmpamt;
+			if (amt.substring(i-1,i).equals("3")) tmpamt ="삼"+tmpamt;
+			if (amt.substring(i-1,i).equals("4")) tmpamt ="사"+tmpamt;
+			if (amt.substring(i-1,i).equals("5")) tmpamt ="오"+tmpamt;
+			if (amt.substring(i-1,i).equals("6")) tmpamt ="육"+tmpamt;
+			if (amt.substring(i-1,i).equals("7")) tmpamt ="칠"+tmpamt;
+			if (amt.substring(i-1,i).equals("8")) tmpamt ="팔"+tmpamt;
+			if (amt.substring(i-1,i).equals("9")) tmpamt ="구"+tmpamt;
+		}
+	
+		return tmpamt;
+	}
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="jdf.framework.core.io.FormatedEntity" />
+
+		
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	         
+public void getLogList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{	
+			req.setAttribute("templet-bypass", "true");
+			
+			input.put("cmpny_no", getUserObject(req, resp).getDataSet().getText("cmpny_no"));
+			
+			if("".equals(input.getText("page_key"))) input.put("page_key", "0");
+			if("".equals(input.getText("row_per_page"))) input.put("row_per_page", "10");
+			
+			String log_mode = input.getText("log_mode");
+			if("E".equals(log_mode)) log_mode = "<" + log_mode + ">";
+			if("W".equals(log_mode)) log_mode = "<" + log_mode + ">"; 
+			if("I".equals(log_mode)) log_mode = "<" + log_mode + ">"; 
+			if("D".equals(log_mode)) log_mode = "<" + log_mode + ">"; 
+			if("U".equals(log_mode)) log_mode = "<" + log_mode + ">"; 
+			if("S".equals(log_mode)) log_mode = "<" + log_mode + ">"; 
+			if("P".equals(log_mode)) log_mode = "<" + log_mode + ">"; 
+			if("batch".equals(log_mode)) log_mode = "[" + log_mode + "]"; 
+			
+			input.put("start_dd", input.getText("start_dd"));
+ 			input.put("end_dd", input.getText("end_dd"));
+			input.put("server_alias", input.getText("server_alias"));
+ 			input.put("log_mode", log_mode);
+			
+			String[] blockNames = new String[]{};
+				
+	 		input.put("cmd", "getLogList");
+	 		log(">>>>>>>>>>>>>>>>>>>>>input>>>>>>>>>>>"+input);
+	 		
+	 		output = interact.execute("/common/Log", input);	
+	 		
+	 		//log(">>>>>>>>>>>>>>>>>>>>>output>>>>>>>>>>>"+output);
+	 		
+	 		blockNames = new String[]{"get_log_list", "property"};
+				
+	 		output.put(jdf.framework.logic.transform.TransFormConstant.PAGE_KEY, input.getText("page_key"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			//output.put(jdf.framework.logic.transform.TransFormConstant.TOT_CNT, output.getMaxDataSize()+"");
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "jqgrid");
+ 			String result = getJson(output, blockNames);
+ 			
+ 			
+ 			responseJson(result, resp);
+				
+			} catch(Exception ex)
+			{			
+				responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+
+		//로그 삭제.
+		public void delLog(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception 
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			bind(req, input);
+				
+			req.setAttribute("templet-bypass", "true");
+			
+			try {			
+				input.put("cmd", "delLog");
+				log(">>>>>>>>>>>>>>input>>>>>>>>>>>>"+input);
+				output = interact.execute("/common/Log", input);
+				log(">>>>>>>>>>>>>>output>>>>>>>>>>>>"+output);
+				
+				String result = getXMLFormat("");
+				responseXML(result, resp);
+			} catch (Exception ex) {
+				responseXML(
+						getXMLFormat(
+								HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+								ex.getMessage(), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+	
+		
+        
+public void getAdminLogList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();     
+        bind(req, input);
+        try
+        {   
+            req.setAttribute("templet-bypass", "true");
+            
+            input.put("cmpny_no", getUserObject(req, resp).getDataSet().getText("cmpny_no"));
+            
+            if("".equals(input.getText("page_key"))) input.put("page_key", "0");
+            if("".equals(input.getText("row_per_page"))) input.put("row_per_page", "10");
+            
+            
+            input.put("cmd", "getAdminLogList");
+            output = interact.execute("/common/AdminLog", input);    
+            
+            //log(">>>>>>>>>>>>>>>>>>>>>output>>>>>>>>>>>"+output);
+            
+            String[] blockNames = new String[]{"get_log_list", "property"};
+                
+            output.put(jdf.framework.logic.transform.TransFormConstant.PAGE_KEY, input.getText("page_key"));
+            output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+            
+            output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "jqgrid");
+            String result = getJson(output, blockNames);
+            
+            
+            responseJson(result, resp);
+                
+            } catch(Exception ex)
+            {           
+                responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+                Logger.err.print(Utility.getStackTrace(ex));
+            }
+        }		
+        
+public void getAdminLogDetail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+    {
+        DataSet input = new DataSet();
+        DataSet output = new DataSet();     
+        bind(req, input);
+        try
+        {   
+            req.setAttribute("templet-bypass", "true");
+            input.put("cmd", "getAdminLogInputValue");
+            output = interact.execute("/common/AdminLog", input);    
+            String data = output.getText("input_val");
+            data = java.net.URLEncoder.encode(data, "utf8");
+            
+            //log("@@@@@ data -"+data);
+            data = getXMLFormat(data);
+            responseXML(data, resp);
+        } catch(Exception ex)
+        {
+            responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+            Logger.err.print(Utility.getStackTrace(ex));
+        }
+    }		
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

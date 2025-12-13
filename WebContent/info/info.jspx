@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	         
+	    private final String INFO_CENTER = "/info/_center.jsp";     
+	    private final String INFO_CALC = "/info/_calc.jsp";      
+	    private final String INFO_MEMBER = "/info/_member_list.jsp";
+	    private final String INFO_DUES = "/info/_dues_list.jsp";
+	    private final String INFO_MANAGE = "/info/_manage_list.jsp";
+	    private final String INFO_INTRO = "/info/_member_info.jsp";
+	    	    
+	    public void center(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				req.setAttribute("input", input);
+				view.setViewPage(INFO_CENTER);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void calc(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				req.setAttribute("input", input);
+				view.setViewPage(INFO_CALC);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void member(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				req.setAttribute("input", input);
+
+				output = interact.execute("/common/jiinfo_all", input);		
+			
+
+
+				req.setAttribute("output_count" ,  output.getCount("jicode") - 1);
+				req.setAttribute("output" 		,  output.toList());
+
+				view.setViewPage(INFO_MEMBER);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void dues(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				User session_user = getUserObject(req, resp);
+				DataSet s_userData = session_user.getDataSet();
+				input.put("cp_code", s_userData.getText("cp_code") );
+				input.put("ill_no", s_userData.getText("ill_no") );
+				
+				input.put("cp_code","6010");
+				input.put("ill_no", "000001-001" );
+				
+				
+				req.setAttribute("input", input);
+				req.setAttribute("output" ,  output);
+
+				view.setViewPage(INFO_DUES);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void manage(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				req.setAttribute("input", input);
+				view.setViewPage(INFO_MANAGE);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void intro(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				req.setAttribute("input", input);
+				view.setViewPage(INFO_INTRO);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	]]>
+	</jsp:declaration>
+</jsp:root>

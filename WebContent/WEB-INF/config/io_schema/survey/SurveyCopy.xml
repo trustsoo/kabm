@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='SurveyCopy' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<property name="sqlLogMode" value="bind"/>
+		<script language="java" import="java.util.*,
+							java.util.regex.Pattern">
+			<![CDATA[
+		
+		java.util.UUID uuid = java.util.UUID.randomUUID();
+		long l = java.nio.ByteBuffer.wrap(uuid.toString().getBytes()).getLong();
+		String new_paper_id = Long.toString(l, Character.MAX_RADIX);
+		input.put("new_paper_id", new_paper_id);
+		
+		executeSQL("insertPaper", connection, input, output);
+		executeSQL("insertQstn", connection, input, output);
+		executeSQL("insertQstnExmp", connection, input, output);
+		
+		
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="insertPaper">
+			<query>
+				<![CDATA[
+				INSERT INTO tb_survey_paper
+				(paper_id, paper_title, qstn_cnt, qstn_add_seq, reg_dt)				
+				select 
+					? paper_id, ('복사 - '+paper_title) paper_title, 
+					qstn_cnt, qstn_add_seq, getdate()
+				from tb_survey_paper
+				where paper_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>new_paper_id,paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="insertQstn">
+			<query>
+				<![CDATA[
+				INSERT	INTO   tb_survey_qstn (
+					qstn_no, paper_id, qstn_answ, answ_type, answ_cnt,
+					exmp_add_seq, multi_yn, multi_cnt, connect_yn, qstn_ord
+				) 
+				select 
+					REPLACE(qstn_no, ?, ? ) AS qstn_no, ? as paper_id, qstn_answ, answ_type, answ_cnt,
+					exmp_add_seq, multi_yn, multi_cnt, connect_yn, qstn_ord
+				from tb_survey_qstn
+				where paper_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id,new_paper_id,new_paper_id,paper_id
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="insertQstnExmp">
+			<query>
+				<![CDATA[
+				INSERT INTO tb_survey_qstn_exmp
+				(exmp_seq_no, exmp_sort_no, qstn_no, exmp_word, connect_qstn_no)
+				select 
+					REPLACE(exmp_seq_no, ?, ?) as exmp_seq_no, exmp_sort_no, 
+					REPLACE(qstn_no, ?, ?) as qstn_no, exmp_word, 
+					REPLACE(connect_qstn_no, ?, ?) as connect_qstn_no
+				from tb_survey_qstn_exmp
+				where qstn_no like ( ? + '_' + '%')
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id,new_paper_id,paper_id,new_paper_id,paper_id,new_paper_id,paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		 
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='paper_id' type='String' size=''/>
+			<field name='reg_emp_no' type='int' size=''/>
+			<field name='new_paper_id' type='String' size=''/>
+		</block>
+	</input>
+	
+	
+	<output>
+		<block name="arg">
+					
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+		</block>
+				
+	</output>
+</transaction>

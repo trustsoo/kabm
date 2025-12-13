@@ -1,0 +1,257 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='FAQ' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>		
+		
+		<script language="java" import="jdf.framework.core.log.Logger,
+										jdf.framework.core.util.*">
+		<![CDATA[
+			String cmd = input.getText("cmd");	
+			
+			String dynamic_sql = "";
+			if("list".equals(cmd))
+			{
+				String start_dt = input.getText("start_dt");
+				String end_dt = input.getText("end_dt");
+				if(!"".equals(start_dt) && !"".equals(end_dt) )
+				{
+					dynamic_sql = " a.reg_ddtm between CONVERT(DATETIME, '"+start_dt+"'+' 00:00:00') AND CONVERT(DATETIME, '"+end_dt+"'+' 23:59:59') ";
+					
+				} else
+				{
+					dynamic_sql = " 0 = 0 ";
+				}
+				input.put("dynamic_sql", dynamic_sql);
+				executeSQL(cmd, connection, input, output);
+			} else {
+				executeSQL(cmd, connection, input, output);
+			}
+		]]>	
+		</script>
+		
+		<transaction-type>rollback</transaction-type>	
+		
+		<sql id="create">
+			<query>
+			   <![CDATA[
+				INSERT INTO tb_kabm_faq
+				(category_cd, use_yn, question,answer,reg_ddtm, reg_emp_cd)
+				VALUES
+				(?, ?, ?, ?,getdate(),?)	
+				]]>
+			</query>
+			<mapping>
+				<setProperty>category_cd, use_yn, question,answer, reg_emp_cd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="update">
+			<query>
+			   <![CDATA[
+				UPDATE tb_kabm_faq SET
+					category_cd = ?,
+					use_yn = ?, 
+					question = ?,
+					answer = ?
+				WHERE faq_no = ?
+				
+				]]>
+			</query>
+			<mapping>
+				<setProperty>category_cd, use_yn, question,answer,faq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="drop">
+			<query>
+			   <![CDATA[
+				DELETE FROM tb_kabm_faq WHERE faq_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>faq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="detail">
+			<query>
+			   <![CDATA[
+				SELECT
+					 a.faq_no,a.category_cd, a.use_yn, a.question, a.answer, CONVERT(varchar(10), a.reg_ddtm,120) reg_ddtm, a.reg_emp_cd, d.emp_nm emp_nm
+				FROM tb_kabm_faq a
+					LEFT OUTER JOIN tb_kabm_emp d
+							ON a.reg_emp_cd = d.emp_cd
+				WHERE a.faq_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>faq_no</setProperty>
+				<getProperty>faq_no,category_cd, use_yn, question,answer,reg_ddtm, reg_emp_cd, emp_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="list">
+			<query>
+			   <![CDATA[
+			   	SELECT TOP (?)
+			   		 faq_no, category_cd, category_nm, use_yn, question, answer,  CONVERT(varchar(10), reg_ddtm,120) reg_ddtm, reg_emp_cd, emp_nm,
+					 num, tot_cnt
+			   	FROM
+			   	(
+					SELECT
+						 a.faq_no, a.category_cd, b.cd_nm category_nm, a.use_yn, a.question, a.answer, a.reg_ddtm, a.reg_emp_cd, d.emp_nm emp_nm,
+						 ROW_NUMBER() OVER(order by a.reg_ddtm desc) num, 
+						 count(*) over() tot_cnt
+					FROM tb_kabm_faq a
+						LEFT OUTER JOIN tb_kabm_emp d
+								ON a.reg_emp_cd = d.emp_cd
+						LEFT OUTER JOIN tb_kabm_code b
+								ON a.category_cd = b.cd and b.div_cd = 'faq_category'
+					WHERE $dynamic_sql
+					AND (CASE ?
+								WHEN '' THEN '0'
+								ELSE a.category_cd
+						END		
+						=
+						CASE ?
+							WHEN '' THEN '0'
+							ELSE ?
+						END
+						)
+					 AND (CASE ?
+								WHEN '' THEN '0'
+								ELSE a.use_yn
+						END		
+						=
+						CASE ?
+							WHEN '' THEN '0'
+							ELSE ?
+						END
+						)
+					) x
+					WHERE num > (? -1) * ? 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>board_row_per_page, category_cd,category_cd,category_cd,
+							use_yn,use_yn,use_yn, cur_pg, board_row_per_page </setProperty>
+				<getProperty>faq_no, category_cd, category_nm, use_yn, question, answer, reg_ddtm, reg_emp_cd, emp_nm,
+					 num, tot_cnt</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getSearchList">
+			<query>
+			   <![CDATA[
+			   	SELECT TOP (?)
+			   		 faq_no, category_cd, category_nm, use_yn, question, answer,  CONVERT(varchar(10), reg_ddtm,120) reg_ddtm, reg_emp_cd, emp_nm,
+					 num, tot_cnt
+			   	FROM
+			   	(
+					SELECT
+						 a.faq_no, a.category_cd, b.cd_nm category_nm, a.use_yn, a.question, a.answer, a.reg_ddtm, a.reg_emp_cd, d.emp_nm emp_nm,
+						 ROW_NUMBER() OVER(order by a.reg_ddtm desc) num, 
+						 count(*) over() tot_cnt
+					FROM tb_kabm_faq a
+						LEFT OUTER JOIN tb_kabm_emp d
+								ON a.reg_emp_cd = d.emp_cd
+						LEFT OUTER JOIN tb_kabm_code b
+								ON a.category_cd = b.cd and b.div_cd = 'faq_category'
+					WHERE a.use_yn = 'Y'
+					AND ( a.question LIKE '%'+?+'%'
+							  OR
+						  a.answer LIKE '%'+?+'%'
+						 )
+				) x		 
+				WHERE num > (? -1) * ? 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>row_per_page, search_word, search_word, faq_cur_pg, row_per_page </setProperty>
+				<getProperty>faq_no, category_cd, category_nm, use_yn, question, answer, reg_ddtm, reg_emp_cd, emp_nm,
+					 num, tot_cnt</getProperty>
+			</mapping>
+		</sql>
+		
+		
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='board_row_per_page' type='int'	size='' />			
+			<field name='start_dt' type='string'	size=''/>
+			<field name='end_dt' type='string'	size=''/>
+			<field name='category_cd' type='string'	size=''/>
+			<field name='use_yn' type='string'	size=''/>
+			<field name='question' type='string'	size=''/>
+			<field name='answer' type='string'	size=''/>
+			<field name='reg_emp_cd' type='string'	size=''/>
+			<field name='faq_no' type='int'	size=''/>
+			<field name='cur_pg' type='int'	size=''/>
+			<field name='dynamic_sql' type='string'	size=''/>
+			
+			<field name='faq_cur_pg' type='int'	size='' />
+			<field name='row_per_page' type='int'	size='' />
+			<field name='search_word' type='string'	size='' />
+		</block>
+	</input>
+	
+	<output>
+		<block name="" repeat="">
+			<field name='board_row_per_page' type='int'	size='' />			
+			<field name='start_dt' type='string'	size=''/>
+			<field name='end_dt' type='string'	size=''/>
+			<field name='category_cd' type='string'	size=''/>
+			<field name='use_yn' type='string'	size=''/>
+			<field name='question' type='string'	size=''/>
+			<field name='answer' type='string'	size=''/>
+			<field name='reg_emp_cd' type='string'	size=''/>
+			<field name='category_nm' type='string'	size=''/>
+			<field name='emp_nm' type='string'	size=''/>
+			<field name='reg_ddtm' type='string'	size=''/>
+			<field name='num' type='string'	size=''/>
+			<field name='tot_cnt' type='string'	size=''/>
+			<field name='faq_no' type='int'	size=''/>
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+		</block>
+		
+		
+		<block name="list" repeat="">
+			<field name='faq_no' type='int'	size=''/>
+			<field name='category_nm' type='string'	size=''/>
+			<field name='category_cd' type='string'	size=''/>
+			<field name='use_yn' type='string'	size=''/>
+			<field name='question' type='string'	size=''/>
+			<field name='answer' type='string'	size=''/>
+			<field name='reg_emp_cd' type='string'	size=''/>
+			<field name='num' type='string'	size=''/>			
+			<field name='reg_ddtm' type='string'	size=''/>
+			<field name='emp_nm' type='string'	size=''/>
+			
+		</block>
+		<block name="detail" repeat="">
+			<field name='faq_no' type='int'	size=''/>
+			<field name='category_nm' type='string'	size=''/>
+			<field name='category_cd' type='string'	size=''/>
+			<field name='use_yn' type='string'	size=''/>
+			<field name='question' type='string'	size=''/>
+			<field name='answer' type='string'	size=''/>
+			<field name='reg_emp_cd' type='string'	size=''/>
+			<field name='num' type='string'	size=''/>			
+			<field name='reg_ddtm' type='string'	size=''/>
+			<field name='emp_nm' type='string'	size=''/>
+			
+		</block>
+	</output>
+</transaction>

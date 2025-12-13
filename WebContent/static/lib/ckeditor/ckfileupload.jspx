@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+
+	
+
+
+	<jsp:declaration><![CDATA[//
+
+
+	public void fileupload(HttpServletRequest req, HttpServletResponse res, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+	{	
+		res.setCharacterEncoding("UTF-8");
+		res.setContentType("text/html; charset=UTF-8");
+		res.setHeader("Cache-Control", "no-cache");
+		PrintWriter out = res.getWriter();
+		
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+
+		
+		bind(req, input);
+
+
+		String path = "/static/com/img/folder.png";  //임시
+	        
+        String callback = req.getParameter("CKEditorFuncNum");
+
+        out.println("<script type=\"text/javascript\">");
+        out.println("window.parent.CKEDITOR.tools.callFunction(" + callback   + ",'" + path + "',''" + ")");
+        out.println("</script>");
+        out.flush();
+        out.close();
+        
+
+	
+		/*
+        Date today = new Date();
+
+        System.out.println(input.getText("vc_bid")+":"+ today);
+
+        MultipartAttributes attr = (MultipartAttributes) view.getHttpAttributes(new MemoryBasedMultipartProcessor());
+        try{
+	        String upload_dir = getUploadDir(input.getText("vc_bid"), today);
+	        System.out.println(attr);
+	        System.out.println("!)");
+	        DataSet output = getAttachObject(attr, upload_dir, "upload", 0);
+	        System.out.println("!)");
+	        String path = "/main/common/common_file/fileView.cmd?category=1&file="+output.getText("vc_fname")+"&store="+output.getText("vc_sname")+"&dir="+upload_dir+"&getFD=1";
+	        
+	        String callback = req.getParameter("CKEditorFuncNum");
+	        out.println("<script type=\"text/javascript\">");
+	        out.println("window.parent.CKEDITOR.tools.callFunction(" + callback   + ",'" + path + "',''" + ")");
+	        out.println("</script>");
+	        out.flush();
+	        out.close();
+	        return;
+        }catch(Exception e){
+        	e.printStackTrace();
+        }
+        */
+       
+	}
+	
+	//]]></jsp:declaration>
+</jsp:root>

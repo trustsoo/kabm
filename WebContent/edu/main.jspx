@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	         
+	    private final String MYPAGE = "/edu/_mypage.jsp";     
+	    
+	    protected String getDefaultMethodName()
+		{
+			return "mypage"; 
+		}
+	    public void mypage(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				
+				input.put("cmd", "GET_LECTURE_CODE_LIST");			
+				output = interact.execute( "/edu/LectureMgr" , input);
+				String new_start = "";
+				String new_end = "";
+				String old_start = "";
+				String old_end = "";
+				String new_req = "N";
+				String old_req = "N";
+				String new_std_yyyy = "";
+				String old_std_yyyy = "";
+				String new_lecture_seq_no = "";
+				String old_lecture_seq_no = "";
+				if( output.getCount("lecture_seq_no") == 2)
+				{
+					new_std_yyyy = output.getText("std_yyyy",0);
+					old_std_yyyy = output.getText("std_yyyy",1);
+					
+					new_lecture_seq_no = output.getText("lecture_seq_no",0);
+					old_lecture_seq_no = output.getText("lecture_seq_no",1);
+					
+					new_start = DateTime.trans( output.getText("start_dd",0) , "yyyyMMdd", "yyyy년 MM월 dd일");
+					new_end = DateTime.trans( output.getText("end_dd",0) , "yyyyMMdd", "yyyy년 MM월 dd일");
+					old_start = DateTime.trans( output.getText("start_dd",1) , "yyyyMMdd", "yyyy년 MM월 dd일");
+					old_end = DateTime.trans( output.getText("end_dd",1) , "yyyyMMdd", "yyyy년 MM월 dd일");
+					
+					int int_new_start = Integer.parseInt( output.getText("start_dd",0));
+					int int_new_end = Integer.parseInt( output.getText("end_dd",0));
+					int int_old_start = Integer.parseInt( output.getText("start_dd",1));
+					int int_old_end = Integer.parseInt( output.getText("end_dd",1));
+					int int_cur_day = Integer.parseInt(DateTime.getFormatString("yyyyMMdd")); 
+					if( int_new_start <= int_cur_day &&  int_new_end >= int_cur_day)
+						new_req = "Y";
+					if( int_old_start <= int_cur_day &&  int_old_end >= int_cur_day)
+						old_req = "Y";
+				}
+				req.setAttribute("new_std_yyyy", new_std_yyyy);
+				req.setAttribute("old_std_yyyy", old_std_yyyy);
+				req.setAttribute("new_lecture_seq_no", new_lecture_seq_no);
+				req.setAttribute("old_lecture_seq_no", old_lecture_seq_no);
+				req.setAttribute("new_start", new_start);
+				req.setAttribute("new_end", new_end);
+				req.setAttribute("old_start", old_start);
+				req.setAttribute("old_end", old_end);
+				req.setAttribute("new_req", new_req);
+				req.setAttribute("old_req", old_req);
+				
+				User session_user = getUserObject(req, resp);
+				DataSet s_userData = session_user.getDataSet();
+				input.put("s_user_ip", session_user.getIp());			
+				input.put("s_user_id", session_user.getId());
+				input.put("s_user_nm", session_user.getName());						
+				input.put("s_email", session_user.getEmail());
+				input.put("s_user_seq_no", session_user.getUser_seq_no());
+				input.put("s_mem_div", s_userData.getText("mem_div"));
+				
+				boolean isDoing = true;
+				
+				input.put("user_seq_no", session_user.getUser_seq_no());
+				input.put("cmd", "GET_CURR_USER_LECTURE");
+				DataSet temp = interact.execute( "/edu/LectureMgr" , input);
+				
+				if( temp != null && temp.getCount("lecture_seq_no") > 0 )
+				{
+					input.put("lecture_seq_no", temp.getText("lecture_seq_no"));
+					input.put("user_lecture_seq_no", temp.getText("user_lecture_seq_no"));
+				}else{
+					isDoing = false;
+				}
+				input.put("isDoing", isDoing);
+				
+				DataSet top_input = new DataSet();
+				top_input.put("cmd","GET_PROCESS_CLASS_LIST");
+				top_input.put("user_seq_no",session_user.getUser_seq_no());
+				DataSet cls_list = interact.execute("/edu/EstimateMgr" , top_input );
+				req.setAttribute("cls_list", cls_list);
+				
+				input.put("cmd", "GET_CURR_CLASS_NO");
+				output = interact.execute( "/edu/ClassMgr" , input);
+				String user_class_seq_no = output.getText("user_class_seq_no");
+				req.setAttribute("cur_user_class_seq_no", user_class_seq_no );
+				
+				input.put("cmd", "GET_USER_LECTURE_DETAIL");
+				DataSet detailLecture = interact.execute( "/edu/LectureMgr" , input);
+				req.setAttribute("detailLecture", detailLecture);
+				
+				req.setAttribute("input", input);
+				view.setViewPage(MYPAGE);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	]]>
+	</jsp:declaration>
+</jsp:root>

@@ -1,0 +1,371 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='Attach' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+		<![CDATA[
+			String cmd = input.getText("cmd");
+			
+			if("create".equals(cmd))
+			{
+				String ckey = com.kabm.util.SitePropertyManager.getString("COOKIE_USER_ID_KEY");
+				byte[] decodeVal = null;
+				String file_nm = null;
+				for(int idx=0; idx<input.getCount("file_nm");idx++)
+				{
+					//decodeVal = jdf.framework.core.util.encrypt.CipherUtil.stringToHex(input.getText("file_nm", idx));
+					//file_nm = new String(jdf.framework.core.util.encrypt.CipherUtil.decode(ckey.getBytes(), decodeVal));
+					file_nm = input.getText("file_nm", idx);
+					if( file_nm != null ) file_nm = file_nm.trim();
+					
+					input.put("file_nm", file_nm.trim(), idx);
+					output.put("dec_file_nm", file_nm, idx);
+						
+				}
+			}
+			executeSQL(cmd, connection, input, output);
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="create">
+			<query type="batch">
+			<![CDATA[
+				INSERT INTO tb_kabm_attach_file
+				(file_nm, file_path, file_size, ext_nm, 
+				user_file_nm, attach_div_cd, data_no, reg_dt)
+				VALUES
+				(?, ?, ?, ?,
+				?, ?, ?, getdate())
+			]]>
+			</query>
+			<mapping>
+				<setProperty>file_nm, file_path, file_size, ext_nm, 
+				user_file_nm, attach_div_cd, data_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="update">
+			<query>
+			<![CDATA[
+				UPDATE 
+					tb_kabm_attach_file 
+				SET
+					file_nm=?, file_path=?, file_size=?, ext_nm=?, 
+					user_file_nm=?, upd_dt=getdate()
+				WHERE 
+					attach_div_cd=? AND data_no=?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>file_nm, file_path, file_size, ext_nm, 
+				user_file_nm, attach_div_cd, data_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="get_attach_file_list_by_file_nm">
+			<query>
+			<![CDATA[
+				SELECT
+					file_no, file_nm, file_path, file_size, ext_nm, 
+						user_file_nm, attach_div_cd, data_no
+				FROM tb_kabm_attach_file
+				WHERE file_nm IN (SELECT * FROM FUNC_SPLIT(?, ','))
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>file_nm</setProperty>
+				<getProperty>file_no, file_nm, file_path, file_size, ext_nm, 
+						user_file_nm, attach_div_cd, data_no</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="createTmpl">
+			<query type="storedprocedure">
+			   <![CDATA[
+			   		{ call sf_ins_file_attch_tmpl(?, ?, ?, ?, ?, ?) }
+				]]>
+			</query>
+			<mapping-procedure>				
+				<param seq="1" mode="in" type="VARCHAR">file_nm</param>
+				<param seq="2" mode="in" type="VARCHAR">file_path</param>
+				<param seq="3" mode="in" type="INTEGER">file_size</param>
+				<param seq="4" mode="in" type="VARCHAR">ext_nm</param>			
+				<param seq="5" mode="in" type="VARCHAR">user_file_nm</param>
+				<param seq="6" mode="out" type="INTEGER">file_no</param>
+			</mapping-procedure>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="updateAttachFromTmpl">
+			<query type="storedprocedure">
+			   <![CDATA[
+			   		{ call sp_up_attch_from_tmpl(?, ?, ?) }
+				]]>
+			</query>
+			<mapping-procedure>
+				<param seq="1" mode="in" type="VARCHAR">e_file_no</param>
+				<param seq="3" mode="in" type="VARCHAR">attach_div_cd</param>
+				<param seq="4" mode="in" type="INTEGER">data_no</param>
+			</mapping-procedure>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="get_attach_files_by_file_nos">
+			<query>
+				<![CDATA[
+					SELECT
+						file_no, file_nm, file_path, file_size, ext_nm, 
+						user_file_nm, attach_div_cd, data_no, CONVERT(VARCHAR(20), reg_dt, 120) reg_dt
+					FROM tb_kabm_attach_file
+					WHERE file_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+					
+				]]>		
+			</query>
+			<mapping>
+				<setProperty>file_nos</setProperty>
+				<getProperty>file_no, file_nm, file_path, file_size, ext_nm, user_file_nm, attach_div_cd, data_no,reg_dt</getProperty>
+			</mapping>
+		</sql>
+
+		<sql id="get_attach_files_by_datano">
+			<query>
+				<![CDATA[
+					SELECT
+						file_no, file_nm, file_path, file_size, ext_nm, 
+						user_file_nm, attach_div_cd, data_no, SUBSTRING(CONVERT(VARCHAR, reg_dt, 120), 0, 17) reg_dt
+					FROM tb_kabm_attach_file
+					WHERE data_no = ?
+					AND attach_div_cd = ?
+					AND file_no > 0 -- for index scanning..
+					ORDER BY attach_div_cd, data_no, file_no
+				]]>		
+			</query>
+			<mapping>
+				<setProperty>data_no,attach_div_cd</setProperty>
+				<getProperty>file_no, file_nm, file_path, file_size, ext_nm, user_file_nm, attach_div_cd, data_no,reg_dt</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="get_act_attach_files_by_datano">
+			<query>
+				<![CDATA[
+					SELECT --index(tb_kabm_attach_file, IX1_tb_kabm_attach_FILE)
+						file_no, file_nm, file_path, file_size, ext_nm, 
+						user_file_nm, attach_div_cd, data_no, SUBSTRING(CONVERT(VARCHAR, reg_dt, 120), 0, 17) reg_dt
+					FROM tb_kabm_attach_file
+					WHERE data_no = ?
+					AND attach_div_cd = ?
+					AND file_no IN (SELECT file_no FROM tb_impv_file_connect WHERE act_no = ?)					
+					ORDER BY attach_div_cd, data_no, file_no
+				]]>		
+			</query>
+			<mapping>
+				<setProperty>data_no,attach_div_cd, act_no</setProperty>
+				<getProperty>file_no, file_nm, file_path, file_size, ext_nm, user_file_nm, attach_div_cd, data_no,reg_dt</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="get_attach_file">
+			<query>
+				<![CDATA[
+					SELECT --index(tb_kabm_attach_file, IX1_tb_kabm_attach_FILE)
+						file_no, file_nm, file_path, file_size, ext_nm, 
+						user_file_nm, attach_div_cd, data_no, SUBSTRING(CONVERT(VARCHAR, reg_dt, 120), 0, 17) reg_dt
+					FROM tb_kabm_attach_file
+					WHERE file_no = ?
+					ORDER BY attach_div_cd, data_no, file_no
+				]]>		
+			</query>
+			<mapping>
+				<setProperty>file_no</setProperty>
+				<getProperty>file_no, file_nm, file_path, file_size, ext_nm, user_file_nm, attach_div_cd, data_no,reg_dt</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="drop">
+			<query>
+				<![CDATA[
+					DELETE FROM tb_kabm_attach_file WHERE file_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+				]]>
+			</query>
+			<mapping>
+				<setProperty>file_nos</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="regist_delete_schedule">
+			<query>
+				<![CDATA[					
+					INSERT NTO tb_kabm_attach_file_del
+					SELECT						 
+						file_path+file_nm file_full_path, 
+						getdate() reg_dt, 
+						'N' del_yn, 
+						null del_dt, 
+						file_no, 
+						attach_div_cd, 
+						data_no
+					FROM tb_kabm_attach_file
+					WHERE attach_div_cd = ?
+					AND data_no IN (SELECT * FROM FUNC_SPLIT(?, ','))
+					
+				]]>
+			</query>
+			<mapping>
+				<setProperty>attach_div_cd, data_nos</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="regist_delete_schedule_by_brd_mng_no">
+			<query>
+				<![CDATA[		
+					INSERT INTO tb_kabm_attach_file_del	
+					( SEQ_NO, FILE_FULL_PATH,REG_DT,DEL_YN,DEL_DT,FILE_NO,ATTCH_DIV_CD,DATA_NO )
+					SELECT						 
+						file_path+file_nm file_full_path, 
+						getdate() reg_dt, 
+						'N' del_yn, 
+						null del_dt, 
+						file_no, 
+						attach_div_cd, 
+						data_no					
+					FROM tb_kabm_attach_file
+					WHERE attach_div_cd = 'ISMPAT0108'
+					AND data_no IN (SELECT brd_no FROM tb_board WHERE brd_mng_no = ?)					
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="regist_delete_schedule_by_impv_no">
+			<query>
+				<![CDATA[					
+					INSERT INTO tb_kabm_attach_file_del
+					( SEQ_NO, FILE_FULL_PATH,REG_DT,DEL_YN,DEL_DT,FILE_NO,ATTCH_DIV_CD,DATA_NO )
+					SELECT						 
+						file_path+file_nm file_full_path, 
+						getdate() reg_dt, 
+						'N' del_yn, 
+						null del_dt, 
+						file_no, 
+						attach_div_cd, 
+						data_no
+					FROM tb_kabm_attach_file
+					WHERE attach_div_cd = ?
+					AND data_no = ?
+					
+				]]>
+			</query>
+			<mapping>
+				<setProperty>attach_div_cd, data_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="regist_delete_schedule_by_act">
+			<query>
+				<![CDATA[					
+					INSERT INTO tb_kabm_attach_file_del
+					( SEQ_NO, FILE_FULL_PATH,REG_DT,DEL_YN,DEL_DT,FILE_NO,ATTCH_DIV_CD,DATA_NO )
+					SELECT
+						file_path+file_nm file_full_path, 
+						getdate() reg_dt, 
+						'N' del_yn, 
+						null del_dt, 
+						file_no, 
+						attach_div_cd, 
+						data_no
+					FROM tb_kabm_attach_file
+					WHERE attach_div_cd = ?
+					AND file_no IN (SELECT file_no FROM tb_impv_file_connect WHERE impv_id = ? AND act_no = ?)
+					
+				]]>
+			</query>
+			<mapping>
+				<setProperty>attach_div_cd, data_no, act_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='file_no' type='int'	size=''/>
+			<field name='brd_mng_no' type='int'	size=''/>
+			<field name='file_nos' type='String'	size=''/>
+			<field name='attach_div_cd' type='String'	size=''/>
+			<field name='data_nos' type='String'	size=''/>
+			
+			<field name='act_no' type='String'	size=''/>
+			
+			<field name='file_nm' type='String'	size=''/>
+			<field name='file_path' type='String'	size=''/>
+			<field name='file_size' type='String'	size=''/>
+			<field name='ext_nm' type='String'	size=''/>
+			<field name='user_file_nm' type='String'	size=''/>
+			<field name='attach_div_cd' type='String'	size=''/>
+			<field name='data_no' type='String'	size=''/>
+			
+			<field name="e_file_no" type="String" size='' />
+		</block>
+	</input>
+	
+	<output>
+		<block name="arg" repeat="1">
+			<field name='file_no' type='int'	size=''/>
+			<field name='brd_mng_no' type='int'	size=''/>
+			<field name='file_nos' type='String'	size=''/>
+			<field name='attach_div_cd' type='String'	size=''/>
+			<field name='data_nos' type='String'	size=''/>			
+			<field name='file_nm' type='String'	size=''/>
+			<field name='file_path' type='String'	size=''/>
+			<field name='file_size' type='String'	size=''/>
+			<field name='ext_nm' type='String'	size=''/>
+			<field name='user_file_nm' type='String'	size=''/>
+			<field name='attach_div_cd' type='String'	size=''/>
+			<field name='data_no' type='String'	size=''/>
+			<field name='reg_dt' type='String'	size=''/>
+			<field name="e_file_no" type="String" size='' />
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+		</block>
+		
+			
+		<block id='file_entries' name='file_entries' repeat='9999999'>		
+			<field name='file_no' type='String'	size='' properties="isUnique:true"/>
+			<field name='user_file_nm' type='String'	size=''/>			
+			<field name='ext_nm' type='String'	size=''/>
+			<field name='file_size' type='String'	size=''/>
+			<field name='reg_dt' type='String'	size=''/>
+			<field name='data_no' type='String'	size=''/>
+			<field name='attach_div_cd' type='String'	size=''/>			
+			<field name='file_nm' type='String'	size=''/>
+			
+		</block>
+	
+	</output>
+	
+</transaction>

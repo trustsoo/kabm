@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	    private final String INTRO_ORG = "/intro/_org_ji_detail.jsp";     //지회 정보 디스플레이
+	    
+	    
+	    protected String getDefaultMethodName()
+		{
+			return ""; 
+		}
+	   
+	    
+	    public void getSubInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+
+			
+
+			try{				
+				output = interact.execute("/main/intro/subcomp", input);
+				
+
+				String thumb_url = "";
+				try
+				{
+					Config conf = Configuration.lookup("/file/thumb");
+					thumb_url = conf.getString("url");
+					input.put("thumb_url", thumb_url);
+				}catch(Exception e){}
+				req.setAttribute("input", input);
+				
+				req.setAttribute("output" ,  output.toList());
+				
+				req.setAttribute("code"		, HTTPResultConstant.RESULT_OK);				
+						
+			} catch(Exception ex)
+			{
+				//req.setAttribute("code" , HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR);
+				//req.setAttribute("msg" ,  ex.getMessage() );
+			}
+	
+			view.setViewPage(INTRO_ORG);
+		}
+	  
+	]]>
+	</jsp:declaration>
+</jsp:root>

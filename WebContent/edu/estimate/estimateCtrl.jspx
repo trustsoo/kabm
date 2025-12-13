@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[   
+
+/******************************************************************************** 
+ * Program ID		: 평가
+ * FileName		    : estimateCtrl.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/edu/estimate/";
+	
+	private static final String JSP_ESTIMATE = "_estimate";
+	
+	private static final String JSP_CLASS_EXEC=JSP_BASE+JSP_ESTIMATE+"_execute.jsp";
+	
+	private static final String JSP_CLASS_RESULT=JSP_BASE+JSP_ESTIMATE+"_result.jsp";
+	
+	
+	public void doEstimate(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		DataSet output2 = new DataSet();
+		DataSet output3 = new DataSet();
+		try
+		{	
+			Config conf = Configuration.lookup("/file/chart");
+			String photoPath = conf.getString("url");
+			
+			input.put("cmd", "GET_CURR_CLASS_NO");
+			DataSet output4 = interact.execute( "/edu/ClassMgr" , input);
+			
+			String estimate_cnt = output4.getText("estimate_cnt");
+			if( estimate_cnt == null || "0".equals(estimate_cnt)|| "".equals(estimate_cnt))
+			{
+				input.put("user_class_seq_no", output4.getText("user_class_seq_no") );
+				input.put("cmd", "DELETE_ESTIMATE");
+				executeBL( "/edu/EstimateMgr" , input,output);
+			}
+			
+			
+			input.put("user_class_seq_no", output4.getText("user_class_seq_no") );
+			input.put("cmd", "GET_EXAM_LIST");
+			executeBL( "/edu/EstimateMgr" , input,output);
+			
+			if( output.getCount("estimate_seq_no") <= 0 )
+			{
+				
+				input.put("cmd", "GET_EXAM_ALL_LIST");
+				executeBL( "/edu/EstimateMgr" , input,output3);
+				
+				Random rd = new Random();
+				DataSet in = new DataSet();
+				HashMap<Integer , Integer> hm = new HashMap<Integer, Integer>();
+				int idx = 0;
+				int examCnt = 20;
+				while(true)
+				{
+					int rdInt = rd.nextInt(output3.getCount("exam_seq_no"));
+					
+					if( hm.containsKey(rdInt) )
+						continue;
+					else
+					{
+						in.put("cmd", "SET_EXAM_LIST", idx);
+						in.put("exam_seq_no", output3.getText("exam_seq_no",rdInt), idx);
+						in.put("user_class_seq_no" , input.getText("user_class_seq_no"), idx);
+						in.put("exam_num" , idx+1, idx);
+						hm.put(rdInt , rdInt);
+						idx++;
+					}
+					System.out.println( rdInt + ":" + idx);
+					if( idx >= examCnt || output3.getCount("exam_seq_no") == idx)
+						break;
+				}	
+				
+				executeBL( "/edu/EstimateMgr" , in,output);
+			}
+			
+			  for( int idx = 0 ; idx < output.getCount("estimate_seq_no"); idx++)
+		      {
+		   	   String exam_type = output.getText("exam_type", idx);
+		   	   output2 = new DataSet();
+		   	   if( exam_type != null && "1".equals(exam_type))
+		   	   {
+			       input.put("exam_seq_no" , output.getText("exam_seq_no", idx) );
+		   		   input.put("cmd" , "GET_ITEM_LIST");
+			       executeBL("/edu/EstimateMgr", input, output2);
+		   	   }
+		   	   output.put( "reqView" , output2 ,idx );
+		   	   
+		      }
+			DataSet status_in = new DataSet();
+			status_in.put("cmd", "SET_STATUS_START");
+			status_in.put("user_class_seq_no" ,input.getText("user_class_seq_no"));
+			status_in.put("user_lecture_seq_no" ,input.getText("user_lecture_seq_no"));
+			status_in.put("status" ,"2");
+			executeBL( "/edu/EstimateMgr" , status_in);
+			
+			input.put("cmd", "GET_USER_CLASS_LIST");			
+			DataSet class_list = interact.execute( "/edu/ClassMgr" , input);
+			req.setAttribute("class_list", class_list);
+			req.setAttribute("user_class_seq_no", input.getText("user_class_seq_no"));
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			req.setAttribute("photoPath", photoPath);
+			view.setViewPage(JSP_CLASS_EXEC);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void viewEstimateResult(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		DataSet output2 = new DataSet();
+		try
+		{	
+			Config conf = Configuration.lookup("/file/chart");
+			String photoPath = conf.getString("url");
+			
+			input.put("cmd", "GET_EXAM_LIST");
+			executeBL( "/edu/EstimateMgr" , input,output);
+			
+			  for( int idx = 0 ; idx < output.getCount("estimate_seq_no"); idx++)
+		      {
+		   	   String exam_type = output.getText("exam_type", idx);
+		   	   output2 = new DataSet();
+		   	   if( exam_type != null && "1".equals(exam_type))
+		   	   {
+			           input.put("exam_seq_no" , output.getText("exam_seq_no", idx) );
+		   		   input.put("cmd" , "GET_ITEM_LIST");
+			           executeBL("/edu/EstimateMgr", input, output2);
+		   	   }
+		   	   output.put( "reqView" , output2 ,idx );
+		   	   
+		      }
+			
+			input.put("cmd", "GET_LECTURE_CLASS_INFO");
+			DataSet lecture_info = executeBL( "/edu/ClassMgr" , input);
+			
+			input.put("cmd", "GET_USER_CLASS_LIST");			
+			DataSet class_list = interact.execute( "/edu/ClassMgr" , input);
+			req.setAttribute("class_list", class_list);
+			req.setAttribute("user_class_seq_no", input.getText("user_class_seq_no"));
+				
+			req.setAttribute("lecture", lecture_info);
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			req.setAttribute("photoPath", photoPath);
+			
+			view.setViewPage(JSP_CLASS_RESULT);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

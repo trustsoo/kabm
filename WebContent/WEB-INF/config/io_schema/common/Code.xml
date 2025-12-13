@@ -1,0 +1,376 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='Code' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<!-- property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/-->
+	
+		<script language="java" import="">
+		<![CDATA[
+			String cmd = input.getText("cmd");
+			String cd = input.getText("cd");
+			String div_cd = input.getText("div_cd");
+			
+			executeSQL(cmd, connection, input, output);
+			
+			//if("insertCode".equals(cmd) || "updateCode".equals(cmd))
+			//{
+			//	jdf.framework.core.pool.cache.CacheManagerFactory.getInstance().clearCache("/common/Code");
+			//}
+			
+		]]>
+		</script>
+		<!-- <cache>
+	      <enable>true</enable>
+	      <expire>86400</expire>
+	      <max-object-num>300</max-object-num>
+	    </cache> -->
+		<transaction-type>rollback</transaction-type>
+		
+		
+		<sql id="getCodeListUseY">
+			<query>
+			   <![CDATA[
+					SELECT 
+						cd cd,
+						cd_nm
+					FROM tb_kabm_code with(nolock)
+					WHERE div_cd = ?
+					AND use_yn = 'Y'
+					AND   prnt_cd = '0'
+					ORDER BY sort_no, cd	
+				]]>
+			</query>
+			<mapping>
+				<setProperty>div_cd</setProperty>
+				<getProperty>cd,cd_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="getDay">
+			<query>
+			<![CDATA[
+				SELECT 
+					DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,CONVERT(DATETIME, '20140401'))+1,0)) last_day,
+					SUBSTRING(CONVERT(varchar, getdate(), 112), 7, 2)
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>month</setProperty>
+				<getProperty>last_day, current_day</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getMonthDay">
+			<query>
+			<![CDATA[
+				select
+					'd'+ substring(ymd, 7,2) day,
+					substring(datename(dw, ymd_date), 1, 1) dat
+				from tb_copy_ymd with(nolock)
+				where ymd_date >= convert(datetime, ?+'01')
+				and ymd_date <= DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,CONVERT(DATETIME, ?+'01'))+1,0))
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>date_code, date_code</setProperty>
+				<getProperty>day, dat</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getYear">
+			<query>
+			<![CDATA[
+				SELECT 
+					SUBSTRING(CONVERT(varchar, getdate(), 112), 1, 4) AS year
+			]]>		
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>year</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getCodeDivListAll">
+			<query>
+			<![CDATA[
+				SELECT 
+					div_cd,
+					div_nm,
+					CONVERT(VARCHAR, reg_ddtm, 120) reg_dt
+				FROM tb_kabm_code_div with(nolock)
+				ORDER BY div_nm
+			]]>		
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>cd,cd_nm,reg_dt</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="getCodeListByPrntCd">
+			<query>
+			<![CDATA[
+			SELECT
+				a.cd, 
+				a.cd_nm,	
+				ISNULL((SELECT top 1 'folder' FROM tb_kabm_code x with(nolock) WHERE x.prnt_cd = a.cd), 'item') type
+			FROM tb_kabm_code a with(nolock)
+			WHERE CASE ISNULL(?, '')
+					WHEN '' THEN '0'
+					ELSE a.use_yn
+				END
+				=
+				CASE ISNULL(?, '')
+					WHEN '' THEN '0'
+					ELSE ?
+				END					
+			AND a.div_cd = ?
+			AND a.prnt_cd = ?
+			and a.sort_no >= 0
+			order by a.sort_no, a.cd_nm
+			]]>
+			</query>
+			<mapping>
+				<setProperty>use_yn,use_yn,use_yn,div_cd,prnt_cd</setProperty>
+				<getProperty>cd,cd_nm,type</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="getCodeDetail">
+			<query>
+			<![CDATA[
+			select
+				a.cd, a.div_cd, d.div_nm, a.prnt_cd, a.cd_nm, a.sort_no, 
+				a.use_yn, a.reg_emp_cd, b.emp_nm reg_emp_nm, 
+				CONVERT(VARCHAR, a.reg_ddtm, 120) reg_dt, 
+				a.upd_emp_cd, c.emp_nm upd_emp_nm, 
+				CONVERT(VARCHAR, a.upd_ddtm, 120) upd_dt,
+				(select hierarchy_path from sf_get_code_hierachy_path(a.cd)) hierarchy_path
+			FROM tb_kabm_code a with(nolock)
+				LEFT OUTER JOIN tb_kabm_emp b with(nolock)
+					ON a.reg_emp_cd = b.emp_cd 
+				LEFT OUTER JOIN tb_kabm_emp c with(nolock)
+					ON a.reg_emp_cd = c.emp_cd,
+				tb_kabm_code_div d with(nolock)
+			WHERE a.cd = ?
+			AND a.div_cd = d.div_cd
+			]]>
+			</query>
+			<mapping>
+				<setProperty>cd</setProperty>
+				<getProperty>cd, div_cd, div_nm, prnt_cd, cd_nm, sort_no,
+				use_yn, reg_emp_cd, reg_emp_nm, reg_dt, upd_emp_cd, upd_emp_nm, upd_dt, 
+				hierarchy_path</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="insertCode">
+			<query>
+			<![CDATA[
+				INSERT INTO tb_kabm_code
+				(cd, div_cd, prnt_cd, cd_nm, sort_no,
+				use_yn,reg_emp_cd,upd_emp_cd,reg_ddtm)
+				VALUES
+				(?, ?, ?, ?, ?, 
+				?, ?, ?, getdate())
+			]]>
+			</query>
+			<mapping>
+				<setProperty>cd, div_cd, prnt_cd, cd_nm, sort_no, use_yn,reg_emp_cd,upd_emp_cd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="updateCode">
+			<query>
+			<![CDATA[		
+				UPDATE tb_kabm_code SET						
+					cd_nm = ?, 
+					sort_no = ?,
+					use_yn = ?,
+					upd_emp_cd = ?,
+					upd_ddtm = getdate()
+				WHERE cd = ?
+			]]>
+			</query>
+			<mapping>
+					<setProperty>cd_nm, sort_no, use_yn, upd_emp_cd, cd</setProperty>
+					<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getCodeNm">
+			<query>
+			<![CDATA[		
+				SELECT cd_nm
+				FROM tb_kabm_code with(nolock)
+				WHERE cd = ?
+			]]>
+			</query>
+			<mapping>
+					<setProperty>cd</setProperty>
+					<getProperty>cd_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getCodeList">
+			<query>
+			   <![CDATA[
+					SELECT 
+						cd cd,
+						cd_nm,
+						sort_no,
+						CONVERT(VARCHAR, reg_ddtm, 120) reg_dt
+					FROM tb_kabm_code with(nolock)
+					WHERE div_cd = ?
+					AND prnt_cd = '0'
+					ORDER BY sort_no, cd	
+				]]>
+			</query>
+			<mapping>
+				<setProperty>div_cd</setProperty>
+				<getProperty>cd,cd_nm,sort_no,reg_dt</getProperty>
+			</mapping>
+		</sql>
+
+		<sql id="getUseCodeList">
+			<query>
+			   <![CDATA[
+					SELECT 
+						cd cd,
+						cd_nm
+					FROM tb_kabm_code with(nolock)
+					WHERE div_cd = ?	
+					AND use_yn = 'Y'
+					AND   prnt_cd = '0'
+					ORDER BY sort_no, cd
+				]]>
+			</query>
+			<mapping>
+				<setProperty>div_cd</setProperty>
+				<getProperty>cd,cd_nm</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="deleteCode">
+			<query>
+			   <![CDATA[
+					DELETE FROM tb_kabm_code WHERE cd = ?	
+					
+				]]>
+			</query>
+			<mapping>
+				<setProperty>cd</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		</processor-info>
+	<input>
+		<block name="arg" repeat="1">		
+			<field name='month' type='String'	size=''/>
+			<field name='cd' type='String'	size=''/>
+			<field name='cd_nm' type='String'	size=''/>
+			<field name='div_cd' type='String'	size=''/>
+			<field name='use_yn' type='String'	size=''/>
+			<field name='prnt_cd' type='String'	size=''/>
+			<field name='sort_no' type='String'	size=''/>	
+			<field name='reg_emp_cd' type='String'	size=''/>
+			<field name='reg_emp_nm' type='String'	size=''/>
+			<field name='reg_dt' type='String'	size=''/>
+			<field name='upd_emp_cd' type='String'	size=''/>
+			<field name='upd_emp_nm' type='String'	size=''/>
+			<field name='upd_dt' type='String'	size=''/>
+			
+			<field name='date_code' type='String'	size=''/>
+			
+			<field name='depth' type='int'	size=''/>
+			
+			
+		</block>
+	</input>
+	
+	<output> 
+		
+		<block id='' name='' repeat='9999999'>
+			<field name='cd' type='String'	size=''/>
+			<field name='cd_nm' type='String'	size=''/>	
+			<field name='div_nm' type='String'	size=''/>
+					
+			<field name='type' type='String'	size=''/>			
+			
+			<field name='div_cd' type='String'	size=''/>
+			<field name='prnt_cd' type='String'	size=''/>
+			<field name='sort_no' type='String'	size=''/>
+			<field name='use_yn' type='String'	size=''/>
+			<field name='reg_emp_cd' type='String'	size=''/>
+			<field name='reg_emp_nm' type='String'	size=''/>
+			<field name='rg_ymdt' type='String'	size=''/>
+			<field name='upd_emp_cd' type='String'	size=''/>
+			<field name='upd_emp_nm' type='String'	size=''/>
+			<field name='upd_dt' type='String'	size=''/>
+			<field name='hierarchy_path' type='String'	size=''/>
+			
+			<field name='day' type='String'	size=''/>
+			<field name='dat' type='String'	size=''/>
+			
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+		</block>
+		
+		<block id='cd_list' name='cd_list' repeat='9999999'>
+			<field name='cd' type='String'	size='' properties="isUnique:true"/>
+			<field name='cd_nm' type='String'	size=''/>
+			<field name='sort_no' type='String'	size=''/>
+			<field name='reg_dt' type='String'	size=''/>
+		</block>
+		
+		<block id='cd_detail' name='cd_detail' repeat='1'>
+			<field name='cd' type='String'	size=''/>
+			<field name='cd_nm' type='String'	size=''/>
+			<field name='div_cd' type='String'	size=''/>
+			<field name='div_nm' type='String'	size=''/>
+			<field name='prnt_cd' type='String'	size=''/>
+			<field name='sort_no' type='String'	size=''/>
+			<field name='use_yn' type='String'	size=''/>
+			<field name='reg_emp_cd' type='String'	size=''/>
+			<field name='reg_emp_nm' type='String'	size=''/>
+			<field name='reg_dt' type='String'	size=''/>
+			<field name='upd_emp_cd' type='String'	size=''/>
+			<field name='upd_emp_nm' type='String'	size=''/>
+			<field name='upd_dt' type='String'	size=''/>
+			<field name='hierarchy_path' type='String'	size=''/>	
+		</block>
+		
+		<block id='year_list' name='year_list' repeat='9999999'>
+			<field name='year' type='String'	size=''/>
+		</block>
+		
+		<block id='day_list' name='day_list' repeat='9999999'>
+			<field name='day' type='String'	size=''/>
+			<field name='dat' type='String'	size=''/>
+		</block>
+		
+		<block id='last_day_list' name='last_day_list' repeat='9999999'>
+			<field name='last_day' type='String'	size=''/>
+			<field name='current_day' type='String'	size=''/>
+		</block>
+		
+		<block id='code_list' name='code_list' repeat='9999999'>
+			<field name='cd' type='String'	size=''/>
+			<field name='cd_nm' type='String'	size=''/>
+			<field name='sort_no' type='String'	size=''/>
+			<field name='reg_dt' type='String'	size=''/>
+		</block>
+		
+	</output>
+	
+</transaction>

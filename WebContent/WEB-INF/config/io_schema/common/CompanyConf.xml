@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="CompanyConf">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			executeSQL(cmd, connection, input, output);
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		
+		<sql id="GET_CONF_LIST">
+			<query>
+			<![CDATA[
+				SELECT
+					ky, 
+					val
+				FROM tb_kabm_glbl_config	
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>key,val</getProperty>
+			</mapping>
+		</sql>
+		
+		
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+		</block>
+	</input>
+	
+	<output> 
+		
+		<block id='' name='' repeat='9999999'>
+			<field name='cmpny_no' type='String'	size=''/>
+			<field name='cmpny_nm' type='String'	size=''/>
+			
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+		</block>
+		
+		<block id='conf_list' name='conf_list' repeat='9999999'>
+			<field name='key' type='String'	size=''/>
+			<field name='val' type='String'	size=''/>
+		</block>
+		
+	</output>
+	
+	
+	
+</transaction>

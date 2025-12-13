@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.page import="jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.data.schema.*" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+		
+		//설문지 정보를 호출한다.
+		public void getSurveyQstnInfo(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+		{
+			
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			req.setAttribute("templet-bypass", "true");
+			try
+			{
+				input.put("cmpny_no", 1);
+				input.put("cmd", "getSurveyQstnInfo");
+				output = interact.execute("/survey/Survey_detail", input);
+				String[] blockNames = new String[]{"detail_qstn_list"};	
+				
+				String result = getJson(output, blockNames);
+				responseJson(result, resp);
+			} catch(Exception ex)
+			{
+				responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+				Logger.err.print(Utility.getStackTrace(ex));
+			}
+		}
+
+     	public void getSurveyPaper(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+     			throws ServletException, IOException, Exception
+     	{
+     		DataSet input = new DataSet();
+     		DataSet output1 = new DataSet();
+     		DataSet output2 = new DataSet();
+     		bind(req, input);
+     		try
+     		{
+     			req.setAttribute("templet-bypass", "true");
+     			
+     			
+     			input.put("cmpny_no",getUserObject(req, resp).getCmpnyNo());
+     			input.put("cmd", "getPaperInfo");
+     			
+     			output1 = interact.execute("/survey/Survey", input);
+     			
+     			input.put("cmd", "getQstnList");			
+     			
+     			output2 = interact.execute("/survey/Survey", input);
+     			
+     			output2.append(output1);
+     			
+     			String[] blockNames = new String[]{"paper_info", "qstn_list", "qstn_exmp_list"};
+     			String data = getJson(output2, blockNames);
+     			
+     			responseJson(data, resp);
+     		} catch(Exception ex)
+     		{			
+     			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+     			Logger.err.print(Utility.getStackTrace(ex));
+     		}
+     	}
+	    
+     	
+        //설문조사 답안 등록
+        public void makeSurveyAnsw(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+                throws ServletException, IOException, Exception
+        {
+            DataSet input = new DataSet();
+            DataSet output = new DataSet();
+
+            InteractionBean bean = new InteractionBean();
+            HttpAttributes attr = bean.getHttpAttributes(req);
+            bind(req, input);
+
+
+            try
+            {
+                req.setAttribute("templet-bypass", "true");
+
+                DataSet surveyAnswer = new DataSet();
+
+                Iterator ite = input.keySet().iterator();
+                String key = null;
+                String qstn_no = null;
+
+                String answ = null;
+                int k = 0;
+                while(ite.hasNext())
+                {
+                    key = (String)ite.next();
+                    if(key.indexOf("ANSW_DT_") != -1)
+                    {
+                        qstn_no = key.substring(8);
+                        String[] strArray = attr.getStringArray(key);
+
+                        for(int x=0; x<strArray.length;x++)
+                        {
+                            surveyAnswer.add("qstn_no", qstn_no);
+                            surveyAnswer.add("answ", strArray[x]);
+                            surveyAnswer.add("qstn_cnt", input.getText("qstn_cnt"));
+                            surveyAnswer.add("user_lecture_seq_no", input.getText("user_lecture_seq_no"));
+                            surveyAnswer.add("paper_id", input.getText("paper_id"));
+                        }
+                    }
+                }
+
+                input.put("surveyAnswer", surveyAnswer);
+                input.put("cmd", "answDeleteCreate");
+                output = interact.execute("/survey/Survey", input);
+
+                StringBuffer data = new StringBuffer();
+                responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", data.toString()), resp);
+
+            } catch(Exception ex)
+            {
+                responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+                Logger.err.print(Utility.getStackTrace(ex));
+            }
+        }
+		
+
+        //설문조사 답안 수정
+        public void lectureSurveyAnsw(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+            throws ServletException, IOException, Exception
+        {
+            DataSet input = new DataSet();
+            DataSet output = new DataSet();
+
+            InteractionBean bean = new InteractionBean();
+            HttpAttributes attr = bean.getHttpAttributes(req);
+            bind(req, input);
+
+            try
+            {
+                req.setAttribute("templet-bypass", "true");
+                
+                System.out.println("input==>"+ input);
+                
+                /* String q81 = "";
+                for( int idx =0; idx < input.getCount("sq81"); idx++){
+                	if(idx == 0)
+                		q81 = input.getText("sq81", idx);
+                	else 
+                		q81 = q81 + "," + input.getText("sq81", idx);
+                	
+                }
+                input.put("q81", q81);
+                 */
+                input.put("cmd", "answCreate");
+                output = interact.execute("/survey/Survey_lecture", input);
+
+                StringBuffer data = new StringBuffer();
+                data.append("{\"user_lecture_seq_no\":").append("\"").append(output.getText("user_lecture_seq_no")).append("\"").append("}");
+                responseJson(getJsonFormat(HTTPResultConstant.RESULT_OK, "success", data.toString()), resp);
+
+            } catch(Exception ex)
+            {
+                responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, new jdf.framework.core.MessageBox().getMessage(com.kabm.util.UserAgentUtil.getUserLanguage(req), "ERROR" ,  "E0002"), ""), resp);
+                Logger.err.print(Utility.getStackTrace(ex));
+            }
+        }
+
+      
+	]]>
+	</jsp:declaration>
+</jsp:root>

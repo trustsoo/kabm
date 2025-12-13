@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[         
+
+/******************************************************************************** 
+ * Program ID		: 회원관리 
+ * FileName		    : signUp.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/member/";
+	
+	private static final String JSP_PREFIX = "_sign";
+	
+	private static final String JSP_JOIN_STEP_1=JSP_BASE+JSP_PREFIX+"_join_step_1.jsp";
+	
+	private static final String JSP_JOIN_STEP_2=JSP_BASE+JSP_PREFIX+"_join_step_2.jsp";
+	
+	private static final String JSP_JOIN_STEP_3=JSP_BASE+JSP_PREFIX+"_join_step_3.jsp";
+	
+	private static final String JSP_JOIN_STEP_4=JSP_BASE+JSP_PREFIX+"_join_step_4.jsp";
+	
+	private static final String JSP_JOIN_STEP_5=JSP_BASE+JSP_PREFIX+"_join_step_5.jsp";
+	
+	private static final String JSP_JOIN_STEP_6=JSP_BASE+JSP_PREFIX+"_join_step_6.jsp";
+	
+	private static final String JSP_JOIN_STEP_7=JSP_BASE+JSP_PREFIX+"_join_step_7.jsp";
+	
+	
+	protected String getDefaultMethodName()
+	{
+		return "join_step_1";
+	}
+	
+	public void join_step_1(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			resp.sendRedirect("/member/join.jspx?cmd=join_step_1");
+			/* req.setAttribute("input", input);
+			view.setViewPage(JSP_JOIN_STEP_1); */
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+
+	public void join_step_2(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			resp.sendRedirect("/member/join.jspx?cmd=join_step_1");
+			/* req.setAttribute("input", input);
+			
+			if( MEM_DIV_PESN.equals(input.getText("mem_div")) )
+			{
+				view.setViewPage(JSP_JOIN_STEP_2);
+			}else if( MEM_DIV_CORP.equals(input.getText("mem_div")) ){
+				view.setViewPage(JSP_JOIN_STEP_2);
+			}else{
+				view.setViewPage(JSP_JOIN_STEP_1);
+			} */
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+	
+	public void join_step_3(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			resp.sendRedirect("/member/join.jspx?cmd=join_step_1");
+			
+			/* req.setAttribute("input", input);
+			if( MEM_DIV_PESN.equals(input.getText("mem_div")) )
+			{
+				view.setViewPage(JSP_JOIN_STEP_3);
+			}else if( MEM_DIV_CORP.equals(input.getText("mem_div")) ){
+				view.setViewPage(JSP_JOIN_STEP_3);
+			}else{
+				view.setViewPage(JSP_JOIN_STEP_1);
+			} */
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+
+	public void join_step_4(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			resp.sendRedirect("/member/join.jspx?cmd=join_step_1");
+			
+			/* req.setAttribute("input", input);
+			
+			String currentYear = DateTime.getString( new java.util.Date() , "yyyy");
+			req.setAttribute("currentYear", currentYear);
+			
+			if( MEM_DIV_PESN.equals(input.getText("mem_div")) )
+			{
+				view.setViewPage(JSP_JOIN_STEP_4);
+			}else if( MEM_DIV_CORP.equals(input.getText("mem_div")) ){
+				view.setViewPage(JSP_JOIN_STEP_4);
+			}else{
+				view.setViewPage(JSP_JOIN_STEP_1);
+			} */
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+
+	public void join_step_5(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			resp.sendRedirect("/member/join.jspx?cmd=join_step_1");
+			
+			/* req.setAttribute("input", input);
+			if( MEM_DIV_PESN.equals(input.getText("mem_div")) )
+			{
+				view.setViewPage(JSP_JOIN_STEP_5);
+			}else if( MEM_DIV_CORP.equals(input.getText("mem_div")) ){
+				view.setViewPage(JSP_JOIN_STEP_6);
+			}else{
+				view.setViewPage(JSP_JOIN_STEP_1);
+			} */
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+
+	public void join_step_6(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			resp.sendRedirect("/member/join.jspx?cmd=join_step_1");
+			
+			/* req.setAttribute("input", input);
+			if( MEM_DIV_PESN.equals(input.getText("mem_div")) )
+			{
+				view.setViewPage(JSP_JOIN_STEP_6);
+			}else if( MEM_DIV_CORP.equals(input.getText("mem_div")) ){
+				view.setViewPage(JSP_JOIN_STEP_6);
+			}else{
+				view.setViewPage(JSP_JOIN_STEP_1);
+			} */
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+
+	public void join_step_7(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			resp.sendRedirect("/member/join.jspx?cmd=join_step_1");
+			
+			/* req.setAttribute("input", input);
+			if( MEM_DIV_PESN.equals(input.getText("mem_div")) )
+			{
+				view.setViewPage(JSP_JOIN_STEP_7);
+			}else if( MEM_DIV_CORP.equals(input.getText("mem_div")) ){
+				view.setViewPage(JSP_JOIN_STEP_7);
+			}else{
+				view.setViewPage(JSP_JOIN_STEP_1);
+			} */
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

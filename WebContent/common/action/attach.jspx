@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8"
+		pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+	
+	
+	public void getAttachList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			input.put("cmd", "get_attach_files_by_datano");			
+			output = interact.execute("/common/Attach", input);
+			String[] blockNames = new String[]{"file_entries"};						
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void getActAttachList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			input.put("cmd", "get_act_attach_files_by_datano");			
+			output = interact.execute("/common/Attach", input);
+			String[] blockNames = new String[]{"file_entries"};						
+			
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doDownload(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("cmd", "get_attach_file");			
+			output = interact.execute("/common/Attach", input);
+			
+			if(!"".equals(output.getText("file_nm")))
+			{
+				Config conf = Configuration.lookup("/MultipartAttributes");
+				String rootDir = conf.getString("dir");
+				
+				
+				File file = new File(rootDir+java.io.File.separator+output.getText("file_path")+java.io.File.separator+output.getText("file_nm"));
+				
+				Logger.debug.println(output);
+				Logger.debug.println(file.getAbsolutePath());
+				
+				if(file.exists())
+					sendFileStream(output.getText("user_file_nm"), (int)file.length(), file, resp, req);
+				else
+					resp.sendError(resp.SC_NOT_FOUND);
+			}
+			
+		} catch(Exception ex)
+		{
+			Logger.err.print(Utility.getStackTrace(ex));
+			resp.sendError(resp.SC_NOT_FOUND);			
+		}
+	}
+	
+	public void doDelete(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("cmd", "get_attach_file");			
+			output = interact.execute("/common/Attach", input);
+			
+			if(!"".equals(output.getText("file_nm")))
+			{				
+				File file = new File(output.getText("file_path")+java.io.File.separator+output.getText("file_nm"));		
+				//log(file.getAbsolutePath() +" is exist ? "+ file.exists());
+				file.delete();
+			}
+			input.put("file_nos", input.getText("file_no"));
+			input.put("cmd", "drop");			
+			interact.execute("/common/Attach", input);
+			responseXML(getXMLFormat(""), resp);
+			
+		} catch(Exception ex)
+		{
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void doDownloadForMail(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("cmd", "get_attach_file");			
+			output = interact.execute("/common/Attach", input);
+			
+			if(!"".equals(output.getText("file_nm")))
+			{
+				Config conf = Configuration.lookup("/MultipartAttributes");
+				String rootDir = conf.getString("dir");
+				String subdir = SitePropertyManager.getString("EMAIL_SUB_DIR"); 
+				
+				File file = new File(rootDir+java.io.File.separator+subdir+java.io.File.separator+output.getText("file_path")+java.io.File.separator+output.getText("file_nm"));
+				
+				Logger.debug.println(output);
+				Logger.debug.println(file.getAbsolutePath());
+				
+				if(file.exists())
+					sendFileStream(output.getText("user_file_nm"), (int)file.length(), file, resp, req);
+				else
+					resp.sendError(resp.SC_NOT_FOUND);
+			}
+			
+		} catch(Exception ex)
+		{
+			Logger.err.print(Utility.getStackTrace(ex));
+			resp.sendError(resp.SC_NOT_FOUND);			
+		}
+	}
+	
+	/*
+	public void doDownloadBase64(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			String file_nm = input.getText("file_nm");
+			String data = input.getTrimmedText("data");
+			
+			if( data != null && !"".equals(data))
+			{
+				data = unfilter(data);
+				byte[] bytes = data.getBytes();
+				byte[] decodedBytes = Base64.decodeBytes(bytes);
+				
+				//System.out.println( data);
+				
+				if( file_nm == null || "".equals(file_nm)) file_nm = "ChartImage";
+					
+				if(decodedBytes !=null && decodedBytes.length > 0 )
+					sendBase64Stream(file_nm + ".png", decodedBytes.length , decodedBytes , resp, req);
+				else
+					resp.sendError(resp.SC_NOT_FOUND);
+			}else{
+				resp.sendError(resp.SC_NOT_FOUND);
+			}
+			
+			
+		} catch(Exception ex)
+		{
+			Logger.err.print(Utility.getStackTrace(ex));
+			resp.sendError(resp.SC_NOT_FOUND);			
+		}
+	}
+	*/
+	
+	
+	public String unfilter(String input) {
+        if(input==null) {
+            return null;
+        }
+        
+        String clean = input.replaceAll("&quot;", "\"").replaceAll("&#039;","\'").replaceAll("&#043;", "\\+");
+        clean = clean.replaceAll("&lt;", "<").replaceAll("&gt;", ">");
+        clean = clean.replaceAll("&#40;", "\\(").replaceAll("&#41;", "\\)");
+        return clean;
+    }
+	]]>
+	</jsp:declaration>
+</jsp:root>
+	

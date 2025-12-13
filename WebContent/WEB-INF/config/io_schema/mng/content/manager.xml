@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='manager' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+           	//임원정보 리스트 조회
+            //if( "select_all".equals(cmd) ) 
+            //{
+            	executeSQL(cmd, connection, input, output);
+            //}           
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_manager_list">
+            <query>
+                <![CDATA[
+                   SELECT TOP (?) 
+                        emp_no,emp_nm,use_yn,duty_nm,pos_nm,tel_no,fax_no,cmpny_nm,odr,post_no,addr,CONVERT(CHAR(10), reg_ddtm, 23) reg_ddtm,reg_emp_cd,
+                         reg_emp_nm, rnum,tot_cnt,
+                         file_no , file_nm , file_path  
+                    FROM ( 
+                        SELECT 
+                            ROW_NUMBER() OVER( ORDER BY odr) AS rnum, 
+                            count(*) over() tot_cnt,                            
+                            A.*, 
+                            B.emp_nm reg_emp_nm,
+							f.file_no , f.file_nm , f.file_path 
+                        FROM tb_kabm_manager A LEFT OUTER JOIN tb_kabm_emp B ON A.reg_emp_cd = B.emp_cd 
+						LEFT OUTER JOIN  (select data_no , file_no , file_nm, file_path  from tb_kabm_attach_file where
+                        attach_div_cd ='attach_div_04' group by  data_no , file_no , file_nm , file_path 
+                       
+                        ) f  
+						ON f.data_no = a.emp_no
+                        WHERE A.emp_nm like '%' + ? + '%'  AND A.cmpny_nm like '%' + ? + '%' 
+						
+                     ) x 
+                    WHERE rnum > (?-1) * ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>row_per_page, in_emp_nm, in_cmpny_nm, cur_pg, row_per_page </setProperty>
+                <getProperty>emp_no,emp_nm,use_yn,duty_nm,pos_nm,tel_no,fax_no,cmpny_nm,odr,post_no,addr,reg_ddtm,reg_emp_cd,
+                         reg_emp_nm, rnum,tot_cnt,file_no, file_nm , file_path</getProperty>
+            </mapping>
+        </sql>
+        
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">
+            <field name='in_emp_nm' type='string'      size=''/>  <!--이름 -->
+            <field name='in_cmpny_nm' type='string'    size=''/> <!--회사명 -->
+           
+            
+            <field name='cur_pg' type='int' size=''/>
+            <field name='row_per_page' type='int'   size=''/>
+        </block>
+    </input>
+    
+    <output>
+
+
+        <block id="property" name="property" repeat="1">
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+
+       <block id='manager_list' name='manager_list' 	repeat=''>
+        	<field name='emp_no' 	type='string' size=''/>  <!-- 임원 일련번호 -->
+			<field name='emp_nm' 	type='string' size=''/>  <!-- 성명 -->
+			<field name='use_yn' 	type='string' size=''/>  <!-- 사용유무 -->
+			<field name='duty_nm' 	type='string' size=''/>  <!-- 직위 -->
+			<field name='pos_nm' 	type='string' size=''/>	 <!-- 직책 -->
+			<field name='tel_no' 	type='string' size=''/>  <!-- 연락처 -->
+			<field name='fax_no' 	type='string' size=''/>  <!-- 팩스 -->
+			<field name='cmpny_nm' 	type='string' size=''/>  <!-- 회사명 -->
+            <field name='odr'       type='string' size=''/>  <!-- 게시순서 -->
+            <field name='post_no'   type='string' size=''/>  <!-- 우편번호 -->
+            <field name='addr'      type='string' size=''/>  <!-- 주소 -->
+            <field name='reg_ddtm'  type='string' size=''/>  <!-- 등록일시 -->
+            <field name='reg_emp_cd'    type='string' size=''/>
+            <field name='reg_emp_nm'    type='string' size=''/>
+            <field name='rnum'          type='string' size=''/>
+            <field name='tot_cnt'       type='string' size=''/>
+            <field name='file_no' type='string' size=''/>  <!--file 번호 -->
+            <field name='file_nm' type='string' size=''/>
+            <field name='file_path' type='string' size=''/>
+        </block>        
+        
+    </output>
+  
+</transaction>

@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.UUID" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	<jsp:declaration>
+	<![CDATA[
+	
+	public void delJob(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{		
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);	
+		
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			input.put("cmd", "deleteJob");		
+			interact.execute("/community/board", input);
+			
+			String result = getJsonFormat("");
+			responseJson(result, resp);
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+	
+	         
+	public void getJobList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+	
+		
+		try
+		{
+			req.setAttribute("templet-bypass", "true");			
+			
+			input.put("cmd", "job_list");		
+			output = interact.execute("/community/board", input);
+			String[] blockNames = new String[] {"property", "job_list" };
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("board_row_per_page"));
+			 output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			 String result = getJson(output, blockNames);
+			 responseJson(result, resp);	
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}         
+	         
+	         
+	public void createJobWrite(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		 throws ServletException, IOException, Exception 
+	 {
+		 DataSet input = new DataSet();
+		 DataSet output = new DataSet();
+		 DataSet authput = new DataSet();
+		 
+		 boolean isAddOK = true;
+		 
+		 bind(req, input);
+			
+			
+		 req.setAttribute("templet-bypass", "true");
+		 try {
+			 
+			 if("".equals(input.getText("brd_no")))
+			 {
+				 input.put("brd_no", "-1");
+			 }
+			 
+			 
+			 if("".equals(input.getText("p_brd_no")))
+			 {
+				 input.put("p_brd_no", "-1"); 
+			 }
+			 
+				 
+			 //첨부파일.
+			 String file_nm = input.getText("file_nms");
+			 String file_path = input.getText("file_paths");
+			 String file_size = input.getText("file_sizes");
+			 String ext_nm = input.getText("ext_nms");
+			 String user_file_nm = input.getText("user_file_nms");
+			 
+			
+			 String[] file_nms = SmartStringArray.split(",", file_nm);
+			 String[] file_paths = SmartStringArray.split(",", file_path);
+			 String[] file_sizes = SmartStringArray.split(",", file_size);
+			 String[] ext_nms = SmartStringArray.split(",", ext_nm);
+			 String[] user_file_nms = SmartStringArray.split(",", user_file_nm);
+			
+			 input.put("rg_empl_no", getUserObject(req, resp).getId());
+			 input.put("file_nms", file_nms);
+			 input.put("file_nms", file_nms);
+			 input.put("file_paths", file_paths);
+			 input.put("file_sizes", file_sizes);
+			 input.put("ext_nms", ext_nms);
+			 input.put("user_file_nms", user_file_nms);
+			 
+			 input.put("cmd", "createJobBoard");
+			 output = interact.execute("/community/board", input);
+			 
+			 String brd_mng_no = input.getText("brd_mng_no");
+			 
+			 String result = getJsonFormat("");
+			 responseJson(result, resp);
+			
+		 } catch (Exception ex) {
+			 responseJson(
+					 getJsonFormat(
+							 HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+							 ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	 }         
+	         
+	         
+	         
+	public void createQuestion(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{	
+			input.put("cmd", "insert_answer");
+			interact.execute("/mng/content/question_action", input, output);
+			String result = getJsonFormat("");
+			responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			throw ex;				
+		}
+	}
+	         
+	         
+	public void getFaqList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+	
+		
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			log(input.toString());
+			
+			input.put("cmd", "list");
+			output = interact.execute("/community/FAQ", input);
+			String[] blockNames = new String[] {"property", "list" };
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("board_row_per_page"));
+			 output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			 String result = getJson(output, blockNames);
+			 responseJson(result, resp);	
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+
+    public void getNoticeList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+
+		
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			log(input.toString());
+			
+			input.put("cmd", "getNoticeList");
+			output = interact.execute("/community/board", input);
+			String[] blockNames = new String[] {"property", "notice_list" };
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("board_row_per_page"));
+			 output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			 String result = getJson(output, blockNames);
+			 responseJson(result, resp);	
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+    
+    public void getBoardList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+
+		
+		try
+		{
+			String album_yn = input.getText("album_yn");
+			req.setAttribute("templet-bypass", "true");
+			
+			String emp_no = "";
+			
+			try
+			{
+				if(getUserObject(req, resp) != null && getUserObject(req, resp).getId() != null)
+				{			
+					emp_no = getUserObject(req, resp).getId();
+				}	
+			} catch(Exception ex)
+			{}
+			
+			
+			if(!"Y".equals(album_yn))
+			{
+				input.put("emp_no", emp_no);
+				input.put("cmd", "getBoard");	
+			} else
+			{
+				input.put("emp_no", emp_no);
+				input.put("cmd", "getAlbumBoard");
+			}
+			
+			output = interact.execute("/community/board", input);
+			String[] blockNames = new String[] {"property", "board_list" };
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("board_row_per_page"));
+			 output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			 String result = getJson(output, blockNames);
+			 System.out.println(result);
+			 responseJson(result, resp);	
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+    
+    public void getSearchList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+
+		
+		try
+		{
+			String album_yn = input.getText("album_yn");
+			req.setAttribute("templet-bypass", "true");
+						
+			input.put("cmd", "getSearchList");	
+			
+			output = interact.execute("/community/board", input);
+			String[] blockNames = new String[] {"property", "board_list" };
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("board_row_per_page"));
+			 output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			 String result = getJson(output, blockNames);
+			 
+			 responseJson(result, resp);	
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+    
+    public void getSearchFaqList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+	
+		
+		try
+		{
+			req.setAttribute("templet-bypass", "true");
+			
+			log(input.toString());
+			
+			input.put("cmd", "getSearchList");
+			output = interact.execute("/community/FAQ", input);
+			String[] blockNames = new String[] {"property", "list" };
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			 output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("faq_cur_pg"));
+			 
+			 output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+			 
+			 String result = getJson(output, blockNames);
+			 responseJson(result, resp);	
+		 } catch (Exception ex) {
+			 responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	}
+    
+    public void doBoardRead(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{
+			
+			String emp_no = "";
+			
+			try
+			{
+				if(getUserObject(req, resp) != null && getUserObject(req, resp).getId() != null)
+				{			
+					emp_no = getUserObject(req, resp).getId();
+				}	
+			} catch(Exception ex)
+			{}
+			
+			
+			input.put("emp_no", emp_no);
+			
+			input.put("cmd", "doBoardRead");
+			interact.execute("/community/board", input, output);
+			
+			String[] blockNames = new String[] { "board_detail"};
+
+			String result = getJson(output, blockNames);
+			responseJson(result, resp);
+			
+		} catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw ex;				
+		}
+	}
+    
+    
+  //댓글 등록.
+  	 public void doCommentAdd(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		 throws ServletException, IOException, Exception 
+	 {
+		 DataSet input = new DataSet();
+		 DataSet output = new DataSet();
+		 bind(req, input);
+		
+			
+		 req.setAttribute("templet-bypass", "true");
+		 input.put("use_emp_no", getUserObject(req, resp).getId() );
+		 
+		 try {			
+			 input.put("cmd", "doCommentAdd");
+			 output = interact.execute("/community/board", input);
+			 
+			 String result = getXMLFormat("");
+			 responseXML(result, resp);
+		 } catch (Exception ex) {
+			 responseXML(
+					 getXMLFormat(
+							 HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+							 ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	 }
+ 
+  	 //댓글 삭제.
+  	 public void doCommentDel(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+  			 throws ServletException, IOException, Exception 
+  	 {
+  		 DataSet input = new DataSet();
+  		 DataSet output = new DataSet();
+  		 bind(req, input);
+  		
+  	
+  		boolean isAdmin = isContainUserGroup(req, resp, "BOARDMNG");
+  			
+  		 req.setAttribute("templet-bypass", "true");
+  		 
+  		 if(isAdmin )
+  			 input.put("use_emp_no", input.getText("use_emp_no") );
+  		 else
+  			 input.put("use_emp_no", getUserObject(req, resp).getId() );
+  		 
+  		 try {			
+  			 input.put("cmd", "doCommentDel");
+  			 output = interact.execute("/community/board", input);
+
+  			 String result = getXMLFormat("");
+  			 responseXML(result, resp);
+  		 } catch (Exception ex) {
+  			 responseXML(
+  					 getXMLFormat(
+  							 HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+  							 ex.getMessage(), ""), resp);
+  			 Logger.err.print(Utility.getStackTrace(ex));
+  		 }
+  	 }
+  	 
+  	//댓글 조회.
+	 public void doCommentRead(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			 throws ServletException, IOException, Exception 
+	 {
+		 DataSet input = new DataSet();
+		 DataSet output = new DataSet();
+		 bind(req, input);
+			
+			
+		 req.setAttribute("templet-bypass", "true");
+		 //input.put("rg_empl_no", getUserObject(req, resp).getId() );
+		 
+		 try {			
+			 input.put("cmd", "doCommentRead");
+			 output = interact.execute("/community/board", input);
+			 String[] blockNames = new String[] { "comment_info" };
+			 
+			 String result = getXML(output, blockNames);		
+			 responseXML(result, resp);
+		 } catch (Exception ex) {
+			 responseXML(
+					 getXMLFormat(
+							 HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR,
+							 ex.getMessage(), ""), resp);
+			 Logger.err.print(Utility.getStackTrace(ex));
+		 }
+	 }
+  
+    
+	]]>
+	</jsp:declaration>
+</jsp:root>
+

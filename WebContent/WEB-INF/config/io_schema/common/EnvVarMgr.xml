@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="EnvVarMgr">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			executeSQL(cmd, connection, input, output);
+			]]>
+
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="GET_ENV_VAR">
+			<query>
+			<![CDATA[
+				SELECT			
+				  seq_no,
+				  ky,
+				  val
+				FROM tb_kabm_glbl_config
+				ORDER BY seq_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty> seq_no, key, val</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="UPDATE_ENV_VAR">
+			<query>
+			<![CDATA[
+				UPDATE tb_kabm_glbl_config
+				SET val=?
+				WHERE seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>val, seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='cmpny_no' type='String'	size=''/>
+			<field name='val' type='String'	size=''/>
+			<field name='seq_no' type='int'	size=''/>
+			
+		</block>
+	</input>
+	
+	<output> 
+						
+		<block id='env_var_list' name='env_var_list' repeat='9999999'>
+			<field name='seq_no' type='String'	size=''/>
+			<field name='key' type='String'	size=''/>
+			<field name='val' type='String'	size=''/>
+		</block>
+		
+	</output>
+</transaction>

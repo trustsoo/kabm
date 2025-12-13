@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="OfflineMgr">
+	<processor-info type='dbms' datasource=''>
+		<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+		<script language="java" import="">
+			<![CDATA[
+			String cmd = input.getText("cmd");
+			
+			if("GET_OFFLINE_EDU_LIST".equals(cmd) )
+			{
+				StringBuffer addWhere = new StringBuffer();
+                
+                //지회코드  
+                String search_gbn_jicode = input.getText("search_gbn_jicode") ;
+               
+                if ( search_gbn_jicode !=null && !search_gbn_jicode.equals("%") )
+                {
+                    addWhere.append(" and a.ji_code = '" + search_gbn_jicode + "' ");
+                }
+                input.put("addWhere", addWhere.toString() );
+              	executeSQL(cmd, connection, input, output);
+             }else if( "GET_OFFLINE_USER_LIST".equals(cmd) || "GET_OFFLINE_USER_HISTORY".equals(cmd) ){
+             	
+             	if( "GET_OFFLINE_USER_LIST".equals(cmd) )
+             		input.put("addWhere", " and a.dcm_no = '" + input.getText("dcm_no")+ "' " );
+             		
+             	if( "GET_OFFLINE_USER_HISTORY".equals(cmd) &&  "2".equals(input.getText("confirm_step")) )
+             		input.put("addWhere", " and a.jcode = '" + input.getText("jcode")+ "' " );	
+             		
+              	executeSQL("GET_OFFLINE_USER_LIST", connection, input, output);
+             
+             }else{
+				executeSQL(cmd, connection, input, output);
+			}
+			
+			
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		
+		<sql id="GET_OFFLINE_EDU_LIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					    schedule_id, cp_code, ji_code, dcm_no, is_date,
+						is_gb,ist_title, is_ill, obcnt, apcnt, 
+						pscnt, rccnt, iplace, jcha, remark,
+						state, use_yn , web_yn, emtp, stime,
+						etime, edct_expns, bank_no, bank_name, bank_ju,
+						tel, dam_tel,
+						srcv_date, ercv_date, brd_no,jisaname,
+						start_yn,end_yn,ing_yn,
+                   	    tot_cnt
+				FROM
+				(	
+					select 
+						schedule_id, a.cp_code, a.ji_code, dcm_no, convert( char(10), is_date, 23 ) is_date,
+						is_gb,ist_title, is_ill, obcnt, apcnt, 
+						pscnt, rccnt, iplace, jcha, remark,
+						state, a.use_yn , web_yn, emtp, convert( char(5), stime, 8 ) stime,
+						convert( char(5), etime , 8 ) etime, edct_expns, bank_no, bank_name, bank_ju,
+						b.tel, b.dam_tel,
+						srcv_date, ercv_date, brd_no, replace(b.jisaname, '지회', '' ) jisaname,
+						case when  cast( srcv_date as datetime) <= getdate() +1  then 'Y' else 'N' end as start_yn,
+						case when  cast( ercv_date as datetime) < getdate() -1  then 'Y' else 'N' end as end_yn,
+						case when  cast( srcv_date as datetime) <= getdate()+1  and  cast(ercv_date as datetime) >= getdate()-1  then 'Y' else 'N' end as ing_yn,
+						ROW_NUMBER() over( order by a.is_date desc) rnum,
+						COUNT(a.schedule_id) over() tot_cnt
+					from TB_EDCT_SCHEDULE a, tb_apc_company_sub b
+					where a.ji_code = b.ji_code 		
+					and convert(char(4) , IS_DATE, 23) = ?
+					and is_gb = ?
+					$addWhere
+					
+				)a	
+				where a.rnum > (?-1)*?		
+			]]>
+			</query>
+			<mapping>
+				<setProperty>yyyy,is_gb,page_no,rnum</setProperty>
+				<getProperty>
+						schedule_id, cp_code, ji_code, dcm_no, is_date,
+						is_gb,ist_title, is_ill, obcnt, apcnt, 
+						pscnt, rccnt, iplace, jcha, remark,
+						state, use_yn , web_yn, emtp, stime,
+						etime, edct_expns, bank_no, bank_name, bank_ju,
+						tel, dam_tel,
+						srcv_date, ercv_date, brd_no,jisaname,
+						start_yn,end_yn,ing_yn,
+						tot_cnt
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_OFFLINE_EDU_INFO">
+			<query>
+			<![CDATA[
+				
+					select 
+						schedule_id, a.cp_code, a.ji_code, dcm_no, convert( char(10), is_date, 23 ) is_date,
+						is_gb,ist_title, is_ill, obcnt, apcnt, 
+						pscnt, rccnt, iplace, jcha, remark,
+						state, a.use_yn , web_yn, emtp, convert( char(5), stime, 8 ) stime,
+						convert( char(5), etime , 8 ) etime, edct_expns, bank_no, bank_name, bank_ju,
+						srcv_date, ercv_date, brd_no, replace(b.jisaname, '지회', '' ) jisaname,
+						b.tel jisatel,
+						case when  cast( srcv_date as datetime) <= getdate() +1  then 'Y' else 'N' end as start_yn,
+						case when  cast( ercv_date as datetime) < getdate() -1  then 'Y' else 'N' end as end_yn,
+						case when  cast( srcv_date as datetime) <= getdate()+1  and  cast(ercv_date as datetime) >= getdate()-1  then 'Y' else 'N' end as ing_yn
+					from TB_EDCT_SCHEDULE a, tb_apc_company_sub b
+					where a.ji_code = b.ji_code 		
+					and dcm_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>dcm_no</setProperty>
+				<getProperty>
+						schedule_id, cp_code, ji_code, dcm_no, is_date,
+						is_gb,ist_title, is_ill, obcnt, apcnt, 
+						pscnt, rccnt, iplace, jcha, remark,
+						state, use_yn , web_yn, emtp, stime,
+						etime, edct_expns, bank_no, bank_name, bank_ju,
+						srcv_date, ercv_date, brd_no,jisaname,jisatel,
+						start_yn,end_yn,ing_yn
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="INSERT_OFFLINE_EDU">
+			<query>
+			<![CDATA[
+				
+				MERGE INTO TB_CYBER_USER_OFFLINE a
+					USING (SELECT ? JCODE ) b
+					ON (a.JCODE = b.JCODE )
+				WHEN MATCHED THEN
+				UPDATE SET
+					JDATE = getdate(),
+					ILL_NO = ?,
+					COMPANY = ?,
+					MOD_YN = ?,
+					RE_CORP_POST =?,RE_CORP_ADDR =?,RE_CORP_NM =?,RE_CORP_PRESIDENT =?,RE_CORP_REG_NO =?,
+		            BNONE_YN= ?,BNAME= ?,BDATE= ?,BAREA= ?,BADDR= ?, 
+		            BJIBUN = ?,BPOST = ?,BTEL= ?,
+					PDATE = ?,RNAME = ?,JIKWEY = ?,JM_NO = ?,
+					TEL = ?,HP = ?,EMAIL = ?,SEX = ?,
+					DEPOSIT_DT = ?,DEPOSIT_NM = ?, DEPOSIT_BANK = ?
+				WHEN NOT MATCHED THEN
+				INSERT
+				(CP_CODE,JI_CODE,JCODE,JDATE,ILL_NO,COMPANY
+				,REQ_USER_NM,REQ_TEL_NO,MOD_YN
+				,RE_CORP_POST,RE_CORP_ADDR,RE_CORP_NM,RE_CORP_PRESIDENT,RE_CORP_REG_NO
+				,BNONE_YN,BNAME,BDATE,BAREA,BADDR
+				,BJIBUN,BPOST,BTEL
+				,PDATE,RNAME,JIKWEY,JM_NO
+				,TEL,HP,EMAIL,SEX
+				,DTL_CODE,DCM_NO,REG_DATE,STATUS
+				,DEPOSIT_DT,DEPOSIT_NM,DEPOSIT_BANK)
+				VALUES
+				(?, ?, ?, getdate(), ?, ?,
+				 ?, ?, ?,
+				 ?, ?, ?, ?, ?,
+				 ?, ?, ?, ?, ?, 
+				 ?, ?, ?,				 
+				 ?, ?, ?, ?,
+				 ?, ?, ?, ?,
+				 ?, ?, getdate(), 'R',
+				 ?, ?, ?);
+			]]>
+			</query>
+			<mapping>
+				<setProperty>jcode,ill_no,corp_nm,mod_yn
+				            ,re_corp_zipcode,re_corp_addr,re_corp_nm,re_president_nm,re_corp_reg_no
+							,building_none,building_nm,building_start_dt,building_area,building_addr
+							,building_jibun,building_zipcode,building_tel_no
+							,chrg_ymd,user_nm,pos_nm,birth
+							,tel_no,phone_no,email,sex
+							,deposit_dt,deposit_nm,deposit_bank
+							
+							,cp_code,ji_code,jcode,ill_no,corp_nm
+				            ,req_user_nm,req_tel_no,mod_yn
+				            ,re_corp_zipcode,re_corp_addr,re_corp_nm,re_president_nm,re_corp_reg_no
+							,building_none,building_nm,building_start_dt,building_area,building_addr
+							,building_jibun,building_zipcode,building_tel_no
+							,chrg_ymd,user_nm,pos_nm,birth
+							,tel_no,phone_no,email,sex
+							,is_gb,dcm_no
+							,deposit_dt,deposit_nm,deposit_bank
+				</setProperty>
+				<getProperty>	</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_OFFLINE_USER_LIST">
+			<query>
+			<![CDATA[
+				SELECT top $rnum
+					    user_offline_seq_no,cp_code,ji_code,jcode,convert( varchar, jdate, 23 ) jdate,ill_no,corp_nm
+			            ,req_user_nm,req_tel_no,mod_yn
+			            ,re_corp_zipcode,re_corp_addr,re_corp_nm,re_president_nm,re_corp_reg_no
+						,building_none,building_nm,building_start_dt,building_area,building_addr
+						,building_jibun,building_zipcode,building_tel_no
+						,chrg_ymd,user_nm,pos_nm,birth
+						,tel_no,phone_no,email,sex
+						,is_gb,dcm_no,convert( char(10), reg_date, 23 ) reg_date,jisaname,jisatel
+						,corp_reg_no,president_nm,corp_addr_nm,is_date						
+						,web_yn, use_yn	,iplace,stime,etime
+						,start_yn,end_yn,ing_yn
+						,deposit_dt,deposit_nm,deposit_bank
+                   	    ,tot_cnt
+				FROM
+				(	
+					select 
+						 a.user_offline_seq_no,a.cp_code,a.ji_code,a.jcode,a.jdate,a.ill_no,a.company corp_nm
+						,a.req_user_nm,a.req_tel_no,a.mod_yn
+						,a.re_corp_post re_corp_zipcode,a.re_corp_addr,a.re_corp_nm,a.re_corp_president re_president_nm,a.re_corp_reg_no
+						,a.bnone_yn building_none,a.bname building_nm,a.bdate building_start_dt,a.barea building_area,a.baddr building_addr
+						,a.bjibun building_jibun,a.bpost building_zipcode,a.btel building_tel_no
+						,a.pdate chrg_ymd,a.rname user_nm,a.jikwey pos_nm,a.jm_no birth
+						,a.tel tel_no,a.hp phone_no,a.email,a.sex
+						,a.dtl_code is_gb,a.dcm_no,a.reg_date
+						,c.jisaname,c.tel jisatel
+						,d.bsns_no corp_reg_no,d.rprstt_kr president_nm
+						,'('+d.cpost+')'+ d.cp_addr + ' '+ d.cp_jibun as corp_addr_nm
+						,convert( char(10), b.is_date, 23 ) is_date
+						
+						,b.web_yn, b.use_yn,b.iplace,convert(varchar, b.stime, 108) stime, convert(varchar, b.etime, 108) etime
+						,case when  cast( b.srcv_date as datetime) <= getdate() +1  then 'Y' else 'N' end as start_yn
+						,case when  cast( b.ercv_date as datetime) < getdate() -1  then 'Y' else 'N' end as end_yn
+						,case when  cast( b.srcv_date as datetime) <= getdate()+1  and  cast(b.ercv_date as datetime) >= getdate()-1  then 'Y' else 'N' end as ing_yn
+						
+						,a.deposit_dt,a.deposit_nm,a.deposit_bank
+						,ROW_NUMBER() over( order by a.reg_date desc) rnum
+						,COUNT(a.dcm_no) over() tot_cnt
+					from TB_CYBER_USER_OFFLINE a, TB_EDCT_SCHEDULE b, tb_apc_company_sub c, tb_mb_master d
+					where a.dcm_no = b.dcm_no 
+					and b.cp_code = c.cp_code 		
+					and b.ji_code = c.ji_code
+					and a.ill_no = d.ill_no 
+					$addWhere
+					and a.req_user_nm = ?
+					and a.req_tel_no = ?
+					and ISNULL(a.status , 'R') != 'C' 
+				) a	
+				where a.rnum > (?-1)*?		
+			]]>
+			</query>
+			<mapping>
+				<setProperty>req_user_nm,req_tel_no,page_no,rnum</setProperty>
+				<getProperty>
+						user_offline_seq_no,cp_code,ji_code,jcode,jdate,ill_no,corp_nm
+			            ,req_user_nm,req_tel_no,mod_yn
+			            ,re_corp_zipcode,re_corp_addr,re_corp_nm,re_president_nm,re_corp_reg_no
+						,building_none,building_nm,building_start_dt,building_area,building_addr
+						,building_jibun,building_zipcode,building_tel_no
+						,chrg_ymd,user_nm,pos_nm,birth
+						,tel_no,phone_no,email,sex
+						,is_gb,dcm_no,reg_date,jisaname,jisatel
+						,corp_reg_no,president_nm,corp_addr_nm,is_date
+						,web_yn, use_yn	,iplace,stime,etime
+						,start_yn,end_yn,ing_yn	
+						,deposit_dt,deposit_nm,deposit_bank
+                   	    ,tot_cnt
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_OFFLINE_USER_INFO">
+			<query>
+			<![CDATA[
+				
+					select 
+						  a.user_offline_seq_no,a.cp_code,a.ji_code,a.jcode,convert( varchar, a.jdate, 23 ) jdate,a.ill_no,a.company corp_nm
+						,a.req_user_nm,a.req_tel_no,a.mod_yn
+						,a.re_corp_post re_corp_zipcode,a.re_corp_addr,a.re_corp_nm,a.re_corp_president re_president_nm,a.re_corp_reg_no
+						,a.bnone_yn building_none,a.bname building_nm,a.bdate building_start_dt,a.barea building_area,a.baddr building_addr
+						,a.bjibun building_jibun,a.bpost building_zipcode,a.btel building_tel_no
+						,a.pdate chrg_ymd,a.rname user_nm,a.jikwey pos_nm,a.jm_no birth
+						,a.tel tel_no,a.hp phone_no,a.email,a.sex
+						,a.dtl_code is_gb,a.dcm_no,convert( char(10), a.reg_date, 23 ) reg_date
+						,c.jisaname,c.tel jisatel
+						,d.bsns_no corp_reg_no,d.rprstt_kr president_nm
+						,'('+d.cpost+')'+ d.cp_addr + ' '+ d.cp_jibun as corp_addr_nm
+						,convert( char(10), b.is_date, 23 ) is_date
+						,b.web_yn, b.use_yn,b.iplace,convert(varchar, b.stime, 108) stime, convert(varchar, b.etime, 108) etime
+						,case when  cast( b.srcv_date as datetime) <= getdate() +1  then 'Y' else 'N' end as start_yn
+						,case when  cast( b.ercv_date as datetime) < getdate() -1  then 'Y' else 'N' end as end_yn
+						,case when  cast( b.srcv_date as datetime) <= getdate()+1  and  cast(b.ercv_date as datetime) >= getdate()-1  then 'Y' else 'N' end as ing_yn
+						,a.deposit_dt,a.deposit_nm,a.deposit_bank
+					from TB_CYBER_USER_OFFLINE a, TB_EDCT_SCHEDULE b, tb_apc_company_sub c, tb_mb_master d
+					where a.dcm_no = b.dcm_no 
+					and b.cp_code = c.cp_code 		
+					and b.ji_code = c.ji_code
+					and a.ill_no = d.ill_no 
+					and a.user_offline_seq_no = ?
+				
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_offline_seq_no</setProperty>
+				<getProperty>
+						user_offline_seq_no,cp_code,ji_code,jcode,jdate,ill_no,corp_nm
+			            ,req_user_nm,req_tel_no,mod_yn
+			            ,re_corp_zipcode,re_corp_addr,re_corp_nm,re_president_nm,re_corp_reg_no
+						,building_none,building_nm,building_start_dt,building_area,building_addr
+						,building_jibun,building_zipcode,building_tel_no
+						,chrg_ymd,user_nm,pos_nm,birth
+						,tel_no,phone_no,email,sex
+						,is_gb,dcm_no,reg_date,jisaname,jisatel
+						,corp_reg_no,president_nm,corp_addr_nm,is_date
+						,web_yn, use_yn	,iplace,stime,etime
+						,start_yn,end_yn,ing_yn	
+						,deposit_dt,deposit_nm,deposit_bank
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_OFFLINE_JUPSU_INFO">
+			<query>
+			<![CDATA[				
+					select 
+						 a.user_offline_seq_no,a.cp_code,a.ji_code,a.jcode,a.req_user_nm,a.req_tel_no
+					from TB_CYBER_USER_OFFLINE a
+					where a.jcode = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>jcode</setProperty>
+				<getProperty>
+						user_offline_seq_no,cp_code,ji_code,jcode,req_user_nm,req_tel_no
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="CANCEL_OFFLINE_USER_INFO">
+			<query>
+			<![CDATA[
+				
+				UPDATE TB_CYBER_USER_OFFLINE SET
+					STATUS = 'C'
+				WHERE user_offline_seq_no = ?
+				AND req_user_nm = ?
+				AND req_tel_no = ? 
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_offline_seq_no,req_user_nm,req_tel_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+				
+		<sql id="UPDATE_OFFLINE_USER_CORP_INFO">
+			<query>
+			<![CDATA[
+				
+				UPDATE TB_CYBER_USER_OFFLINE SET
+					ILL_NO = ?,
+					COMPANY = ?,
+					MOD_YN = ?,
+					RE_CORP_POST =?,RE_CORP_ADDR =?,RE_CORP_NM =?,RE_CORP_PRESIDENT =?,RE_CORP_REG_NO =?
+				WHERE user_offline_seq_no = ?				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>ill_no,corp_nm,mod_yn			            
+			            ,re_corp_zipcode,re_corp_addr,re_corp_nm,re_president_nm,re_corp_reg_no
+			            ,user_offline_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="UPDATE_OFFLINE_USER_BUILDING_INFO">
+			<query>
+			<![CDATA[
+				
+				UPDATE TB_CYBER_USER_OFFLINE SET
+					BNONE_YN= ?,BNAME= ?,BDATE= ?,BAREA= ?,BADDR= ?, 
+		            BJIBUN = ?,BPOST = ?,BTEL= ?
+				WHERE user_offline_seq_no = ?				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>building_none,building_nm,building_start_dt,building_area,building_addr
+							,building_jibun,building_zipcode,building_tel_no
+			            	,user_offline_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="UPDATE_OFFLINE_USER_STUDENT_INFO">
+			<query>
+			<![CDATA[
+				
+				UPDATE TB_CYBER_USER_OFFLINE SET
+					PDATE = ?,RNAME = ?,JIKWEY = ?,JM_NO = ?,
+					TEL = ?,HP = ?,EMAIL = ?,SEX = ?
+				WHERE user_offline_seq_no = ?				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>chrg_ymd,user_nm,pos_nm,birth
+							,tel_no,phone_no,email,sex
+			            	,user_offline_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="UPDATE_OFFLINE_USER_DEPOSIT_INFO">
+			<query>
+			<![CDATA[
+				
+				UPDATE TB_CYBER_USER_OFFLINE SET
+					DEPOSIT_DT = ?,DEPOSIT_NM = ?, DEPOSIT_BANK = ?
+				WHERE user_offline_seq_no = ?				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>deposit_dt,deposit_nm,deposit_bank
+			            	,user_offline_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		<sql id="CHANGE_OFFLINE_USER_EDU_INFO">
+			<query>
+			<![CDATA[
+				
+				UPDATE TB_CYBER_USER_OFFLINE SET
+					CP_CODE = ?,JI_CODE = ?,DCM_NO = ?
+				WHERE user_offline_seq_no = ?				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>cp_code,ji_code,dcm_no,user_offline_seq_no
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+	</processor-info>
+
+	<input>
+		<block name="arg" repeat="1">			
+			<field name="rnum"  type="int"      size="" default="20"/>
+            <field name="page_no"     type="int"      size="" default="1"/>
+            <field name="user_seq_no"      type="int"   size="" />
+            
+            <field name='is_gb'       type='String' size=''/>
+            <field name='is_date'       type='String' size=''/>
+            <field name='yyyy'       type='String' size=''/>            
+            
+            <field name='dtl_code'       type='String' size=''/>            
+            <field name="addWhere"      type="string"   size="" />
+            
+            <field name="cp_code"      type="string"   size="" />
+            <field name="ji_code"      type="string"   size="" />
+            <field name="jcode"      type="string"   size="" />
+            <field name="ill_no"      type="string"   size="" />
+            <field name='dcm_no'       type='String' size=''/>
+            
+            <field name="req_user_nm"      type="string"   size="" />
+            <field name="req_tel_no"      type="string"   size="" />
+            
+            <field name="corp_nm"      type="string"   size="" />
+            <field name="mod_yn"      type="string"   size="" />
+            <field name="re_corp_zipcode"      type="string"   size="" />
+            <field name="re_corp_addr"      type="string"   size="" />
+            <field name="re_corp_nm"      type="string"   size="" />
+            <field name="re_corp_reg_no"      type="string"   size="" />
+            <field name="re_president_nm"      type="string"   size="" />
+            
+            <field name="building_nm"      type="string"   size="" />
+            <field name="building_zipcode"      type="string"   size="" />
+            <field name="building_addr"      type="string"   size="" />
+            <field name="building_jibun"      type="string"   size="" />
+            <field name="building_tel_no"      type="string"   size="" />
+            <field name="building_area"      type="string"   size="" />
+            <field name="building_start_dt"      type="string"   size="" />
+            <field name="building_none"      type="string"   size="" />
+                        
+            <field name="user_nm"      type="string"   size="" />
+            <field name="sex"      type="string"   size="" />
+            <field name="birth"      type="string"   size="" />
+            <field name="phone_no"      type="string"   size="" />
+            <field name="email"      type="string"   size="" />
+            <field name="chrg_ymd"      type="string"   size="" />
+            <field name="pos_nm"      type="string"   size="" />
+            <field name="tel_no"      type="string"   size="" />
+         	
+         	<field name="user_offline_seq_no"      type="int"   size="" />
+         	<field name='deposit_dt' type='string' size="" />
+            <field name='deposit_nm' type='string' size="" />
+            <field name='deposit_bank' type='string' size="" />
+		</block>
+	</input>
+
+	<output>
+		<block repeat=''>
+			<field name='rnum'          type='int'      size=''/>      
+            <field name='tot_cnt'       type='int'      size=''/>      
+            
+		</block>
+		<block id="property" name="property" repeat="1">
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+        
+		<block name="req_info" id="req_info" repeat='9999999'>
+			 <field name='user_offline_seq_no'         type='string' size=''/>
+			 <field name='dcm_no'         type='string' size=''/>
+			 <field name='ist_title'         type='string' size=''/>
+			 <field name='is_date'         type='string' size=''/>
+			 <field name='is_ill'         type='string' size=''/>
+			 <field name='iplace'         type='string' size=''/>
+			 <field name='jcode'         type='string' size=''/>
+			 <field name='jdate'         type='string' size=''/>
+			 <field name='dtl_code'         type='string' size=''/>
+			 <field name='user_seq_no'         type='string' size=''/>
+			 <field name='req_status'         type='string' size=''/>
+			 <field name='state_nm'         type='string' size=''/>
+			 <field name='reg_date'         type='string' size=''/>
+			 <field name='tot_cnt'         type='string' size=''/>
+		</block>
+		<block id='offline_user_info' name='offline_user_info' repeat='9999999'>
+			<field name="user_offline_seq_no"      type="string"   size="" />
+			<field name="cp_code"      type="string"   size="" />
+            <field name="ji_code"      type="string"   size="" />
+            <field name="jcode"      type="string"   size="" />
+            <field name="ill_no"      type="string"   size="" />
+            <field name='dcm_no'       type='String' size=''/>
+            
+            <field name="req_user_nm"      type="string"   size="" />
+            <field name="req_tel_no"      type="string"   size="" />
+            
+            <field name="corp_nm"      type="string"   size="" />
+            <field name="mod_yn"      type="string"   size="" />
+            <field name="re_corp_zipcode"      type="string"   size="" />
+            <field name="re_corp_addr"      type="string"   size="" />
+            <field name="re_corp_nm"      type="string"   size="" />
+            <field name="re_corp_reg_no"      type="string"   size="" />
+            <field name="re_president_nm"      type="string"   size="" />
+            
+            <field name="building_nm"      type="string"   size="" />
+            <field name="building_zipcode"      type="string"   size="" />
+            <field name="building_addr"      type="string"   size="" />
+            <field name="building_jibun"      type="string"   size="" />
+            <field name="building_tel_no"      type="string"   size="" />
+            <field name="building_area"      type="string"   size="" />
+            <field name="building_start_dt"      type="string"   size="" />
+            <field name="building_none"      type="string"   size="" />
+                        
+            <field name="user_nm"      type="string"   size="" />
+            <field name="sex"      type="string"   size="" />
+            <field name="birth"      type="string"   size="" />
+            <field name="phone_no"      type="string"   size="" />
+            <field name="email"      type="string"   size="" />
+            <field name="chrg_ymd"      type="string"   size="" />
+            <field name="pos_nm"      type="string"   size="" />
+            <field name="tel_no"      type="string"   size="" />
+            
+            <field name="reg_date"      type="string"   size="" />
+            <field name="jdate"      type="string"   size="" />
+            <field name="jisaname"      type="string"   size="" />
+            <field name="jisatel"      type="string"   size="" />
+            
+            <field name="corp_reg_no"      type="string"   size="" />
+            <field name="president_nm"      type="string"   size="" />
+            <field name="corp_addr_nm"      type="string"   size="" />
+            <field name="is_date"      type="string"   size="" />
+            <field name='is_gb' type='string' size="" />
+            <field name="stime"      type="string"   size="" />
+            <field name="etime"      type="string"   size="" />
+            <field name='iplace' type='string' size="" />
+            
+            <field name='web_yn' type='string' size="" />
+            <field name='use_yn' type='string' size="" />
+            <field name='start_yn' type='string' size="" />
+            <field name='end_yn' type='string' size="" />
+            <field name='ing_yn' type='string' size="" />
+            
+            <field name='deposit_dt' type='string' size="" />
+            <field name='deposit_nm' type='string' size="" />
+            <field name='deposit_bank' type='string' size="" />
+		</block>
+		
+		<block id='offline_info' name='offline_info' repeat='9999999'>
+			<field name='schedule_id' type='String'	size=''/>
+			<field name='cp_code' type='string'	size=''/>
+			<field name='ji_code' type='string'	size=''/>
+			<field name='dcm_no' type='string'	size=''/>
+			<field name='is_date' type='string'/>
+			
+			<field name='is_gb' type='string'/>
+			<field name='ist_title' type='string'/>
+			<field name='is_ill' type='string'/>
+			<field name='obcnt' type='string'/>
+			<field name='apcnt' type='string'/>
+			
+			<field name='pscnt' type='string'/>
+			<field name='rccnt' type='string'/>
+			<field name='iplace' type='string'/>
+			<field name='jcha' type='string'/>
+			<field name='remark' type='string'/>
+			
+			<field name='state' type='string'/>
+			<field name='use_yn' type='string'/>
+			<field name='web_yn' type='string'/>
+			<field name='emtp' type='string'/>
+			<field name='stime' type='string'/>
+			
+			<field name='etime' type='string'/>
+			<field name='edct_expns' type='int'/>
+			<field name='bank_no' type='string'/>
+			<field name='bank_name' type='string'/>
+			<field name='bank_ju' type='string'/>
+			
+			<field name='tel' type='string'/>
+			<field name='dam_tel' type='string'/>
+						
+			<field name='srcv_date' type='string'/>
+			<field name='ercv_date' type='string'/>
+			<field name='brd_no' type='string'/>
+			<field name='jisaname' type='string'/>
+			<field name='jisatel' type='string'/>
+			<field name='start_yn' type='string'/>
+			<field name='end_yn' type='string'/>
+			<field name='ing_yn' type='string'/>
+			
+			<field name='deposit_dt' type='string' size="" />
+            <field name='deposit_nm' type='string' size="" />
+            <field name='deposit_bank' type='string' size="" />
+		</block>
+		<block id='offline_jupsu_info' name='offline_jupsu_info' repeat='1'>
+			<field name='user_offline_seq_no' type='string'/>
+			<field name='cp_code' type='string'/>
+			<field name='ji_code' type='string'/>
+			<field name='jcode' type='string'/>
+			<field name='req_user_nm' type='string'/>
+			<field name='req_tel_no' type='string'/>
+		</block>
+	</output>
+</transaction>

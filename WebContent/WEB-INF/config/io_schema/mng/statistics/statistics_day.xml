@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='statistics_day' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String in_search_gbn = input.getText("in_search_gbn");  
+          
+           
+            if( "monthtotal".equals(in_search_gbn) ) 
+            {
+            	executeSQL("select_staticstic_monthtotal", connection, input, output);
+            } else {
+                executeSQL("select_staticstic_daytotal", connection, input, output);
+            }
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_staticstic_daytotal">
+            <query>
+                <![CDATA[
+                   SELECT TOP (?) 
+                     A.log_date, A.sum_uv, A.sum_pv,A.rnum,A.tot_cnt,
+                    isnull(b.memberCount,0) memberCount
+                    FROM ( 
+                        select 
+                            ROW_NUMBER() OVER( ORDER BY yyyy,mm,dd ) AS rnum, 
+                            count(*) over() tot_cnt,    
+                            yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) as reg_date,  
+                            yyyy + '-' + RIGHT('00' + replace(mm, ' ', ''),2) + '-' +   RIGHT('00' + replace(dd, ' ', ''),2) as log_date,
+                            sum(uv) as sum_uv,
+                            sum(pv) as sum_pv
+                        from 
+                            tb_kabm_stat_view
+                        where yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) >= ? and  
+                              yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) <= ?
+                        group by yyyy, mm, dd
+                    ) A
+                    left outer join 
+                    (
+                        select 
+                            CONVERT(CHAR(8), reg_date, 112) as reg_date, 
+                            count(*) as memberCount
+                        from TB_CYBER_MEMBER
+                        where CONVERT(CHAR(8), reg_date, 112) >= ? and  CONVERT(CHAR(8), reg_date, 112) <= ?
+                        group by CONVERT(CHAR(8), reg_date, 112)
+                    ) B
+                    on A.reg_date = B.reg_date
+                    WHERE rnum > (?-1) * ?
+                ]]>
+            </query>
+            <mapping>
+                 <setProperty>row_per_page,in_ddtm_from , in_ddtm_to,in_ddtm_from , in_ddtm_to, cur_pg, row_per_page </setProperty>
+                <getProperty>log_date, sum_uv, sum_pv, rnum, tot_cnt, memberCount</getProperty>
+            </mapping>
+        </sql>
+
+        <sql id="select_staticstic_monthtotal">
+            <query>
+                <![CDATA[
+                    SELECT  
+                    TOP (?) 
+                    A.log_date, A.sum_uv, A.sum_pv,A.rnum,A.tot_cnt,
+                    isnull(b.memberCount,0) memberCount
+                    FROM (                                              
+                        select 
+                            ROW_NUMBER() OVER( ORDER BY yyyy,mm ) AS rnum, 
+                            count(*) over() tot_cnt,    
+                            yyyy + RIGHT('00' + replace(mm, ' ', ''),2)  as reg_date,
+                            yyyy + '-' + RIGHT('00' + replace(mm, ' ', ''),2)  as log_date,
+                            sum(uv) as sum_uv,
+                            sum(pv) as sum_pv
+                        from 
+                            tb_kabm_stat_view
+                        where yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) >= ? and  
+                              yyyy + RIGHT('00' + replace(mm, ' ', ''),2) + RIGHT('00' + replace(dd, ' ', ''),2) <= ?
+                        group by yyyy, mm
+                    ) A
+                    left outer join 
+                    (
+                        select 
+                            CONVERT(CHAR(6), reg_date, 112) as reg_date, 
+                            count(*) as memberCount
+                        from TB_CYBER_MEMBER
+                        where CONVERT(CHAR(8), reg_date, 112) >= ? and  CONVERT(CHAR(8), reg_date, 112) <= ?
+                        group by CONVERT(CHAR(6), reg_date, 112)
+                    ) B
+                    on A.reg_date = B.reg_date
+                    WHERE rnum > (?-1) * ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>row_per_page,in_ddtm_from , in_ddtm_to,in_ddtm_from , in_ddtm_to, cur_pg, row_per_page </setProperty>
+                <getProperty>log_date, sum_uv, sum_pv, rnum, tot_cnt, memberCount</getProperty>
+            </mapping>
+        </sql>
+        
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">   
+            <field name='in_ddtm_from' type='string'    size=''/>
+            <field name='in_ddtm_to' type='string'    size=''/>
+            
+            <field name='cur_pg' type='int' size=''/>
+            <field name='row_per_page' type='int'   size=''/>
+
+            <field name='in_search_gbn' type='string'    size=''/>
+        </block>
+    </input>
+    
+    <output>
+
+
+        <block id="property" name="property" repeat="1">
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+
+       <block id='statics_list' name='statics_list' 	repeat=''>
+        	<field name='log_date' 		type='string' size=''/>
+			<field name='sum_uv'     	type='string' size=''/>
+			<field name='sum_pv' 		type='string' size=''/>
+
+            <field name='rnum' type='string'    size=''/>
+            <field name='tot_cnt' type='string' size=''/>
+            <field name='memberCount' type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

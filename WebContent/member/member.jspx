@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[         
+
+/******************************************************************************** 
+ * Program ID		: 멤버관리 
+ * FileName		    : member.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/member/";
+	
+	private static final String JSP_PREFIX = "_mem";
+	
+	private static final String JSP_ID_FIND=JSP_BASE+JSP_PREFIX+"_find_id.jsp";
+	
+	private static final String JSP_PASSWD_FIND=JSP_BASE+JSP_PREFIX+"_find_passwd.jsp";
+	
+	private static final String JSP_PASSWD_FIND_CONFIRM=JSP_BASE+JSP_PREFIX+"_find_passwd_confirm.jsp";
+	
+	private static final String JSP_MODIFY=JSP_BASE+JSP_PREFIX+"_modify.jsp";
+	
+	private static final String JSP_MODIFY_PERSON=JSP_BASE+JSP_PREFIX+"_modify_person.jsp";
+	
+	private static final String JSP_MODIFY_CORP=JSP_BASE+JSP_PREFIX+"_modify_corp.jsp";
+	
+	private static final String JSP_PASS=JSP_BASE+JSP_PREFIX+"_password.jsp";
+	
+	public void id_find(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_ID_FIND);
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+	
+	public void passwd_confirm(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_PASSWD_FIND_CONFIRM);
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+
+	public void passwd_find(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_PASSWD_FIND);
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+	
+	public void memModifyView(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		DataSet reqOutput = new DataSet();
+		try
+		{	
+			jdf.framework.view.auth.User session_user = getUserObject(req , resp);
+			String user_id = "";
+			if(session_user != null )user_id = session_user.getId();
+			
+			input.put("user_id", user_id);
+			input.put("cmd", "MEM_INFO");			
+			output = interact.execute( "/member/MemberMgr" , input);
+			
+			input.put("user_seq_no", session_user.getUser_seq_no());
+			input.put("cmd", "GET_MEMBER_REQ");			
+			reqOutput = interact.execute( "/member/MemberMgr" , input);
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			req.setAttribute("reqOutput", reqOutput);
+			
+			if(MEM_DIV_PESN.equals(output.getText("mem_div")))
+				view.setViewPage(JSP_MODIFY_PERSON);
+			else if(MEM_DIV_CORP.equals(output.getText("mem_div")))
+				view.setViewPage(JSP_MODIFY_CORP);
+			else
+				view.setViewPage(JSP_MODIFY);
+			
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+	
+	public void passModifyView(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);		
+		
+		DataSet output = new DataSet();
+		try
+		{	
+			jdf.framework.view.auth.User session_user = getUserObject(req , resp);
+			String user_id = "";
+			if(session_user != null )user_id = session_user.getId();
+			
+			req.setAttribute("input", input);
+			
+			view.setViewPage(JSP_PASS);
+		} catch(Exception ex)
+		{	
+			throw ex;
+		}
+	}
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

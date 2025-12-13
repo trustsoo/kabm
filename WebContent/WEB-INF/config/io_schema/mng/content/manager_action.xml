@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='manager_action' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+           
+          
+            
+            if( "insert_manager".equals(cmd) ) 
+            {
+                executeSQL(cmd, connection, input, output);
+                executeSQL("getIdentity", connection, input, output);
+            }           
+
+            if( "update_manager".equals(cmd) || "delete_manager".equals(cmd) ) 
+            {
+                executeSQL(cmd, connection, input, output);
+                output.put("emp_no", input.get("emp_no"));
+            } 
+
+            if( ("insert_manager".equals(cmd) || "update_manager".equals(cmd)) && input.getCount("file_nm") > 0) 
+            {
+                DataSet fileInfo = new DataSet();                
+                
+                for (int i = 0, ic = input.getCount("file_nm"); i < ic; i++) {
+	                fileInfo.put("file_nm", input.getText("file_nm", i), i);
+	                fileInfo.put("file_path", input.getText("file_path", i), i);
+	                fileInfo.put("file_size", input.getText("file_size", i), i);
+	                fileInfo.put("ext_nm", input.getText("ext_nm", i), i);
+	                fileInfo.put("user_file_nm", input.getText("user_file_nm", i), i);
+	                fileInfo.put("attach_div_cd", input.getText("attach_div_cd"), i);
+	                fileInfo.put("data_no", output.getText("emp_no"), i);
+	                
+	                if (input.getText("file_no").length() > 0 )
+	                   fileInfo.put("cmd", "update", i);
+	                else
+	                   fileInfo.put("cmd", "create", i);
+	            } 
+                executeTxBL("/common/Attach", fileInfo, output); 
+            } 
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="insert_manager">
+            <query>
+                <![CDATA[
+                    INSERT INTO tb_kabm_manager 
+                        (emp_nm,use_yn,duty_nm,pos_nm,tel_no,fax_no,cmpny_nm,odr,post_no,addr,reg_ddtm,reg_emp_cd)
+                    VALUES
+                        (?,?,?,?,?,?,?,?,?,?,getDate(),?)  
+
+
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>emp_nm,use_yn,duty_nm,pos_nm,tel_no,fax_no,cmpny_nm,odr,post_no,addr,reg_emp_cd</setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+         <sql id="getIdentity">
+            <query>
+                <![CDATA[
+                    SELECT @@IDENTITY AS 'emp_no'                
+                ]]>
+            </query>
+            <mapping>
+                <setProperty></setProperty>
+                <getProperty>emp_no</getProperty>
+            </mapping>
+        </sql>
+
+        <sql id="update_manager">
+            <query>
+                <![CDATA[
+                    UPDATE tb_kabm_manager  SET 
+                        emp_nm=?,use_yn=?,duty_nm=?,pos_nm=?,tel_no=?,fax_no=?,cmpny_nm=?,odr=?,post_no=?,addr=?,reg_emp_cd=?
+                    WHERE emp_no=?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>emp_nm,use_yn,duty_nm,pos_nm,tel_no,fax_no,cmpny_nm,odr,post_no,addr,reg_emp_cd, emp_no</setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+        <sql id="delete_manager">
+            <query>
+                <![CDATA[
+                    DELETE FROM tb_kabm_manager WHERE emp_no=?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>emp_no</setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+
+
+
+        
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">
+            <field name='emp_no'    type='string' size=''/>  <!-- 임원 일련번호 -->
+            <field name='emp_nm'    type='string' size=''/>  <!-- 성명 -->
+            <field name='use_yn'    type='string' size=''/>  <!-- 사용유무 -->
+            <field name='duty_nm'   type='string' size=''/>  <!-- 직위 -->
+            <field name='pos_nm'    type='string' size=''/>  <!-- 직책 -->
+            <field name='tel_no'    type='string' size=''/>  <!-- 연락처 -->
+            <field name='fax_no'    type='string' size=''/>  <!-- 팩스 -->
+            <field name='cmpny_nm'  type='string' size=''/>  <!-- 회사명 -->
+            <field name='odr'       type='string' size=''/>  <!-- 게시순서 -->
+            <field name='post_no'   type='string' size=''/>  <!-- 우편번호 -->
+            <field name='addr'      type='string' size=''/>  <!-- 주소 -->
+            <field name='reg_ddtm'  type='string' size=''/>  <!-- 등록일시 -->
+            <field name='reg_emp_cd'    type='string' size=''/>
+        </block>
+    </input>
+    
+    <output>
+
+
+        <block id="property" name="property" repeat="1">
+            <field name='cur_pg'        type='String' size=''/>
+            <field name='tot_cnt'       type='String' size=''/>
+            <field name='row_per_page'  type='String' size=''/>
+            <field name='tot_pg'         type='String' size=''/>
+        </block>
+
+       <block id='manager_list' name='manager_list' 	repeat=''>
+        	<field name='emp_no' 	type='string' size=''/>  <!-- 임원 일련번호 -->
+        </block>        
+        
+    </output>
+    
+</transaction>

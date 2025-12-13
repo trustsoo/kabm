@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	         
+    private final String NOTICE_LIST = "/board/_notice_list.jsp"; 
+    private final String BOARD_LIST = "/board/_board_list.jsp";
+    private final String BOARD_VIEW = "/board/_board_view.jsp";
+    private final String ALBUM_LIST = "/board/_album_list.jsp";
+    private final String FAQ_LIST = "/board/_faq_list.jsp";
+    private final String FAQ_VIEW = "/board/_faq_view.jsp";
+    private final String SUGGEST_WRITE = "/board/_suggest_write.jsp"; 
+    
+    private final String WRITE_JOB = "/board/_job_write.jsp";
+    private final String LIST_JOB = "/board/_job_list.jsp";
+    
+    private final String SEARCH = "/board/_search.jsp";
+    private final String QNA_LIST = "/board/_qna_list.jsp";    
+    
+    public void write_job(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{	
+			input.put("user_nm", getUserObject(req, resp).getName());
+			input.put("email", getUserObject(req, resp).getEmail());
+			input.put("mobile_no", getUserObject(req, resp).getHpNo());
+			input.put("gender", getUserObject(req, resp).getDataSet().getText("sex"));
+			
+			if(!"".equals(input.getText("brd_no")))
+			{
+				input.put("cmd", "job_detail");
+				interact.execute("/community/board", input, output);
+				
+				
+				input.put("user_nm", output.getText("user_nm"));
+				input.put("email", output.getText("email"));
+				input.put("mobile_no", output.getText("tel_no"));
+				input.put("gender", output.getText("gender"));
+			}
+			req.setAttribute("output", output);
+			req.setAttribute("input", input);
+			view.setViewPage(WRITE_JOB);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+    public void list_job(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{	
+			input.put("board_row_per_page", "10" );
+			req.setAttribute("input", input);
+			view.setViewPage(LIST_JOB);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+    
+    
+    
+    
+    public void write_suggest(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{	
+			input.put("user_nm", getUserObject(req, resp).getName());
+			input.put("board_row_per_page", "10" );
+			req.setAttribute("input", input);
+			view.setViewPage(SUGGEST_WRITE);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+    public void faq_list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{	
+			input.put("cmd", "getCodeListUseY");
+			input.put("div_cd", "faq_category");
+			interact.execute("/common/Code", input, output);
+			
+			input.put("board_row_per_page", "10" );
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(FAQ_LIST);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+    public void faq_view(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{	
+			input.put("cmd", "detail");
+			output = interact.execute("/community/FAQ", input);
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(FAQ_VIEW);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+    public void notice_list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		try
+		{	input.put("board_row_per_page", "10" );
+			req.setAttribute("input", input);
+			view.setViewPage(NOTICE_LIST);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	   
+    public void notice_view(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{	
+			try
+			{
+				User session_user = getUserObject(req, resp);
+				input.put("user_id", session_user.getId());
+				input.put("user_nm", session_user.getName());
+			}catch(Exception e){
+			}
+			
+			input.put("cmd", "getBoardType");
+			interact.execute("/community/boardMgr", input, output);
+			
+			input.put("viewMode", "view");
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(BOARD_VIEW);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+	public void list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{	
+			input.put("div_cd", "file_div");
+			input.put("cmd", "getUseCodeList");
+			
+	        DataSet codeList = interact.execute("/common/Code", input);
+	        req.setAttribute("codeList", codeList);
+	        
+			String thumb_url = "";
+			try
+			{
+				Config conf = Configuration.lookup("/file/thumb");
+				thumb_url = conf.getString("url");
+				
+			}catch(Exception e){}
+			
+			input.put("cmd", "getBoardType");
+			interact.execute("/community/boardMgr", input, output);
+			
+			String view_type = output.getText("view_type");
+			
+			req.setAttribute("input", input);
+			if("board_type_01".equals(view_type)) //일반게시판			
+			{
+				input.put("board_row_per_page", "10" );
+				view.setViewPage(BOARD_LIST);
+			} else if("board_type_02".equals(view_type)) //사진게시판
+			{
+				input.put("board_row_per_page", "8" );
+				input.put("thumb_url", thumb_url);
+				view.setViewPage(ALBUM_LIST);
+			} else if("board_type_03".equals(view_type)) // 질문답변형
+			{
+				input.put("board_row_per_page", "100" );
+				view.setViewPage(QNA_LIST);
+			} else
+			{
+				throw new Exception("존재하지 않는 게시판입니다.");
+			}
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	
+	public void view(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{	
+			try
+			{
+				User session_user = getUserObject(req, resp);
+				input.put("user_id", session_user.getId());
+				input.put("user_nm", session_user.getName());
+			}catch(Exception e){
+			}
+			
+			input.put("cmd", "getBoardType");
+			interact.execute("/community/boardMgr", input, output);
+			
+			input.put("viewMode", "view");
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(BOARD_VIEW);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	
+	public void search(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+				throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{	
+			String thumb_url = "";
+			try
+			{
+				Config conf = Configuration.lookup("/file/thumb");
+				thumb_url = conf.getString("url");
+				
+			}catch(Exception e){}
+			
+			input.put("cmd", "getBoardType");
+			interact.execute("/community/boardMgr", input, output);
+			
+			String view_type = output.getText("view_type");
+			
+			req.setAttribute("input", input);
+			view.setViewPage(SEARCH);
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	
+	public void searchView(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();		
+		bind(req, input);
+		try
+		{	
+			try
+			{
+				User session_user = getUserObject(req, resp);
+				input.put("user_id", session_user.getId());
+				input.put("user_nm", session_user.getName());
+			}catch(Exception e){
+			}
+			
+			input.put("cmd", "getBoardType");
+			interact.execute("/community/boardMgr", input, output);
+			
+			input.put("viewMode", "modal");
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(BOARD_VIEW);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+		    
+	]]>
+	</jsp:declaration>
+</jsp:root>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:declaration>
+	<![CDATA[
+
+		private final String MNGR_QUESTION_TABLE 	= "/mng/content/_question_table.jsp"	; //문의관리
+
+//*****************	
+//STR : 문의관리
+//*****************
+	//문의관리 리즈트 조회
+	public void getQuestionList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		
+		//SQL Injection 공격 대비
+		input = translateInjectField(input);
+
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("cmd", "select_question_list");		
+			
+			if("".equals(input.getText("in_ddtm_from"))) input.put("in_ddtm_from", DateTime.getAdjustDate(DateTime.getFormatString("yyyyMMdd"), java.util.Calendar.MONTH, -2));
+			if("".equals(input.getText("in_ddtm_to"))) input.put("in_ddtm_to", DateTime.getFormatString("yyyyMMdd"));
+			
+			input.put("in_ddtm_from", input.getText("in_ddtm_from").replaceAll("-","") );  //날짜 포맷 제거
+			input.put("in_ddtm_to", input.getText("in_ddtm_to").replaceAll("-","") );  //날짜 포맷 제거
+			
+			output = interact.execute("/mng/content/question", input);
+			
+			
+			String[] blockNames = new String[]{"property","question_list"};
+			
+			output.put(jdf.framework.logic.transform.TransFormConstant.ROW_PER_PAGE, input.getText("row_per_page"));
+			output.put(jdf.framework.logic.transform.TransFormConstant.CUR_PG, input.getText("cur_pg"));
+			 
+			output.put(jdf.framework.logic.transform.TransFormConstant.JSON_DATA_TYPE, "");
+
+
+			String result = getJson(output, blockNames);			
+Logger.debug.println("======================>" + result);			
+			responseJson(result, resp);
+		} catch(Exception ex)
+		{
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+
+	//답변모드로 전환
+	public void preModify(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		
+		//SQL Injection 공격 대비
+		input = translateInjectField(input);
+
+		req.setAttribute("templet-bypass", "true");
+		
+		try{
+			input.put("cmd", "select_question_item");
+
+			output = interact.execute("/mng/content/question", input);
+
+			output.put("question", output.getText("question").replaceAll("\n","<BR/>"));
+
+			req.setAttribute("output" ,  output.toList());
+			req.setAttribute("code" , HTTPResultConstant.RESULT_OK);				
+					
+		} catch(Exception ex)
+		{
+			req.setAttribute("code" , HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR);
+			req.setAttribute("msg" ,  ex.getMessage() );
+		}
+
+		view.setViewPage(MNGR_QUESTION_TABLE);	
+	}
+
+
+	public void registQuestion(HttpServletRequest req, HttpServletResponse resp, ViewMeta view) throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		
+		bind(req, input);
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{
+			input.put("answer_emp_cd", getUserObject(req, resp).getId() );
+			
+			if("update_answer".equals(input.getText("action")))
+			{
+				input.put("cmd", "update_answer");		
+				output = interact.execute("/mng/content/question_action", input);
+				
+				Hashtable<String, String> mailArgs = new Hashtable<String, String>();
+				
+				String mail_title = "[한국건물위생관리협회]문의하신 내용에 대한 답변 메일입니다.";
+				String content = input.getText("answer");
+				String title = input.getText("title");
+				mailArgs.put("title", title);
+				if(content != null ) content = org.apache.commons.lang3.StringEscapeUtils.unescapeHtml4(content); 
+				mailArgs.put("content", content);
+				
+				DataSet receiver = new DataSet();
+				receiver.put("email", input.getText("email"), 0);
+				receiver.put("name",input.getText("user_nm") , 0);
+				receiver.put("user_id","guest" , 0);
+				com.kabm.util.SendMailUtil mail = new com.kabm.util.SendMailUtil();
+				mail.setting("default_mail.html", mail_title, mailArgs, receiver);
+				mail.sendMail();
+				
+			}else if ("delete_question".equals(input.getText("action")))
+			{
+				input.put("cmd", "delete_question");	
+				output = interact.execute("/mng/content/question_action", input);
+			}else{
+				throw new ServletException("[" + input.getText("action") +"] is not support");
+			}
+
+			
+
+			
+	
+			
+			String[] blockNames = new String[]{"question_list"};						
+						
+			
+			//iframe 을 이용하기 위해 깔끔하게...
+			String result = getXML(output, blockNames);
+			responseXML(result, resp);
+		} catch(Exception ex)
+		{
+			//responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			responseXML(getXMLFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+
+	}
+
+
+
+	
+	]]>
+	</jsp:declaration>
+</jsp:root>
+

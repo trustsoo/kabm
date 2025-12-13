@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	         
+	    private final String INTRO_INVITE = "/intro/_invite.jsp";     
+	    private final String INTRO_HIST = "/intro/_hist.jsp";     
+	    private final String INTRO_ORG = "/intro/_org.jsp";     
+	    private final String INTRO_MAP = "/intro/_map.jsp";     
+	    
+	    protected String getDefaultMethodName()
+		{
+			return "invite"; 
+		}
+	    public void invite(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				req.setAttribute("input", input);
+				view.setViewPage(INTRO_INVITE);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void hist(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				req.setAttribute("input", input);
+				view.setViewPage(INTRO_HIST);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	    public void org(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+
+
+			try{				
+				output = interact.execute("/main/intro/manager", input);
+
+				req.setAttribute("output" ,  output.toList());
+				req.setAttribute("output_count" ,  output.getCount("emp_no")-1);
+				
+				req.setAttribute("code"		, HTTPResultConstant.RESULT_OK);				
+						
+			} catch(Exception ex)
+			{
+				//req.setAttribute("code" , HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR);
+				//req.setAttribute("msg" ,  ex.getMessage() );
+			}
+			
+			String thumb_url = "";
+			try
+			{
+				Config conf = Configuration.lookup("/file/thumb");
+				thumb_url = conf.getString("url");
+				input.put("thumb_url", thumb_url);
+			}catch(Exception e){}
+			req.setAttribute("input", input);
+			
+	
+			view.setViewPage(INTRO_ORG);
+		}
+	    
+	    public void map(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				req.setAttribute("input", input);
+				view.setViewPage(INTRO_MAP);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	]]>
+	</jsp:declaration>
+</jsp:root>

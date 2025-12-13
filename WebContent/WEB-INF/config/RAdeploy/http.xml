@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connector>
+	<adapter-name>http</adapter-name>
+	<resourceadapter>
+		<class>
+			jdf.framework.logic.adapter.http.ResourceAdapterImpl
+		</class>
+		<processor>
+			jdf.framework.logic.adapter.http.HttpProcessor
+		</processor>
+		<processfactory>
+			jdf.framework.logic.adapter.http.ProcessorFactoryImpl
+		</processfactory>
+	</resourceadapter>
+</connector>

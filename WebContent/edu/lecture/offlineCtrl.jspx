@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[   
+
+/******************************************************************************** 
+ * Program ID		: 강좌
+ * FileName		    : offlineCtrl.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/edu/lecture/";
+	
+	private static final String JSP_LECTURE = "_offline";
+	
+	private static final String JSP_OFFLINE_SELECT=JSP_BASE+JSP_LECTURE+"_select.jsp";
+	
+	private static final String JSP_OFFLINE_LECTURE=JSP_BASE+JSP_LECTURE+"_lecture.jsp";
+	
+	private static final String JSP_OFFLINE_EDU_LIST=JSP_BASE+JSP_LECTURE+"_edu_list.jsp";
+	
+	private static final String JSP_OFFLINE_EDU_STEP1=JSP_BASE+JSP_LECTURE+"_edu_step_1.jsp";
+	private static final String JSP_OFFLINE_EDU_STEP2=JSP_BASE+JSP_LECTURE+"_edu_step_2.jsp";
+	private static final String JSP_OFFLINE_EDU_STEP3=JSP_BASE+JSP_LECTURE+"_edu_step_3.jsp";
+	private static final String JSP_OFFLINE_EDU_STEP4=JSP_BASE+JSP_LECTURE+"_edu_step_4.jsp";
+	private static final String JSP_OFFLINE_EDU_STEP5=JSP_BASE+JSP_LECTURE+"_edu_step_5.jsp";
+	private static final String JSP_OFFLINE_EDU_STEP6=JSP_BASE+JSP_LECTURE+"_edu_step_6.jsp";
+	private static final String JSP_OFFLINE_EDU_STEP7=JSP_BASE+JSP_LECTURE+"_edu_step_7.jsp";
+	private static final String JSP_OFFLINE_EDU_STEP8=JSP_BASE+JSP_LECTURE+"_edu_step_8.jsp";
+	
+	private static final String JSP_OFFLINE_USER_CONFIRM=JSP_BASE+JSP_LECTURE+"_user_confirm.jsp";
+	private static final String JSP_OFFLINE_LIST=JSP_BASE+JSP_LECTURE+"_list.jsp";
+	private static final String JSP_OFFLINE_VIEW=JSP_BASE+JSP_LECTURE+"_view.jsp";
+	
+	public void offlineSelect(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			removeOfflineSession(req);
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_OFFLINE_SELECT);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void offlineLecture(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_OFFLINE_LECTURE);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+
+	public void offlineEduList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			DataSet output = interact.execute("/common/jiinfo_all", input);	
+
+			req.setAttribute("output_count" ,  output.getCount("jicode") - 1);
+			req.setAttribute("output" 		,  output.toList());
+			
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_OFFLINE_EDU_LIST);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	
+	public void offlineEduStep1(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String next_step = input.getText("next_step");
+			if(!"1".equals(next_step))
+			{
+				resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+			}else{
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_OFFLINE_EDU_STEP1);
+			}
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void offlineEduStep2(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String next_step = input.getText("next_step");
+			if(!"2".equals(next_step))
+			{
+				resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+			}else{
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_OFFLINE_EDU_STEP2);
+			}
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void offlineEduStep3(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String next_step = input.getText("next_step");
+			if(!"3".equals(next_step))
+			{
+				resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+			}else{
+				String req_user_nm = input.getText("req_user_nm");
+				String req_tel_no = input.getText("req_tel_no");
+				if( req_user_nm != null && !"".equals(req_user_nm) && req_tel_no != null && !"".equals(req_tel_no) )
+				{	
+					DataSet user = new DataSet();
+					user.put(OFFLINE_SESSION_USER_NM, req_user_nm);
+					user.put(OFFLINE_SESSION_TEL_NO, req_tel_no); 
+					user.put("jcode", DateTime.getShortDateString() + DateTime.getShortTimeString() );
+					setOfflineSession(req, user);
+					
+					req.setAttribute("input", input);
+					view.setViewPage(JSP_OFFLINE_EDU_STEP3);
+				}else{
+					resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+				}
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+		
+	public void offlineEduStep4(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String next_step = input.getText("next_step");
+			if(!"4".equals(next_step))
+			{
+				resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+			}else{
+				DataSet user = getOfflineSession(req);
+				
+				if( user != null )
+				{	
+					String req_user_nm = user.getText(OFFLINE_SESSION_USER_NM);
+					String ill_no = input.getText("ill_no");
+					
+					if( req_user_nm != null && !"".equals(req_user_nm) && ill_no != null && !"".equals(ill_no) )
+					{	
+						user.put("ill_no", ill_no);
+						user.put("corp_nm", input.getText("corp_nm"));
+						user.put("mod_yn", input.getText("mod_yn"));
+						user.put("re_corp_zipcode", input.getText("re_corp_zipcode"));
+						user.put("re_corp_addr", input.getText("re_corp_addr")); 
+						user.put("re_corp_nm", input.getText("re_corp_nm")); 
+						user.put("re_corp_reg_no", input.getText("re_corp_reg_no")); 
+						user.put("re_president_nm", input.getText("re_president_nm")); 
+											
+						setOfflineSession(req, user);
+						
+						req.setAttribute("input", input);
+						view.setViewPage(JSP_OFFLINE_EDU_STEP4);
+					}else{
+						resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+					}
+				}else{
+					resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+				}
+				
+				
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+		
+	public void offlineEduStep5(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String currentYear = DateTime.getString( new java.util.Date() , "yyyy");
+			req.setAttribute("currentYear", currentYear);
+			
+			
+			String next_step = input.getText("next_step");
+			if(!"5".equals(next_step))
+			{
+				resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+			}else{
+				DataSet user = getOfflineSession(req);				
+				
+				if( user != null )
+				{	
+					String req_user_nm = user.getText(OFFLINE_SESSION_USER_NM);
+					if( req_user_nm != null && !"".equals(req_user_nm) )
+					{
+						user.put("building_nm", input.getText("building_nm"));
+						user.put("building_zipcode", input.getText("building_zipcode"));
+						user.put("building_addr", input.getText("building_addr")); 
+						user.put("building_tel_no", input.getText("building_tel_no")); 
+						user.put("building_area", input.getText("building_area")); 
+						user.put("building_start_dt", input.getText("building_start_dt")); 
+						user.put("building_none", input.getText("building_none")); 
+						
+						setOfflineSession(req, user);
+						
+						req.setAttribute("input", input);
+						view.setViewPage(JSP_OFFLINE_EDU_STEP5);
+					}else{
+						resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+					}
+				}else{
+					resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+				}
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void offlineEduStep6(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String currentYear = DateTime.getString( new java.util.Date() , "yyyy");
+			String next = DateTime.getAdjustDate(DateTime.getString( new java.util.Date() , "yyyyMMdd") , Calendar.YEAR , 1);
+			req.setAttribute("currentYear", currentYear);
+			req.setAttribute("nextYear", next.substring(0,4));
+			
+			String next_step = input.getText("next_step");
+			if(!"6".equals(next_step))
+			{
+				resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+			}else{
+				DataSet user = getOfflineSession(req);				
+				
+				if( user != null )
+				{	
+					String req_user_nm = user.getText(OFFLINE_SESSION_USER_NM);
+					if( req_user_nm != null && !"".equals(req_user_nm) )
+					{
+							
+						user.put("user_nm", input.getText("user_nm" ));
+						user.put("sex", input.getText("sex"));
+						user.put("birth", input.getText("birth")); 
+						user.put("phone_no", input.getText("phone_no")); 
+						user.put("email", input.getText("email")); 
+						user.put("chrg_ymd", input.getText("chrg_ymd")); 
+						user.put("pos_nm", input.getText("pos_nm")); 
+						
+						setOfflineSession(req, user);
+						
+						req.setAttribute("input", input);
+						view.setViewPage(JSP_OFFLINE_EDU_STEP6);
+					}else{
+						resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+					}
+				}else{
+					resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+				}
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void offlineEduStep7(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String currentYear = DateTime.getString( new java.util.Date() , "yyyy");
+			req.setAttribute("currentYear", currentYear);
+			
+			String next_step = input.getText("next_step");
+			if(!"7".equals(next_step))
+			{
+				resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+			}else{
+				DataSet user = getOfflineSession(req);
+				if( user != null )
+				{	
+					String req_user_nm = user.getText(OFFLINE_SESSION_USER_NM);
+					String deposit_nm = input.getText("deposit_nm");
+					
+					if( req_user_nm != null && !"".equals(req_user_nm) )
+					{	
+						if(!"".equals(deposit_nm))
+						{	
+							user.put("deposit_dt", input.getText("deposit_dt"));
+							user.put("deposit_nm", input.getText("deposit_nm")); 
+							user.put("deposit_bank", input.getText("deposit_bank")); 
+							
+							user.put("cp_code", input.getText("cp_code") );
+							user.put("ji_code", input.getText("ji_code") );
+							user.put("is_gb", input.getText("is_gb") );
+							user.put("dcm_no", input.getText("dcm_no") );
+							user.put("cmd", "INSERT_OFFLINE_EDU");
+							interact.execute("/edu/OfflineMgr", user);	
+							
+							setOfflineSession(req, user);
+						}
+						
+						input.put("cmd", "GET_OFFLINE_EDU_INFO");
+						DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+						
+						input.put("req_user_nm", user.getText("req_user_nm"));
+						input.put("req_tel_no", user.getText("req_tel_no"));
+						req.setAttribute("output", output);
+						req.setAttribute("input", input);
+						view.setViewPage(JSP_OFFLINE_EDU_STEP7);
+					}else{
+						resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+					}
+				}else{
+					resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+				}
+				
+				
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+		
+	public void offlineEduStep8(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String next_step = input.getText("next_step");
+			if(!"8".equals(next_step))
+			{
+				resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+			}else{
+				DataSet user = getOfflineSession(req);
+				if( user != null )
+				{	
+					String req_user_nm = user.getText(OFFLINE_SESSION_USER_NM);
+					
+					if( req_user_nm != null && !"".equals(req_user_nm) )
+					{	
+						input.put("cmd", "GET_OFFLINE_EDU_INFO");
+						DataSet output = interact.execute( "/edu/OfflineMgr" , input);
+						   
+						req.setAttribute("output", output);
+						req.setAttribute("input", input);
+						view.setViewPage(JSP_OFFLINE_EDU_STEP8);
+					}else{
+						resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+					}
+				}else{
+					resp.sendRedirect(OFFLINE_SEN_REDIRECT);
+				}
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void offlineUserConfirm(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			removeOfflineSession(req);
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_OFFLINE_USER_CONFIRM);
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void viewOfflineList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{
+			DataSet user = getOfflineSession(req);
+			if( user != null )
+			{
+				String req_user_nm = user.getText("req_user_nm");
+				String req_tel_no = user.getText("req_tel_no");
+				String confirm_step = user.getText("confirm_step");
+				String jcode = user.getText("jcode");
+				input.put("req_user_nm",req_user_nm);
+				input.put("req_tel_no",req_tel_no);
+				input.put("confirm_step",confirm_step);
+				input.put("jcode",jcode);
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_OFFLINE_LIST);
+			}else{
+				String req_user_nm = input.getText("req_user_nm");
+				String req_tel_no = input.getText("req_tel_no");
+				String confirm_step = input.getText("confirm_step");
+				String jcode = input.getText("jcode");
+				if( req_user_nm != null && !"".equals(req_user_nm) && req_tel_no != null && !"".equals(req_tel_no) )
+				{	
+					user = new DataSet();
+					user.put(OFFLINE_SESSION_USER_NM, req_user_nm);
+					user.put(OFFLINE_SESSION_TEL_NO, req_tel_no);
+					user.put("confirm_step", confirm_step); 
+					user.put("jcode",jcode);
+					setOfflineSession(req, user);
+					
+					input.put("req_user_nm",req_user_nm);
+					input.put("req_tel_no",req_tel_no);
+					input.put("confirm_step",confirm_step);
+					input.put("jcode",jcode);
+					req.setAttribute("input", input);
+					view.setViewPage(JSP_OFFLINE_LIST);
+				}else{
+					req.setAttribute("input", input);
+					resp.sendRedirect(OFFLINE_SEN_CONFIRM);
+				}
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+
+	public void viewOfflineView(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			String currentYear = DateTime.getString( new java.util.Date() , "yyyy");
+			String next = DateTime.getAdjustDate(DateTime.getString( new java.util.Date() , "yyyyMMdd") , Calendar.YEAR , 1);
+			req.setAttribute("currentYear", currentYear);
+			req.setAttribute("nextYear", next.substring(0,4));
+						
+			DataSet user = getOfflineSession(req);
+			if( user != null )
+			{
+				req.setAttribute("input", input);
+				view.setViewPage(JSP_OFFLINE_VIEW);
+			}else{
+				req.setAttribute("input", input);
+				resp.sendRedirect(OFFLINE_SEN_CONFIRM);
+			}
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

@@ -1,0 +1,303 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='boardMgr' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+		<![CDATA[
+			String cmd = input.getText("cmd");	
+			if(cmd.equals("getBoardInfo"))
+			{
+				executeSQL("getBoardType", connection, input, output);
+			}
+			else if(cmd.equals("getBoardDetail"))
+			{
+				String brd_mng_no = input.getText("brd_mng_no");
+				
+				if(brd_mng_no.equals("0"))	executeSQL("getBoardOptionSet", connection, input, output);	
+				else executeSQL("getBoardDetail", connection, input, output);
+			}else if(cmd.equals("dropBoard"))
+			{
+				
+				executeSQL("dropBoard", connection, input, output);
+				executeSQL("dropBoardArticle", connection, input, output);
+			}
+			else
+			{	
+				executeSQL(cmd, connection, input, output);
+			}
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		
+		
+		
+		<sql id="getBoardType">
+			<query>
+			   <![CDATA[
+					SELECT brd_mng_no, view_type, fileupload_yn,comment_yn
+					FROM tb_kabm_board_mngr
+					WHERE brd_mng_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no</setProperty>
+				<getProperty>brd_mng_no, view_type, fileupload_yn,comment_yn</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		<sql id="boardAllList">
+			<query>
+			   <![CDATA[
+					SELECT brd_mng_no, brd_nm, view_type, fileupload_yn,comment_yn
+					FROM tb_kabm_board_mngr
+					ORDER BY brd_mng_no
+				]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>cd, cd_nm, etc1, etc2,etc3</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="boardList">
+			<query>
+			   <![CDATA[
+				SELECT
+					a.brd_mng_no,
+					a.brd_nm,
+					(SELECT COUNT(brd_mng_no) FROM tb_kabm_board WHERE brd_mng_no = a.brd_mng_no) bbs_article_cnt,						
+					'' as brd_url,
+					a.fileupload_yn,
+					a.view_type,
+					b.cd_nm view_type_nm,
+					CONVERT(VARCHAR(10), a.reg_ddtm, 120) reg_dt,
+					a.comment_yn
+				FROM tb_kabm_board_mngr a, tb_kabm_code b
+				WHERE a.view_type= b.cd
+				ORDER BY brd_mng_no
+				
+				]]>
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>brd_mng_no, brd_nm, bbs_article_cnt,brd_url,fileupload_yn, view_type, view_type_nm, reg_dt,comment_yn</getProperty>
+			</mapping>
+		</sql>
+		
+		
+		
+		<sql id="saveBoard">
+			<query>
+			   <![CDATA[
+					MERGE INTO tb_kabm_board_mngr a
+					USING (SELECT ? brd_mng_no ) b
+					ON ( a.brd_mng_no= b.brd_mng_no)
+					WHEN MATCHED THEN
+						UPDATE SET		
+							brd_nm = ?, 
+							view_type = ?,
+							fileupload_yn = ?, 
+							upd_emp_cd = ?,
+                            reg_ddtm = getdate(),
+                            upd_ddtm = getdate(),
+                            comment_yn = ?
+					WHEN NOT MATCHED THEN
+						INSERT
+						(brd_nm, view_type, fileupload_yn, reg_emp_cd,upd_emp_cd, reg_ddtm, upd_ddtm,comment_yn)
+						VALUES
+						(?, ?, ?, ?, ?, getdate(), getdate(), ?);
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no,
+							 brd_nm, view_type, fileupload_yn, emp_cd, comment_yn,
+							 brd_nm, view_type, fileupload_yn, emp_cd, emp_cd, comment_yn
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="dropBoard">
+			<query>
+				<![CDATA[
+					DELETE FROM tb_kabm_board_mngr WHERE brd_mng_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="dropBoardArticle">
+			<query>
+				<![CDATA[
+					UPDATE tb_kabm_board SET del_yn = 'Y' WHERE brd_mng_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getBoardDetail">
+			<query>
+			   <![CDATA[
+					SELECT
+						a.brd_mng_no,
+						a.brd_nm,						
+						a.view_type,
+						a.fileupload_yn,
+						a.reg_emp_cd,
+						a.upd_emp_cd,
+						b.emp_nm reg_emp_nm,
+						c.emp_nm upd_emp_nm,
+						CONVERT(VARCHAR(10), a.reg_ddtm, 120) reg_dt,
+						a.comment_yn
+					FROM tb_kabm_board_mngr a, tb_kabm_emp b, tb_kabm_emp c
+					WHERE a.reg_emp_cd = b.emp_cd
+					AND a.upd_emp_cd = b.emp_cd
+	                AND a.brd_mng_no = ?
+				]]>
+			</query>
+			<mapping>
+				<setProperty>brd_mng_no</setProperty>
+				<getProperty>brd_mng_no,brd_nm, view_type, fileupload_yn, reg_emp_cd, upd_emp_cd,reg_emp_nm,upd_emp_nm,reg_dt,comment_yn</getProperty>
+			</mapping>
+		</sql>		
+		
+		
+		
+		</processor-info>
+	
+	
+	<input>
+		<block name="arg" repeat="1">	
+			<field name='save_brd_mng_no' type='int'	size=''/>
+			<field name='brd_mng_no' type='int'	size=''/>
+			<field name='brd_nm' type='string'	size=''/>
+			<field name='brd_dscr' type='string'	size=''/>
+			<field name='read_auth_yn' type='string'	size=''/>
+			<field name='rpl_auth_yn' type='string'	size=''/>
+			<field name='brd_list_div_cd' type='string'	size=''/>
+			<field name='view_type' type='string'	size='' />
+			<field name='comment_yn' type='string'	size='' />
+			<field name='fileupload_yn' type='string'	size='' />
+			<field name='write_auth_yn' type='string'	size='' />
+			<field name='read_auth_yn' type='string'	size='' />
+			<field name='rpl_auth_yn' type='string'	size='' />		
+			<field name='period_auth_yn' type='string'	size='' />	
+			<field name='emer_auth_yn' type='string'	size='' />	
+			<field name='view_type' type='string'	size='' />	
+			<field name='fileupload_yn' type='string'	size='' />
+			<field name='comment_yn' type='string'	size='' />		
+			<field name='emp_cd' type='string'	size='' />	
+		</block>
+	</input>
+	
+	<output> 
+		
+		<block id='' name='' repeat=''>
+			<field name='brd_mng_no' type='int'	size='' />
+			<field name='cmpny_no' type='int'	size=''/>
+			<field name='brd_nm' type='string'	size=''/>
+			<field name='brd_list_div_cd' type='string'/>
+			<field name='brd_list_div_nm' type='string'/>
+			<field name='brd_dscr' type='string'	size=''/>
+			<field name='reg_dt' type='string'	size=''/>
+			<field name='bbs_article_cnt' type='int'	size=''/>
+			<field name='brd_url' type='string'	size=''/>
+			<field name='read_auth_yn' type='string'	size=''/>
+			<field name='rpl_auth_yn' type='string'	size=''/>
+			<field name='write_auth_yn' type='String'	size='' />
+
+			<field name='view_type' type='String'	size='' />
+			<field name='design_type' type='String'	size='' />
+
+			<field name='comment_yn' type='String'	size='' />
+			<field name='fileupload_yn' type='String'	size='' />
+			<field name='root_dept_no' type='string'	size='' />
+			<field name='brd_mng_grp_no' type='string'	size='' />	
+			<field name='view_type' type='string'	size='' />	
+			<field name='fileupload_yn' type='string'	size='' />
+			<field name='comment_yn' type='string'	size='' />		
+			<field name='view_type_nm' type='string'	size='' />
+			<field name='reg_emp_cd' type='string'	size='' />
+			<field name='upd_emp_cd' type='string'	size='' />
+			<field name='reg_emp_nm' type='string'	size='' />
+			<field name='upd_emp_nm' type='string'	size='' />
+			<field name='cd' type='String'	size='' />
+			<field name='cd_nm' type='String'	size='' />
+			<field name='etc1' type='String'	size='' />
+			<field name='etc2' type='String'	size='' />
+						
+		</block>
+		
+		<block id='brd_mng_detail' name='brd_mng_detail' repeat='1'>
+			<field name='brd_mng_no' type='string'	size=''/>
+			<field name='brd_nm' type='string'	size='' />
+			<field name='view_type' type='string'	size='' />
+			<field name='fileupload_yn' type='string'	size='' />
+			<field name='view_type' type='string'	size='' />	
+			<field name='fileupload_yn' type='string'	size='' />	
+			<field name='reg_emp_cd' type='string'	size='' />
+			<field name='upd_emp_cd' type='string'	size='' />
+			<field name='reg_emp_nm' type='string'	size='' />
+			<field name='upd_emp_nm' type='string'	size='' />
+			<field name='reg_dt' type='string'	size='' />
+			<field name='comment_yn' type='string'	size='' />		
+		</block>
+		
+		<block id='board_list' name='board_list' repeat='9999999'>
+			<field name='brd_mng_no' type='int'	size='' properties="isUnique:true"/>
+			<field name='cmpny_no' type='int'	size=''/>
+			<field name='brd_nm' type='string'	size=''/>
+			<field name='brd_list_div_cd' type='string'/>
+			<field name='brd_list_div_nm' type='string'/>
+			<field name='brd_dscr' type='string'	size=''/>
+			<field name='reg_dt' type='string'	size=''/>
+			<field name='bbs_article_cnt' type='int'	size=''/>
+			<field name='brd_url' type='string'	size=''/>
+			<field name='read_auth_yn' type='string'	size=''/>
+			<field name='rpl_auth_yn' type='string'	size=''/>
+			<field name='view_type' type='string'	size='' />	
+			<field name='fileupload_yn' type='string'	size='' />
+			<field name='comment_yn' type='string'	size='' />			
+		</block>
+
+		<block id='board_menu_list' name='board_menu_list' repeat='9999999'>
+			<field name='brd_mng_no' type='int'	size='' properties="isUnique:true"/>
+			<field name='brd_nm' type='string'	size=''/>
+			<field name='brd_list_div_nm' type='string'/>
+			<field name='brd_list_div_cd' type='string'/>
+			<field name='brd_dscr' type='string'	size=''/>
+		</block>
+		
+		<block id='board_auth_info' name='board_auth_info' repeat='9999999'>
+			<field name='read_auth_yn' type='string'	size='' />
+			<field name='rpl_auth_yn' type='string'	size=''/>
+			<field name='write_auth_yn' type='string'	size=''/>
+		</block>		
+		
+		<block id='board_type_info' name='board_type_info' repeat='1'>
+			<field name='brd_mng_no' type='int'	size='' />
+			<field name='view_type' type='String'	size='' />
+			<field name='design_type' type='String'	size='' />
+			<field name='write_auth_yn' type='String'	size='' />
+			<field name='comment_yn' type='String'	size='' />
+			<field name='fileupload_yn' type='String'	size='' />
+		</block>
+		
+		<block id='cd_list' name='cd_list' repeat=''>
+			<field name='cd' type='String'	size='' />
+			<field name='cd_nm' type='String'	size='' />
+			<field name='etc1' type='String'	size='' />
+			<field name='etc2' type='String'	size='' />
+			<field name='etc3' type='String'	size='' />
+		</block>		
+	</output>
+	
+</transaction>

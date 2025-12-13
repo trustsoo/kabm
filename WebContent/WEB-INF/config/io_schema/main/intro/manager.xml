@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='manager' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_manager_list">
+            <query>
+                <![CDATA[
+                   select 
+                        emp_no,
+                        emp_nm,
+                        use_yn,
+                        duty_nm,
+                        pos_nm,
+                        tel_no,
+                        fax_no,
+                        cmpny_nm,
+                        odr,
+                        post_no,
+                        addr,
+                        reg_ddtm,
+                        reg_emp_cd,
+                        f.file_no , f.file_nm , f.file_path 
+                    from tb_kabm_manager X
+                    LEFT OUTER JOIN (select data_no , file_no , file_nm, file_path  from tb_kabm_attach_file where
+                        attach_div_cd ='attach_div_04' group by  data_no , file_no , file_nm , file_path 
+                       
+                    ) f  
+                    ON f.data_no = X.emp_no
+                    where use_yn = 'Y'
+                    order by odr asc
+                ]]>
+            </query>
+            <mapping>
+                <setProperty></setProperty>
+                <getProperty>emp_no, emp_nm,use_yn,duty_nm,pos_nm,tel_no,fax_no, cmpny_nm, odr, post_no, addr,reg_ddtm, reg_emp_cd, file_no,file_nm , file_path </getProperty>
+            </mapping>
+        </sql>
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">
+        </block>
+    </input>
+    
+    <output>
+       <block id='manager_list' name='manager_list' 	repeat=''>
+        	<field name='emp_no' 	type='string' size=''/>  <!-- 임원 일련번호 -->
+			<field name='emp_nm' 	type='string' size=''/>  <!-- 성명 -->
+			<field name='use_yn' 	type='string' size=''/>  <!-- 사용유무 -->
+			<field name='duty_nm' 	type='string' size=''/>  <!-- 직위 -->
+			<field name='pos_nm' 	type='string' size=''/>	 <!-- 직책 -->
+			<field name='tel_no' 	type='string' size=''/>  <!-- 연락처 -->
+			<field name='fax_no' 	type='string' size=''/>  <!-- 팩스 -->
+			<field name='cmpny_nm' 	type='string' size=''/>  <!-- 회사명 -->
+            <field name='odr'       type='string' size=''/>  <!-- 게시순서 -->
+            <field name='post_no'   type='string' size=''/>  <!-- 우편번호 -->
+            <field name='addr'      type='string' size=''/>  <!-- 주소 -->
+            <field name='reg_ddtm'  type='string' size=''/>  <!-- 등록일시 -->
+            <field name='reg_emp_cd'    type='string' size=''/>            
+            <field name='file_no' type='string' size=''/>  <!--file 번호 -->
+            <field name='file_nm' type='string' size=''/>
+            <field name='file_path' type='string' size=''/>
+        </block>                
+    </output>
+    
+</transaction>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />	
+	<jsp:directive.include file="/common/common.jsp"/>
+	<jsp:declaration>
+	<![CDATA[
+	         
+	    private final String MNGR_MAIN = "/main/_main.jsp";     
+	    
+	    protected String getDefaultMethodName()
+		{
+			return "main"; 
+		}
+	    public void main(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+	    			throws ServletException, IOException, Exception
+		{
+			DataSet input = new DataSet();
+			DataSet output = new DataSet();
+			
+			bind(req, input);
+			try
+			{	
+				
+				jdf.framework.core.Config conf = jdf.framework.core.Configuration.lookup("/MultipartAttributes");
+				String dataRoot = conf.getString("dir");
+				  File root = new File(dataRoot);
+				  long total = root.getTotalSpace();  
+				  long free = root.getFreeSpace();  
+				  long usable = root.getUsableSpace();
+				  long pspace = 0;
+				  total = Math.round(total/1000/1000/1000);
+				  free = Math.round(free/1000/1000/1000);
+				  usable = Math.round(usable/1000/1000/1000);
+				  pspace = Math.round( (total-free)*100/total);
+				  input.put("total",total);
+				  input.put("free",total-free);
+				  input.put("usable",usable);
+				  input.put("pspace",pspace);
+				  
+				File[] drr = root.listFiles();
+				
+				int fcnt = 0;
+				for( int idx = 0 ; idx< drr.length ; idx++ ){
+					
+					if( drr[idx].exists() && drr[idx].isDirectory() ) 
+					{
+						File[] frr = drr[idx].listFiles();
+						for( int jdx = 0 ; jdx< frr.length ; jdx++ ){
+							fcnt++;
+						}
+					}else{
+						fcnt++;
+					}
+				}
+				input.put("fcnt",fcnt);
+				req.setAttribute("input", input);
+				view.setViewPage(MNGR_MAIN);
+				
+			} catch(Exception ex)
+			{
+				throw ex;
+			}
+		}
+	    
+	]]>
+	</jsp:declaration>
+</jsp:root>

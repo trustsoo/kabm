@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<acl xmlns="http://www.kabm.com/framework/templet">
+  <default-role>generalUser</default-role>
+  <role name="generalUser">
+    <login url="/login.jsp"></login>
+    <user source-uri="io-schema:user/Login"></user>
+  </role>
+  <role name="adminUser">
+    <login url="/mng/login.jsp"></login>
+    <user source-uri="io-schema:user/MngLogin"></user>
+  </role>
+</acl>

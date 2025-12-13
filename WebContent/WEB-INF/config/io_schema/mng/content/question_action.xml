@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='question_action' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>
+        <script language="java" import="">
+        <![CDATA[
+            String cmd = input.getText("cmd");  
+          
+            executeSQL(cmd, connection, input, output);
+            output.put("seq_no", input.get("seq_no"));
+        ]]>
+        </script>
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="insert_answer">
+            <query>
+                <![CDATA[
+                	INSERT INTO tb_kabm_question
+                	(name, tel_no, email, title, question,
+                	reg_ddtm, question_div)
+                	VALUES
+                	(?, ?, ?, ?, ?,
+                	?, ?)
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>name, tel_no, email, title, question,
+                	reg_ddtm, question_div</setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+        
+        
+        <sql id="update_answer">
+            <query>
+                <![CDATA[
+                    update tb_kabm_question set answer = ?, answer_emp_cd = ?, answer_ddtm = getDate()
+                    where seq_no = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>answer,answer_emp_cd,seq_no</setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+
+        <sql id="delete_question">
+            <query>
+                <![CDATA[
+                    delete from tb_kabm_question where seq_no = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>seq_no</setProperty>
+                <getProperty></getProperty>
+            </mapping>
+        </sql>
+
+        
+
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">   
+            <field name='answer'        type='string'    size=''/>
+            <field name='answer_emp_cd' type='string'    size=''/>
+            <field name='seq_no'         type='string'    size=''/>
+            
+            <field name='name'         type='string'    size=''/>
+            <field name='tel_no'         type='string'    size=''/>
+            <field name='email'         type='string'    size=''/>
+            <field name='title'         type='string'    size=''/>
+            <field name='question'         type='string'    size=''/>
+            <field name='reg_ddtm'         type='string'    size=''/>
+            <field name='question_div'         type='string'    size=''/> 
+        </block>
+    </input>
+    
+    <output>
+       <block id='question_list' name='question_list' 	repeat=''>
+        	<field name='seq_no' 		type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

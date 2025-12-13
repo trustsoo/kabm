@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.net.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[         
+
+/******************************************************************************** 
+ * Program ID		: 본인확인 
+ * FileName		    : smsCert.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	        
+	
+	public void requestSmsCertify(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			System.out.println("-----------------------------------/member/smsCert/action/requestSmsCertify-------------------------------------------------");
+			String sSiteCode = SMS_SITE_CODE;
+			String sSitePw = SMS_SITE_PASSWORD;
+			
+			String sReturnURL = input.getText("rtn_url");
+			String sErrorURL = input.getText("err_url");
+			
+			System.out.println("sReturnURL:::" + sReturnURL);
+			System.out.println("sErrorURL:::" + sErrorURL);
+			
+			NiceID.Check.CPClient niceCheck = new  NiceID.Check.CPClient();
+			HttpSession session = req.getSession();
+		    
+		    String sRequestNumber = "REQ0000000001";        	// 요청 번호, 이는 성공/실패후에 같은 값으로 되돌려주게 되므로 
+		                                                    	// 업체에서 적절하게 변경하여 쓰거나, 아래와 같이 생성한다.
+		    sRequestNumber = niceCheck.getRequestNO(sSiteCode);
+		  	session.setAttribute("REQ_SEQ" , sRequestNumber);	// 해킹등의 방지를 위하여 세션을 쓴다면, 세션에 요청번호를 넣는다.
+		  	
+		   	String sAuthType = "M";      	// 없으면 기본 선택화면, M: 핸드폰, C: 신용카드, X: 공인인증서
+		   	
+		   	String popgubun 	= "Y";		//Y : 취소버튼 있음 / N : 취소버튼 없음
+			String customize 	= "";			//없으면 기본 웹페이지 / Mobile : 모바일페이지
+				
+		    
+		    // 입력될 plain 데이타를 만든다.
+		    String sPlainData = "7:REQ_SEQ" + sRequestNumber.getBytes().length + ":" + sRequestNumber +
+		                        "8:SITECODE" + sSiteCode.getBytes().length + ":" + sSiteCode +
+		                        "9:AUTH_TYPE" + sAuthType.getBytes().length + ":" + sAuthType +
+		                        "7:RTN_URL" + sReturnURL.getBytes().length + ":" + sReturnURL +
+		                        "7:ERR_URL" + sErrorURL.getBytes().length + ":" + sErrorURL +
+		                        "11:POPUP_GUBUN" + popgubun.getBytes().length + ":" + popgubun +
+		                        "9:CUSTOMIZE" + customize.getBytes().length + ":" + customize;
+		    
+		    String sMessage = "";
+		    String sEncData = "";
+		    
+		    int iReturn = niceCheck.fnEncode(sSiteCode, sSitePw, sPlainData);
+		    if( iReturn == 0 )
+		    {
+		        sEncData = niceCheck.getCipherData();
+		    }
+		    else if( iReturn == -1)
+		    {
+		        sMessage = "암호화 시스템 에러입니다.";
+		    }    
+		    else if( iReturn == -2)
+		    {
+		        sMessage = "암호화 처리오류입니다.";
+		    }    
+		    else if( iReturn == -3)
+		    {
+		        sMessage = "암호화 데이터 오류입니다.";
+		    }    
+		    else if( iReturn == -9)
+		    {
+		        sMessage = "입력 데이터 오류입니다.";
+		    }    
+		    else
+		    {
+		        sMessage = "알수 없는 에러 입니다. iReturn : " + iReturn;
+		    }
+			
+			String data = "{\"iRtn\":\""+iReturn+"\", \"sRtnMsg\":\""+sMessage+"\", \"sEncData\":\""+sEncData+"\"}";
+			System.out.println("data:::" + data);
+ 			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void smsCheck(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			System.out.println("-----------------------------------/member/smsCert/action/smsCheck-------------------------------------------------");
+			String sSiteCode = SMS_SITE_CODE;
+			String sSitePw = SMS_SITE_PASSWORD;
+			
+			String sEncodeData = URLDecoder.decode( req.getParameter("enc_data"), "EUC-KR");
+			
+			NiceID.Check.CPClient niceCheck = new  NiceID.Check.CPClient();
+			HttpSession session = req.getSession();
+			
+			String sCipherTime = "";				 // 복호화한 시간
+		    String sRequestNumber = "";			 // 요청 번호
+		    String sResponseNumber = "";		 // 인증 고유번호
+		    String sAuthType = "";				   // 인증 수단
+		    String sName = "";							 // 성명
+		    String sDupInfo = "";						 // 중복가입 확인값 (DI_64 byte)
+		    String sConnInfo = "";					 // 연계정보 확인값 (CI_88 byte)
+		    String sBirthDate = "";					 // 생일
+		    String sGender = "";						 // 성별
+		    String sNationalInfo = "";       // 내/외국인정보 (개발가이드 참조)
+		    String sPlainData = "";
+		    String sMobileNo = "";              //휴대폰번호
+		    String sMobileCo = "";             //통신사정보( SKT, KTF, LGT, SKM, KTM, LGM)
+		    
+		    int iRtn = niceCheck.fnDecode(sSiteCode, sSitePw, sEncodeData);
+		    String sRtnMsg				= "";
+		    DataSet result = new DataSet();
+		    
+		    if( iRtn == 0 ) {
+		    	System.out.println("--------------------------------------SMS 인증 성공--------------------------------");
+				sPlainData = niceCheck.getPlainData();
+		        sCipherTime = niceCheck.getCipherDateTime();
+				
+		     // 데이타를 추출합니다.
+		        java.util.HashMap mapresult = niceCheck.fnParse(sPlainData);
+		        
+		        sRequestNumber  = (String)mapresult.get("REQ_SEQ");
+		        sResponseNumber = (String)mapresult.get("RES_SEQ");
+		        sAuthType 			= (String)mapresult.get("AUTH_TYPE");
+		        sName 					= (String)mapresult.get("NAME");
+		        sBirthDate 			= (String)mapresult.get("BIRTHDATE");
+		        sGender 				= (String)mapresult.get("GENDER");
+		        sNationalInfo  	= (String)mapresult.get("NATIONALINFO");
+		        sDupInfo 				= (String)mapresult.get("DI");
+		        sConnInfo 			= (String)mapresult.get("CI");
+		        sMobileNo		= (String)mapresult.get("MOBILE_NO");
+		        sMobileCo		= (String)mapresult.get("MOBILE_CO");
+				
+		        if( "0".equals(sGender)) sGender = "2";
+				System.out.println(sRequestNumber);
+				System.out.println(sResponseNumber);
+				System.out.println(sAuthType);
+				System.out.println(sName);
+				System.out.println(sBirthDate);
+				System.out.println(sGender);
+				System.out.println(sNationalInfo);
+				System.out.println(sDupInfo);
+				System.out.println(sConnInfo);
+				System.out.println(sMobileNo);
+				System.out.println(sMobileCo);
+				
+				String session_sRequestNumber = (String)session.getAttribute("REQ_SEQ");
+		        if(!sRequestNumber.equals(session_sRequestNumber))
+		        {
+		        	sRtnMsg = "세션값이 다릅니다. 올바른 경로로 접근하시기 바랍니다.";
+		            sResponseNumber = "";
+		            sAuthType = "";
+		            iRtn = 1;
+		        }else{
+				
+			        output.put("sName",sName);
+					output.put("sDupInfo",sDupInfo);
+					output.put("sBirthDate",sBirthDate.substring(0, 8));
+					output.put("sBirthyyyy",sBirthDate.substring(0, 4));
+					output.put("sBirthmm",sBirthDate.substring(4, 6));
+					output.put("sBirthdd",sBirthDate.substring(6, 8));
+					output.put("ssn",sBirthDate.substring(2, 8));
+					output.put("sGenderCode",sGender);
+					output.put("sMobileNo",sMobileNo);
+					output.put("sMobileCo",sMobileCo);
+					
+					
+			        //개인정보 저장
+					input.put("user_nm", sName);
+					input.put("birth", sBirthDate);
+					input.put("cert_key", sDupInfo);
+					input.put("tel_no",sMobileNo);
+					input.put("cmd", "CHECK_MEMBER");
+					result = interact.execute( "/member/MemberMgr" , input);
+					
+					sRtnMsg = "정상 처리되었습니다.";
+		        }
+		    	
+		    }else if( iRtn == -1)
+		    {
+				sRtnMsg = "복호화 시스템 에러입니다.";
+		    }    
+		    else if( iRtn == -4)
+		    {
+		    	sRtnMsg = "복호화 처리오류입니다.";
+		    }    
+		    else if( iRtn == -5)
+		    {
+		    	sRtnMsg = "복호화 해쉬 오류입니다.";
+		    }    
+		    else if( iRtn == -6)
+		    {
+		    	sRtnMsg = "복호화 데이터 오류입니다.";
+		    }    
+		    else if( iRtn == -9)
+		    {
+		    	sRtnMsg = "입력 데이터 오류입니다.";
+		    }    
+		    else if( iRtn == -12)
+		    {
+		    	sRtnMsg = "사이트 패스워드 오류입니다.";
+		    }    
+		    else
+		    {
+		    	sRtnMsg = "알수 없는 에러 입니다. iRtn : " + iRtn;
+		    }
+		    
+		    if( result != null)
+			{
+				String user_id = (String)result.getText("user_id");
+				if( user_id != null && !"".equals(user_id))
+					output.put("sUserId",user_id);
+				else
+					output.put("sUserId","");
+			}else{
+				output.put("sUserId","");
+			}
+			
+			String data = "{\"sName\":\""+ output.getText("sName")
+							+"\", \"sDupInfo\":\""+output.getText("sDupInfo")
+							+"\", \"sBirthDate\":\""+output.getText("sBirthDate")
+							+"\", \"sBirthyyyy\":\""+output.getText("sBirthyyyy")
+							+"\", \"sBirthmm\":\""+output.getText("sBirthmm")
+							+"\", \"sBirthdd\":\""+output.getText("sBirthdd")
+							+"\", \"ssn\":\""+output.getText("ssn")
+							+"\", \"sGenderCode\":\""+output.getText("sGenderCode")
+							+"\", \"sUserId\":\""+output.getText("sUserId")
+							+"\", \"sMobileNo\":\""+sMobileNo
+							+"\", \"iRtn\":\""+iRtn
+							+"\", \"sRtnMsg\":\""+sRtnMsg
+							+"\"}";
+			//String json = getJsonFormat(data);
+ 			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void smsPassCheck(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			System.out.println("-----------------------------------/member/smsCert/action/smsPassCheck-------------------------------------------------");
+			String sSiteCode = SMS_SITE_CODE;
+			String sSitePw = SMS_SITE_PASSWORD;
+			
+			String sEncodeData = URLDecoder.decode( req.getParameter("enc_data"), "EUC-KR");
+			
+			NiceID.Check.CPClient niceCheck = new  NiceID.Check.CPClient();
+			HttpSession session = req.getSession();
+			
+			String sCipherTime = "";				 // 복호화한 시간
+		    String sRequestNumber = "";			 // 요청 번호
+		    String sResponseNumber = "";		 // 인증 고유번호
+		    String sAuthType = "";				   // 인증 수단
+		    String sName = "";							 // 성명
+		    String sDupInfo = "";						 // 중복가입 확인값 (DI_64 byte)
+		    String sConnInfo = "";					 // 연계정보 확인값 (CI_88 byte)
+		    String sBirthDate = "";					 // 생일
+		    String sGender = "";						 // 성별
+		    String sNationalInfo = "";       // 내/외국인정보 (개발가이드 참조)
+		    String sPlainData = "";
+		    
+		    int iRtn = niceCheck.fnDecode(sSiteCode, sSitePw, sEncodeData);
+		    String sRtnMsg				= "";
+		    DataSet result = new DataSet();
+		    
+		    if( iRtn == 0 ) {
+		    	System.out.println("--------------------------------------SMS 인증 성공--------------------------------");
+				sPlainData = niceCheck.getPlainData();
+		        sCipherTime = niceCheck.getCipherDateTime();
+				
+		     // 데이타를 추출합니다.
+		        java.util.HashMap mapresult = niceCheck.fnParse(sPlainData);
+		        
+		        sRequestNumber  = (String)mapresult.get("REQ_SEQ");
+		        sResponseNumber = (String)mapresult.get("RES_SEQ");
+		        sAuthType 			= (String)mapresult.get("AUTH_TYPE");
+		        sName 					= (String)mapresult.get("NAME");
+		        sBirthDate 			= (String)mapresult.get("BIRTHDATE");
+		        sGender 				= (String)mapresult.get("GENDER");
+		        sNationalInfo  	= (String)mapresult.get("NATIONALINFO");
+		        sDupInfo 				= (String)mapresult.get("DI");
+		        sConnInfo 			= (String)mapresult.get("CI");
+
+				System.out.println(sRequestNumber);
+				System.out.println(sResponseNumber);
+				System.out.println(sAuthType);
+				System.out.println(sName);
+				System.out.println(sBirthDate);
+				System.out.println(sGender);
+				System.out.println(sNationalInfo);
+				System.out.println(sDupInfo);
+				System.out.println(sConnInfo);
+				
+				String session_sRequestNumber = (String)session.getAttribute("REQ_SEQ");
+		        if(!sRequestNumber.equals(session_sRequestNumber))
+		        {
+		        	sRtnMsg = "세션값이 다릅니다. 올바른 경로로 접근하시기 바랍니다.";
+		            sResponseNumber = "";
+		            sAuthType = "";
+		            iRtn = 1;
+		        }else{
+				
+			        output.put("sName",sName);
+					output.put("sDupInfo",sDupInfo);
+					output.put("sBirthDate",sBirthDate.substring(2, 8));
+					output.put("sGenderCode",sGender);
+					
+					
+			        //개인정보 저장
+					input.put("user_nm", sName);
+					input.put("birth", sBirthDate);
+					input.put("cert_key", sDupInfo);
+					input.put("cmd", "CHECK_MEMBER_PASS");
+					result = interact.execute( "/member/MemberMgr" , input);
+					
+					sRtnMsg = "정상 처리되었습니다.";
+		        }
+		    	
+		    }else if( iRtn == -1)
+		    {
+				sRtnMsg = "복호화 시스템 에러입니다.";
+		    }    
+		    else if( iRtn == -4)
+		    {
+		    	sRtnMsg = "복호화 처리오류입니다.";
+		    }    
+		    else if( iRtn == -5)
+		    {
+		    	sRtnMsg = "복호화 해쉬 오류입니다.";
+		    }    
+		    else if( iRtn == -6)
+		    {
+		    	sRtnMsg = "복호화 데이터 오류입니다.";
+		    }    
+		    else if( iRtn == -9)
+		    {
+		    	sRtnMsg = "입력 데이터 오류입니다.";
+		    }    
+		    else if( iRtn == -12)
+		    {
+		    	sRtnMsg = "사이트 패스워드 오류입니다.";
+		    }    
+		    else
+		    {
+		    	sRtnMsg = "알수 없는 에러 입니다. iRtn : " + iRtn;
+		    }
+		    
+		    String password = "";
+		    if( result != null)
+			{
+				String user_id = (String)result.getText("user_id");
+				if( user_id != null && !"".equals(user_id))
+				{
+					output.put("sUserId",user_id);
+					
+					String encKey = SitePropertyManager.getString("ENCRYPTION_KEY");
+					input.put("ENCRYPTION_KEY", encKey);
+					
+					password = com.kabm.util.PasswordUtil.getPassword();
+					input.put("user_id", user_id);
+					input.put("password", password);
+					input.put("cmd", "MODIFY_TMP_PASSWORD");
+					interact.execute( "/member/MemberMgr" , input);
+					
+				}else
+					output.put("sUserId","");
+			}else{
+				output.put("sUserId","");
+			}
+			
+			String data = "{\"sName\":\""+ output.getText("sName")
+							+"\", \"sDupInfo\":\""+output.getText("sDupInfo")
+							+"\", \"sBirthDate\":\""+output.getText("sBirthDate")
+							+"\", \"sBirthyyyy\":\""+output.getText("sBirthyyyy")
+							+"\", \"sBirthmm\":\""+output.getText("sBirthmm")
+							+"\", \"sBirthdd\":\""+output.getText("sBirthdd")
+							+"\", \"sGenderCode\":\""+output.getText("sGenderCode")
+							+"\", \"sUserId\":\""+output.getText("sUserId")
+							+"\", \"password\":\""+password
+							+"\", \"iRtn\":\""+iRtn
+							+"\", \"sRtnMsg\":\""+sRtnMsg
+							+"\"}";
+			//String json = getJsonFormat(data);
+ 			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	
+	public void smsError(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);	
+		
+		req.setAttribute("templet-bypass", "true");
+		try
+		{			
+			System.out.println("-----------------------------------/member/smsCert/action/smsError-------------------------------------------------");
+			String sSiteCode = SMS_SITE_CODE;
+			String sSitePw = SMS_SITE_PASSWORD;
+			
+			String sEncodeData = URLDecoder.decode( req.getParameter("enc_data"), "EUC-KR");
+			
+			NiceID.Check.CPClient niceCheck = new  NiceID.Check.CPClient();
+			HttpSession session = req.getSession();
+			
+			String sCipherTime = "";					// 복호화한 시간
+		    String sRequestNumber = "";				// 요청 번호
+		    String sErrorCode = "";						// 인증 결과코드
+		    String sAuthType = "";						// 인증 수단
+		    String sMessage = "";
+		    String sPlainData = "";
+		    
+		    int iRtn = niceCheck.fnDecode(sSiteCode, sSitePw, sEncodeData);
+		    String sRtnMsg				= "";
+		    
+		    if( iRtn == 0 ) {
+		    	System.out.println("--------------------------------------SMS 인증 실패--------------------------------");
+				sPlainData = niceCheck.getPlainData();
+		        sCipherTime = niceCheck.getCipherDateTime();
+				
+		     // 데이타를 추출합니다.
+		        java.util.HashMap mapresult = niceCheck.fnParse(sPlainData);
+		        
+		        sRequestNumber 	= (String)mapresult.get("REQ_SEQ");
+		        sErrorCode 			= (String)mapresult.get("ERR_CODE");
+		        sAuthType 			= (String)mapresult.get("AUTH_TYPE");
+
+				System.out.println(sRequestNumber);
+				System.out.println(sErrorCode);
+				System.out.println(sAuthType);
+				
+		        output.put("sErrorCode",sErrorCode);
+		    	
+		    }else if( iRtn == -1)
+		    {
+				sRtnMsg = "복호화 시스템 에러입니다.";
+		    }    
+		    else if( iRtn == -4)
+		    {
+		    	sRtnMsg = "복호화 처리오류입니다.";
+		    }    
+		    else if( iRtn == -5)
+		    {
+		    	sRtnMsg = "복호화 해쉬 오류입니다.";
+		    }    
+		    else if( iRtn == -6)
+		    {
+		    	sRtnMsg = "복호화 데이터 오류입니다.";
+		    }    
+		    else if( iRtn == -9)
+		    {
+		    	sRtnMsg = "입력 데이터 오류입니다.";
+		    }    
+		    else if( iRtn == -12)
+		    {
+		    	sRtnMsg = "사이트 패스워드 오류입니다.";
+		    }    
+		    else
+		    {
+		    	sRtnMsg = "알수 없는 에러 입니다. iRtn : " + iRtn;
+		    }
+		    
+			String data = "{\"sErrorCode\":\""+ output.getText("sErrorCode")
+							+"\", \"iRtn\":\""+iRtn
+							+"\", \"sRtnMsg\":\""+sRtnMsg
+							+"\"}";
+			//String json = getJsonFormat(data);
+ 			responseJson(data, resp);
+			
+		} catch(Exception ex)
+		{	
+			responseJson(getJsonFormat(HTTPResultConstant.RESULT_INTERNAL_SERVER_ERROR, ex.getMessage(), ""), resp);
+			Logger.err.print(Utility.getStackTrace(ex));
+		}
+	}
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

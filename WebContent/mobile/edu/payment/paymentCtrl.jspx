@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="jdf.framework.view.auth.User" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	
+	<jsp:declaration>
+	<![CDATA[   
+
+/******************************************************************************** 
+ * Program ID		: 결제
+ * FileName		    : paymentCtrl.jspx
+ * @author		    : 최성수
+ * @version		    : 1.0
+ * Comment		    : 
+ ********************************************************************************/           
+	         
+	private static final String JSP_BASE="/mobile/edu/payment/";
+	
+	private static final String JSP_BILL = "_bill";
+	private static final String JSP_PAY = "_pay";
+	private static final String JSP_PAYMENT = "_payment";
+	
+	private static final String JSP_PAY_MEM_DELIVERY=JSP_BASE+JSP_PAY+"_delivery.jsp";
+	private static final String JSP_PAY_MEM_DELIVERY_MODIFY=JSP_BASE+JSP_PAY+"_delivery_modify.jsp";
+	
+	
+	private static final String JSP_PAYMENT_LIST=JSP_BASE+JSP_PAYMENT+"_list.jsp";
+		
+	private static final String JSP_PAY_REQ_CROSS=JSP_BASE+JSP_PAY+"_req_crossplatform.jsp";  //결제창 생성 (1) => LG에서 pay_key.jsp 호출
+	private static final String JSP_PAY_REQ_CERT=JSP_BASE+JSP_PAY+"_certKey.jsp";		
+	private static final String JSP_PAY_RES=JSP_BASE+JSP_PAY+"_res.jsp";        // 결제완료 결과처리 (2-1)
+	private static final String JSP_PAY_RESULT=JSP_BASE+JSP_PAY+"_result.jsp";  // 가상계좌 결제 결과처리 (2-2)
+	
+	public void paymentDelivery(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			jdf.framework.view.auth.User session_user = getUserObject(req , resp);
+			String user_id = "";
+			if(session_user != null )user_id = session_user.getId();
+			
+			input.put("user_id", user_id);
+			input.put("cmd", "MEM_INFO");			
+			output = interact.execute( "/member/MemberMgr" , input);
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			String mod_yn  = input.getText("mod_yn");
+			
+			if( mod_yn != null && "Y".equals(mod_yn))
+				view.setViewPage(JSP_PAY_MEM_DELIVERY_MODIFY);
+			else
+				view.setViewPage(JSP_PAY_MEM_DELIVERY);
+				
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+
+	
+	
+	public void paymentReq(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_REQ_CROSS);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+
+	public void paymentResult(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_RESULT);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}	
+	
+	public void paymentRes(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_RES);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	public void viewPaymentList(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		
+		try
+		{	
+			User session_user = getUserObject(req, resp);
+			DataSet s_userData = session_user.getDataSet();
+			input.put("s_user_ip", session_user.getIp());			
+			input.put("s_emp_no", session_user.getId());
+			input.put("s_emp_name", session_user.getName());						
+			input.put("s_email", session_user.getEmail());
+			input.put("s_user_seq_no", session_user.getUser_seq_no());
+			
+			if( "".equals(input.getText("page_no")))
+				input.put("page_no" , "1");
+			
+			
+			input.put("user_id", session_user.getId());
+			input.put("cmd", "MEM_INFO");			
+			DataSet output = interact.execute( "/member/MemberMgr" , input);
+			
+			req.setAttribute("output", output);
+			req.setAttribute("input", input);
+			view.setViewPage(JSP_PAYMENT_LIST);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}		
+	
+	public void paymentCertKey(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+		throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		bind(req, input);
+		DataSet output = new DataSet();
+		
+		try
+		{	
+			System.out.println(input);
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			view.setViewPage(JSP_PAY_REQ_CERT);
+			
+		} catch(Exception ex)
+		{	
+			Logger.warn.println(Utility.getStackTrace(ex));	
+		}
+	}
+	
+	]]>
+	</jsp:declaration>
+
+</jsp:root>   

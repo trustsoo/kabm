@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.UUID" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.kabm.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	<jsp:declaration>
+	<![CDATA[
+	         
+    private final String COMMUNITY_LIST  = "/mng/board/_community_list.jsp";
+    private final String NOTICE_LIST  = "/mng/board/_notice_list.jsp";
+    private final String FAQ_LIST  = "/mng/board/_faq_list.jsp";
+    
+    public void list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+
+		
+		input.put("board_row_per_page", "5" );
+		
+		try
+		{		
+			setLimitCalendar("start_dt", "end_dt", -12, req);  //게시기간
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			view.setViewPage(COMMUNITY_LIST);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+    public void notice_list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+
+		
+		input.put("board_row_per_page", "5" );
+		
+		try
+		{		
+			setLimitCalendar("start_dt", "end_dt", -12, req);  //게시기간
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			view.setViewPage(NOTICE_LIST);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+    public void faq_list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		DataSet readAuth = new DataSet();
+		bind(req, input);
+
+		
+		input.put("board_row_per_page", "5" );
+		
+		try
+		{		
+			setLimitCalendar("start_dt", "end_dt", -12, req);  //게시기간
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			view.setViewPage(FAQ_LIST);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+    
+    
+    
+    
+	]]>
+	</jsp:declaration>
+</jsp:root>
+

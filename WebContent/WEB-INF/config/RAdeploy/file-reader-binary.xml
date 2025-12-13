@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="euc-kr"?>
+<!--
+	
+	Multi File Access Resource Adapter
+	
+-->
+<connector>
+	<adapter-name>file-reader-binary</adapter-name>
+	<resourceadapter>
+		<class>
+			jdf.framework.logic.adapter.file.ResourceAdapterImpl
+		</class>
+		<processor>
+			jdf.framework.logic.adapter.file.FileParseProcessor
+		</processor>
+		<processfactory>
+			jdf.framework.logic.adapter.file.ProcessorFactoryImpl
+		</processfactory>
+		<config-property>
+			<config-property-name>Delimiter</config-property-name>
+			<config-property-type>
+				java.lang.String
+			</config-property-type>
+			<config-property-value></config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>Delimiter</config-property-name>
+			<config-property-type>
+				java.lang.String
+			</config-property-type>
+			<config-property-value></config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>LineDelimiter</config-property-name>
+			<config-property-type>
+				java.lang.String
+			</config-property-type>
+			<config-property-value>\n\r</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>RootDirectory</config-property-name>
+			<config-property-type>
+				java.lang.String
+			</config-property-type>
+			<config-property-value>
+			</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>Mode</config-property-name>
+			<config-property-type>
+				java.lang.String
+			</config-property-type>
+			<config-property-value>length</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>NumberMode</config-property-name>
+			<config-property-type>
+				java.lang.String
+			</config-property-type>
+			<config-property-value>binary</config-property-value>
+		</config-property>
+	</resourceadapter>
+</connector>

@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='Survey_lecture' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<property name="sqlLogMode" value="bind"/>
+		<script language="java" import="java.util.*,
+							java.util.regex.Pattern">
+			<![CDATA[
+		
+		String cmd = input.getText("cmd");
+		
+		if("answCreate".equals(cmd)){ 
+		
+			if(!"".equals(input.getText("user_lecture_seq_no"))){	
+				executeSQL("deleteSurveyCust", connection, input, output);
+				executeSQL("insertSurveyCust", connection, input, output);				
+			}		
+			
+		}else
+		{
+			executeSQL(cmd, connection, input, output);
+		}
+		
+		
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="insertSurveyCust">
+			<query>
+			<![CDATA[
+				INSERT INTO TB_SURVEY_CUST 
+				(user_lecture_seq_no, paper_id, proc_yn, reg_dt, upd_dt, proc_dt,lecture_seq_no,
+				 q11,q21,
+				 q31,q32,q33,
+				 q41,q42,q43,
+				 q51,q52,q53,
+				 q61,q62,q63,
+				 q71,q72,q73,q731,
+				 q81,q91,
+				 q101,q1011,q102,q1021,q103
+				)
+				VALUES
+				(? , ? , 'Y', getdate(), getdate(), getdate(), ?,
+				 ?, ?,
+				 ?,?,?,
+				 ?,?,?,
+				 ?,?,?,
+				 ?,?,?,
+				 ?,?,?,?,
+				 ?,?,
+				 ?,?,?,?,?
+				)
+			]]>		
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no, paper_id, lecture_seq_no,
+					 q11,q21,
+					 q31,q32,q33,
+					 q41,q42,q43,
+					 q51,q52,q53,
+					 q61,q62,q63,
+					 q71,q72,q73,q731,
+					 q81,q91,
+					 q101,q1011,q102,q1021,q103
+				</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		 </sql>
+		 <sql id="deleteSurveyCust">
+			<query>
+				<![CDATA[
+				DELETE FROM TB_SURVEY_CUST
+				WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		 
+	</processor-info>
+	
+	<input>
+		<block name="arg" repeat="1">
+			<field name='paper_id' type='String' size=''/>
+			<field name='lecture_seq_no' type='String' size=''/>		
+			<field name='user_lecture_seq_no' type='String' size=''/>			
+			<field name='user_seq_no' type='String' size=''/>
+			
+			<field name='q11' type='String' size=''/>
+			<field name='q21' type='String' size=''/>
+			<field name='q31' type='String' size=''/>
+			<field name='q32' type='String' size=''/>
+			<field name='q33' type='String' size=''/>
+			<field name='q41' type='String' size=''/>
+			<field name='q42' type='String' size=''/>
+			<field name='q43' type='String' size=''/>
+			<field name='q51' type='String' size=''/>
+			<field name='q52' type='String' size=''/>
+			<field name='q53' type='String' size=''/>
+			<field name='q61' type='String' size=''/>
+			<field name='q62' type='String' size=''/>
+			<field name='q63' type='String' size=''/>
+			<field name='q71' type='String' size=''/>
+			<field name='q72' type='String' size=''/>
+			<field name='q73' type='String' size=''/>
+			<field name='q731' type='String' size=''/>
+			<field name='q81' type='String' size=''/>
+			<field name='q91' type='String' size=''/>
+			<field name='q101' type='String' size=''/>
+			<field name='q1011' type='String' size=''/>
+			<field name='q102' type='String' size=''/>
+			<field name='q1021' type='String' size=''/>
+			<field name='q103' type='String' size=''/>
+		</block>
+	</input>		
+	<output>
+		<block name="arg">			
+		</block>
+		
+	</output>
+</transaction>

@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='banner_list' protocolName='db1'>
+    <processor-info type='dbms' datasource=''>
+    	<property name="sqlLogMode" value="bind"/>
+		<property name="isPrint" value="Y"/>       
+        
+        <transaction-type>rollback</transaction-type>
+        
+        <sql id="select_banner_list">
+            <query>
+                <![CDATA[
+                    SELECT 
+                        A.seq_no, 
+                        A.use_yn,
+                        A.title,
+                        A.banner_div,
+                        A.link,    
+                       f.file_no , f.file_nm , f.file_path 
+                    FROM tb_kabm_banner A 
+                    LEFT OUTER JOIN  (select data_no , file_no , file_nm, file_path  from tb_kabm_attach_file where
+                        	attach_div_cd ='attach_div_01' group by  data_no , file_no , file_nm , file_path 
+                    	) f
+                    	ON A.seq_no = f.data_no  
+                    WHERE A.use_yn = 'Y' AND A.banner_div = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>banner_div</setProperty>
+                <getProperty>seq_no, use_yn, title, banner_div, link, file_no,file_nm , file_path</getProperty>
+            </mapping>
+        </sql>
+        
+        
+    </processor-info>
+    
+    <input>
+        <block name="arg" repeat="1">   
+            <field name='banner_div'        type='String' size=''/>   
+        </block>
+    </input>
+    
+    <output>
+       <block id='banner_list' name='banner_list' 	repeat=''>
+        	<field name='seq_no' 		type='string' size=''/>
+			<field name='use_yn' 	type='string' size=''/>
+			<field name='title' 		type='string' size=''/>
+			<field name='banner_div' 		type='string' size=''/>
+			<field name='link' 			type='string' size=''/>	
+            <field name='file_no' type='string' size=''/>  <!--file 번호 -->
+            <field name='file_nm' type='string' size=''/>
+            <field name='file_path' type='string' size=''/>
+        </block>        
+        
+    </output>
+    
+</transaction>

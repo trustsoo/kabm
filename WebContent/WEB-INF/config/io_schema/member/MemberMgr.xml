@@ -1,0 +1,970 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<transaction name="MemberMgr">
+	<processor-info type='dbms' datasource=''>
+		<script language="java" import="">
+			<![CDATA[	
+			String cmd = input.getText("cmd");
+			
+			String search_gbn_hcode = input.getText("search_gbn_hcode");
+			String search_gbn_jicode = input.getText("search_gbn_jicode");
+			String search_user_nm = input.getText("search_user_nm");
+			String search_user_id = input.getText("search_user_id");
+			String search_corp_nm = input.getText("search_corp_nm");
+			String search_mem_div = input.getText("search_mem_div");
+			
+			if( "getMemberList".equals(cmd))
+			{
+				if( !"".equals(search_gbn_hcode))
+					input.put("strHcode", "AND b.hcode = '" + search_gbn_hcode + "'" );
+				
+				if( !"".equals(search_gbn_jicode))
+					input.put("strJicode", "AND b.ji_code = '" + search_gbn_jicode + "'" );
+					
+				if( !"".equals(search_user_nm) )
+					input.put("strUserName", "AND a.user_nm like '%" + search_user_nm + "%'" );	
+					
+				if( !"".equals(search_user_id) )
+					input.put("strUserId", "AND a.user_id like '%" + search_user_id + "%'" );		
+				
+				if( !"".equals(search_corp_nm) )
+					input.put("strCorpName", "AND b.company like '%" + search_corp_nm + "%'" );	
+				
+				if( !"".equals(search_mem_div) )
+					input.put("strMemDiv", "AND a.mem_div = '" + search_mem_div + "'" );
+			}
+			
+			
+			if("CREATE_MEMBER".equals(cmd) ){
+				
+				executeSQL("MEM_INFO", connection, input, output);
+				int cnt = output.getCount("user_id");
+				
+				if( cnt == 0 )
+				{
+					executeSQL(cmd, connection, input, output);
+					
+					String re_yn = input.getText("re_yn");
+					
+					if("Y".equals( re_yn ) )
+					{						
+						executeSQL("GET_CURRENT_KEY", connection, input, output);
+						String user_seq_no = output.getText("user_seq_no");
+						input.put("user_seq_no", user_seq_no);					
+						executeSQL("INSERT_MEMBER_REQ", connection, input, output);							
+					}
+				}
+			}else{
+				executeSQL(cmd, connection, input, output);
+			
+			}
+			
+			
+			
+			
+			
+			]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+		<sql id="getMemberList">
+			<query>
+			   <![CDATA[
+			   		SELECT TOP (?) 
+			   			user_seq_no,user_id,password,ssn,user_nm,corp_nm,
+						corp_reg_no,addr,tel_no,email,cp_code,ill_no,mem_div,
+						building_nm,building_addr,zipcode,building_zipcode,
+						post_zipcode,post_addr,post_req,post_tel_no,remark,account_nm,trans_yn,
+						birth_yyyy,birth_mm,birth_dd,
+						corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,sex,addr_nm, 
+						hcode,ji_code,
+						(select top (1) BASE_NAME from TB_APC_BASE_CODE where BASE_CODE = hcode and GROUP_CODE = '21' ) as hname,
+						(select top (1) JISANAME from TB_APC_COMPANY_SUB where ji_code =  x.ji_code ) as jiname,
+						(select top (1) cd_nm from TB_KABM_CODE where div_cd = 'mem_div' and cd = mem_div ) as mem_div_nm,
+						cptel,cpfax,cpost, cp_addr, cp_jibun, rprstt_kr,mb_no,
+						rnum,tot_cnt 
+			   		
+			   		FROM
+			   		(
+						select 
+							ROW_NUMBER() OVER( ORDER BY a.user_seq_no asc ) AS rnum, 
+							count(*) over() tot_cnt,
+							user_seq_no,
+							user_id,
+							password,
+							ssn,
+							user_nm,
+							(case when a.cp_code is null or a.cp_code = '' then a.CORP_NM else b.company end) as corp_nm,
+							(case when a.mem_div = '4' then a.user_id else b.bsns_no end) as corp_reg_no,
+							addr,
+							tel_no,
+							a.email,
+							a.cp_code,
+							a.ill_no,
+							a.mem_div,
+							a.building_nm,
+							a.building_addr,					
+							a.zipcode,
+							a.building_zipcode,
+							a.post_zipcode,
+							a.post_addr,
+							a.post_req,
+							a.post_tel_no,
+							a.remark,
+							a.account_nm,
+							a.trans_yn,
+							a.birth_yyyy,
+							a.birth_mm,
+							a.birth_dd,
+							a.corp_tel_no,
+							a.corp_fax_no,
+							a.building_tel_no,
+							a.building_fax_no,
+							a.sex,
+							'('+b.cpost+')'+ isnull(b.cp_addr,'') + ' '+ isnull(b.cp_jibun,'') as addr_nm,
+							b.hcode,
+							b.ji_code,
+							b.cptel,b.cpfax,b.cpost, b.cp_addr, b.cp_jibun, b.rprstt_kr,
+							replace(replace(b.mb_no , '제', '' ), '호', '') mb_no
+						from tb_cyber_member a
+							LEFT OUTER JOIN tb_mb_master b 
+							ON a.cp_code = b.cp_code
+							and a.ill_no = b.ill_no
+						where 1=1
+							$strHcode
+							$strJicode
+							$strUserName
+							$strUserId
+							$strCorpName
+							$strMemDiv
+							
+					) x 
+				    WHERE rnum > (?-1) * ? 
+				]]>
+			</query>
+			<mapping>
+				<setProperty>row_per_page,cur_pg, row_per_page</setProperty>
+				<getProperty>user_seq_no,user_id,password,ssn,user_nm,corp_nm,
+						corp_reg_no,addr,tel_no,email,cp_code,ill_no,mem_div,
+						building_nm,building_addr,zipcode,building_zipcode,
+						post_zipcode,post_addr,post_req,post_tel_no,remark,account_nm,trans_yn,
+						birth_yyyy,birth_mm,birth_dd,
+						corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,sex,addr_nm, 
+						hcode,jicode,hname,jiname,mem_div_nm,
+						cptel,cpfax,cpost, cp_addr, cp_jibun, rprstt_kr,mb_no,
+						rnum,tot_cnt </getProperty>
+			</mapping>
+		</sql>
+		<sql id="MEM_INFO">
+			<query>
+			<![CDATA[
+				select 
+					user_seq_no,
+					user_id,
+					password,
+					(case when len(ssn) > 6 then substring(ssn, 0, 7) + '-' + substring(ssn , 7, 13) else ssn end) ssn,
+					user_nm,
+					(case when a.cp_code is null or a.cp_code = '' then a.CORP_NM else b.company end) as corp_nm,
+					(case when a.mem_div = '4' then a.user_id else b.bsns_no end) as corp_reg_no,
+					addr,
+					tel_no,
+					a.email,
+					a.cp_code,
+					a.ill_no,
+					a.mem_div,
+					a.building_nm,
+					a.building_addr,					
+					a.zipcode,
+					a.building_zipcode,
+					a.post_zipcode,
+					a.post_addr,
+					a.post_req,
+					a.post_tel_no,
+					a.remark,
+					a.account_nm,
+					a.trans_yn,
+					a.birth_yyyy,
+					a.birth_mm,
+					a.birth_dd,
+					a.corp_tel_no,
+					a.corp_fax_no,
+					a.building_tel_no,
+					a.building_fax_no,
+					a.sex,
+					b.cp_addr + ' '+ isnull(b.cp_jibun,'') as addr_nm,
+					b.hcode,
+					b.ji_code,
+					(select top (1) BASE_NAME from TB_APC_BASE_CODE where BASE_CODE = hcode and GROUP_CODE = '21' ) as hname,
+					(select top (1) JISANAME from TB_APC_COMPANY_SUB where ji_code = b.ji_code ) as jiname,
+					(select top (1) cd_nm from TB_KABM_CODE where div_cd = 'mem_div' and cd = a.mem_div ) as mem_div_nm,
+					b.cptel,b.cpfax,b.cpost, b.cp_addr, b.cp_jibun, b.rprstt_kr,
+					replace(replace(b.mb_no , '제', '' ), '호', '') mb_no,
+					(select top (1) dbo.formatDateTime(req_date,'yyyy.mm.dd') from TB_CYBER_MEMBER_REQ where user_seq_no = a.user_seq_no and req_status = 'R' ) req_date
+				from tb_cyber_member a
+					LEFT OUTER JOIN tb_mb_master b 
+					ON a.cp_code = b.cp_code
+					and a.ill_no = b.ill_no
+				where a.user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_id</setProperty>
+				<getProperty>
+					user_seq_no,user_id,password,ssn,user_nm,corp_nm,
+					corp_reg_no,addr,tel_no,email,cp_code,ill_no,mem_div,
+					building_nm,building_addr,zipcode,building_zipcode,
+					post_zipcode,post_addr,post_req,post_tel_no,remark,account_nm,trans_yn,
+					birth_yyyy,birth_mm,birth_dd,
+					corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,sex,addr_nm,
+					hcode,jicode,hname,jiname,mem_div_nm,
+					cptel,cpfax,cpost, cp_addr, cp_jibun, rprstt_kr,mb_no,
+					req_date
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="CREATE_MEMBER">
+			<query>
+			<![CDATA[
+				INSERT INTO TB_CYBER_MEMBER
+           		(user_id, password, ssn, user_nm, addr, 
+           			tel_no , email,cp_code,ill_no,mem_div,
+           			building_nm,building_addr,zipcode, building_zipcode,remark,
+           			reg_date,last_update_dt,account_nm,trans_yn,birth_yyyy,birth_mm,birth_dd,
+           			corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,sex,corp_nm)
+           		values
+           		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, getdate(), getdate(), ?, 'Y', ? , ?, ?, ?, ?, ? ,? ,?,?)
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_id,password, ssn, user_nm, addr, tel_no , email,cp_code,ill_no,mem_div,building_nm,building_addr,zipcode, 
+				    building_zipcode,remark,account_nm,birth_yyyy,birth_mm,birth_dd,
+				    corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,sex,corp_nm
+				    </setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="CREATE_MERGE_MEMBER">
+			<query>
+			<![CDATA[
+			
+			
+				MERGE INTO TB_CYBER_MEMBER a
+					USING (SELECT ? user_id ) b
+					ON (a.user_id = b.user_id )
+				WHEN NOT MATCHED THEN
+				INSERT
+					 	
+           			(user_id, password, ssn, user_nm, addr, 
+           			tel_no , email,cp_code,ill_no,mem_div,
+           			building_nm,building_addr,zipcode, building_zipcode,remark,
+           			reg_date,last_update_dt,account_nm,trans_yn,birth_yyyy,birth_mm,birth_dd,
+           			corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,sex,corp_nm)
+           		values
+           		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, getdate(), getdate(), ?, 'Y', ? , ?, ?, ?, ?, ? ,? ,?,?);
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_id,user_id,password, ssn, user_nm, addr, tel_no , email,cp_code,ill_no,mem_div,building_nm,building_addr,zipcode, 
+				    building_zipcode,remark,account_nm,birth_yyyy,birth_mm,birth_dd,
+				    corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,sex,corp_nm
+				    </setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="ADDINFO_MEMBER">
+			<query>
+			<![CDATA[
+				update tb_cyber_member set
+					cp_code = ?,
+					ill_no = ?,
+					building_nm = ?,
+					building_addr = ?,
+					building_zipcode = ?,
+					remark = ?,
+					last_update_dt = getdate(),
+					corp_tel_no =?,
+					corp_fax_no =?,
+					building_tel_no =?,
+					building_fax_no =?,
+					corp_nm =?
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>cp_code,ill_no,
+				             building_nm,building_addr, building_zipcode,
+				             remark,
+				             corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,corp_nm,
+				             user_id
+				             </setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="MODIFY_MEMBER">
+			<query>
+			<![CDATA[
+				update tb_cyber_member set
+					user_nm = ?,
+					addr = ?,
+					tel_no = ?,
+					email = ?,
+					cp_code = ?,
+					ill_no = ?,
+					mem_div = ?,
+					building_nm = ?,
+					building_addr = ?,
+					zipcode = ?,
+					building_zipcode = ?,
+					remark = ?,
+					account_nm = ?,
+					birth_yyyy = ?,
+					birth_mm = ?,
+					birth_dd = ?,
+					last_update_dt = getdate(),
+					corp_tel_no =?,
+					corp_fax_no =?,
+					building_tel_no =?,
+					building_fax_no =?,
+					sex =?,
+					corp_nm =?
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_nm,addr,tel_no,email,cp_code,ill_no,mem_div,
+				             building_nm,building_addr,zipcode, building_zipcode,
+				             remark,account_nm,birth_yyyy,birth_mm,birth_dd,
+				             corp_tel_no,corp_fax_no,building_tel_no,building_fax_no,sex,corp_nm,
+				             user_id
+				             </setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="MODIFY_MEMBER_DELIVERY">
+			<query>
+			<![CDATA[
+				update tb_cyber_member set
+					post_zipcode = ?,
+					post_addr = ?,
+					post_req = ?,
+					post_tel_no = ?
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>
+					post_zipcode,post_addr,post_req,post_tel_no,user_id
+				</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="MODIFY_NEW_MEMBER">
+			<query>
+			<![CDATA[
+				update tb_cyber_member set
+					user_nm = ?,
+					tel_no = ?,
+					mem_div = ?,
+					email = ?,
+					addr = ?,
+					zipcode = ?,
+					account_nm = ?,
+					birth_yyyy = ?,
+					birth_mm = ?,
+					birth_dd = ?
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_nm,tel_no,mem_div,email,addr,zipcode,account_nm,birth_yyyy,birth_mm,birth_dd,user_id</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="MNG_INSERT_MEMBER">
+			<query type="batch">
+			<![CDATA[
+			
+			
+				
+				INSERT INTO TB_CYBER_MEMBER
+					 	
+           		(user_id, password, user_nm, tel_no , email,
+           			mem_div,trans_yn,cp_code,ill_no,corp_nm,
+           			corp_tel_no,corp_fax_no,reg_date ,tmp_pass_yn)
+           		values
+           		(?, ?, ?, ?, ?, 
+           		 ?, 'Y', ?, ?, ?,
+           		 ?, ?, getdate(), 'Y')
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>
+					user_id, password, user_nm, tel_no , email,mem_div,cp_code,ill_no,corp_nm,corp_tel_no,corp_fax_no
+				    </setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="MNG_MERGE_MEMBER">
+			<query>
+			<![CDATA[
+			
+			
+				MERGE INTO TB_CYBER_MEMBER a
+					USING (SELECT ? user_id ) b
+					ON (a.user_id = b.user_id )
+					WHEN MATCHED THEN
+						UPDATE SET
+							user_nm = ?,
+							tel_no = ?,
+							mem_div = ?,
+							email = ?,
+							cp_code = ?,
+							ill_no = ?,
+							corp_nm = ?,
+							corp_tel_no = ?,
+							corp_fax_no = ?,
+	                        last_update_dt = getdate()
+					WHEN NOT MATCHED THEN
+						INSERT
+					 	
+           			(user_id, password, user_nm, tel_no , email,
+           			mem_div,trans_yn,cp_code,ill_no,corp_nm,
+           			corp_tel_no,corp_fax_no,reg_date)
+           		values
+           		(?, ?, ?, ?, ?, 
+           		 ?, 'Y', ?, ?, ?,
+           		 ?, ?, getdate());
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_id,user_nm, tel_no,mem_div, email,cp_code,ill_no,corp_nm, corp_tel_no,corp_fax_no,  
+					user_id, password, user_nm, tel_no , email,mem_div,cp_code,ill_no,corp_nm,corp_tel_no,corp_fax_no
+				    </setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="MODIFY_MNG_MEMBER">
+			<query>
+			<![CDATA[
+				update tb_cyber_member set
+					user_nm = ?,
+					tel_no = ?,
+					mem_div = ?,
+					email = ?
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_nm,tel_no,mem_div,email,user_id</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="MODIFY_PASSWORD">
+			<query>
+			<![CDATA[
+				update tb_cyber_member set
+					password = ?,
+					tmp_pass_yn = 'N'
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>password,user_id</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="MODIFY_PASSWORD_BATCH">
+			<query type="batch">
+			<![CDATA[
+				update tb_cyber_member set
+					password = ?
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>password,user_id</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="MODIFY_TMP_PASSWORD">
+			<query>
+			<![CDATA[
+				update tb_cyber_member set
+					password = ?,
+					tmp_pass_yn = 'Y'
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>password,user_id</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="MODIFY_USERID">
+			<query>
+			<![CDATA[
+				update tb_cyber_member set
+					user_id = ?,
+					trans_yn = 'Y'
+				where user_id = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>new_user_id,user_id</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_CURRENT_KEY">
+			<query>
+				SELECT @@IDENTITY
+			</query>
+			<mapping>
+				<setProperty></setProperty>
+				<getProperty>user_seq_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="GET_MEMB_COMPANY">
+			<query>
+				select 
+					case when b.scode = '90' then 'Y' else 'N' end as close_yn 
+				from TB_CYBER_MEMBER a, TB_MB_MASTER b 
+				where a.cp_code = b.cp_code 
+				and a.ill_no = b.ill_no and a.USER_SEQ_NO = ?	
+			</query>
+			<mapping>
+				<setProperty>user_seq_no</setProperty>
+				<getProperty>close_yn</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="CHECK_MEMBER">
+			<query>
+				select 
+					user_id
+				from tb_cyber_member a
+				where a.user_nm = ?
+				and a.birth_yyyy+a.birth_mm+a.birth_dd = ?
+				UNION
+				select 
+					user_id
+				from tb_cyber_member a
+				where a.cert_key = ?
+				
+			</query>
+			<mapping>
+				<setProperty>user_nm,birth,cert_key</setProperty>
+				<getProperty>user_id</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="ID_CHECK_SMS">
+			<query>
+			<![CDATA[
+				select 
+					user_seq_no,
+					user_id,
+					password,
+					ssn,
+					user_nm,
+					tel_no,
+					a.email,
+					a.birth_yyyy,
+					a.birth_mm,
+					a.birth_dd,
+					a.sex
+				from tb_cyber_member a
+				where a.user_nm = ?
+				and replace(a.tel_no, '-' , '') = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_nm, tel_no</setProperty>
+				<getProperty>
+					user_seq_no,user_id,password,ssn,user_nm,tel_no,
+					email,birth_yyyy,birth_mm,birth_dd,sex
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="ID_CHECK_EMAIL">
+			<query>
+			<![CDATA[
+				select 
+					user_seq_no,
+					user_id,
+					password,
+					ssn,
+					user_nm,
+					tel_no,
+					a.email,
+					a.birth_yyyy,
+					a.birth_mm,
+					a.birth_dd,
+					a.sex
+				from tb_cyber_member a
+				where a.user_nm = ?
+				and a.email = ?
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_nm, email</setProperty>
+				<getProperty>
+					user_seq_no,user_id,password,ssn,user_nm,tel_no,
+					email,birth_yyyy,birth_mm,birth_dd,sex
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="CHECK_MEMBER_PASS">
+			<query>
+				select 
+					user_id
+				from tb_cyber_member a
+				where a.user_nm = ?
+				and a.birth_yyyy+a.birth_mm+a.birth_dd = ?
+				and a.user_id = ?
+				
+			</query>
+			<mapping>
+				<setProperty>user_nm,birth,user_id</setProperty>
+				<getProperty>user_id</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="PASS_CHECK_SMS">
+			<query>
+			<![CDATA[
+				select 
+					user_seq_no,
+					user_id,
+					password,
+					ssn,
+					user_nm,
+					tel_no,
+					a.email,
+					a.birth_yyyy,
+					a.birth_mm,
+					a.birth_dd,
+					a.sex
+				from tb_cyber_member a
+				where a.user_nm = ?
+				and replace(a.tel_no, '-' , '') = ?
+				and a.user_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_nm, tel_no,user_id</setProperty>
+				<getProperty>
+					user_seq_no,user_id,password,ssn,user_nm,tel_no,
+					email,birth_yyyy,birth_mm,birth_dd,sex
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="PASS_CHECK_EMAIL">
+			<query>
+			<![CDATA[
+				select 
+					user_seq_no,
+					user_id,
+					password,
+					ssn,
+					user_nm,
+					tel_no,
+					a.email,
+					a.birth_yyyy,
+					a.birth_mm,
+					a.birth_dd,
+					a.sex
+				from tb_cyber_member a
+				where a.user_nm = ?
+				and a.email = ?
+				and a.user_id = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_nm, email,user_id</setProperty>
+				<getProperty>
+					user_seq_no,user_id,password,ssn,user_nm,tel_no,
+					email,birth_yyyy,birth_mm,birth_dd,sex
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="INSERT_MEMBER_REQ">
+			<query>
+			<![CDATA[
+				INSERT INTO TB_CYBER_MEMBER_REQ
+				( USER_SEQ_NO, REQ_DATE, UPD_DATE, REQ_STATUS, RE_CORP_POST,  RE_CORP_ADDR, 
+					RE_CORP_NM, RE_CORP_PRESIDENT, RE_CORP_REG_NO, RE_CORP_TEL_NO, RE_CORP_FAX_NO,
+					RE_CORP_AN_END,RE_CORP_AN_ING )
+				VALUES
+				( ? , getdate() , getdate() , 'R' , ? , ?, ?, ? , ? , ?, ?, ?,? )
+				
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no,re_corp_post,  re_corp_addr, re_corp_nm, re_corp_president, re_corp_reg_no,re_corp_tel_no, re_corp_fax_no,re_corp_an_end,re_corp_an_ing</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="UPDATE_MEMBER_REQ">
+			<query>
+			<![CDATA[
+				UPDATE TB_CYBER_MEMBER_REQ SET
+					UPD_DATE = getdate(), 
+					RE_CORP_POST = ?,  
+					RE_CORP_ADDR = ?, 
+					RE_CORP_NM = ?, 
+					RE_CORP_PRESIDENT = ?, 
+					RE_CORP_REG_NO = ?,
+					RE_CORP_TEL_NO = ?, 
+					RE_CORP_FAX_NO = ?,
+					RE_CORP_AN_END = ?,
+					RE_CORP_AN_ING = ?
+				WHERE user_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>re_corp_post,  re_corp_addr, re_corp_nm, re_corp_president, 
+							re_corp_reg_no,re_corp_tel_no, re_corp_fax_no,re_corp_an_end,re_corp_an_ing,
+							user_seq_no</setProperty>
+				<getProperty>
+				</getProperty>
+			</mapping>
+		</sql>
+		<sql id="GET_MEMBER_REQ">
+			<query>
+			<![CDATA[
+				select top(1)
+					a.user_seq_no, req_date, upd_date, req_status, re_corp_post,  re_corp_addr, re_corp_nm, 
+					re_corp_president, re_corp_reg_no,re_corp_tel_no, re_corp_fax_no,re_corp_an_end,re_corp_an_ing
+				from tb_cyber_member a, tb_cyber_member_req b
+				where a.user_seq_no = b.user_seq_no
+				and req_status = 'R'
+				and b.user_seq_no = ?
+				order by b.upd_date desc
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_seq_no</setProperty>
+				<getProperty>
+					user_seq_no, req_date, upd_date, req_status, re_corp_post,  
+					re_corp_addr, re_corp_nm, re_corp_president, re_corp_reg_no,
+					re_corp_tel_no, re_corp_fax_no,re_corp_an_end,re_corp_an_ing
+				</getProperty>
+			</mapping>
+		</sql>
+	</processor-info>
+
+	<input>
+		<block name="arg" repeat="1">			
+			
+			<field name='birth' 		type='String'	size=''/>
+			<field name='cert_key' 		type='String'	size=''/>
+			
+			<field name="user_seq_no" 	type="string"	size=''/>	
+			<field name="user_id" 		type="string"	size=''/>
+			<field name="password" 		type="string"	size='' properties="encryption:aria"/>
+			<field name='ssn' 		    type='String'	size=''/>
+			<field name='user_nm' 		type='String'	size=''/>
+			<field name='addr' 	        type='String'	size=''/>
+			<field name='tel_no' 		type='String'	size=''/>
+			<field name='email' 		type='String'	size=''/>
+			<field name='cp_code' 		type='String'	size=''/>
+			<field name='ill_no' 		type='String'	size=''/>
+			<field name='mem_div' 		type='String'	size=''/>
+			<field name='building_nm' 		type='String'	size=''/>
+			<field name='building_addr' 		type='String'	size=''/>
+			
+			<field name='zipcode' 		type='String'	size=''/>
+			<field name='building_zipcode' 		type='String'	size=''/>
+			<field name='remark' 		type='String'	size=''/>
+			
+			<field name='post_zipcode' 		type='String'	size=''/>
+			<field name='post_addr' 		type='String'	size=''/>
+			<field name='post_req' 		type='String'	size=''/>
+			<field name='post_tel_no' 		type='String'	size=''/>
+			
+			<field name='account_nm' 		type='String'	size=''/>
+			<field name="new_user_id" 		type="string"	size="" />
+			
+			<field name="birth_yyyy" 		type="string"	size="" />
+			<field name="birth_mm" 		type="string"	size="" />
+			<field name="birth_dd" 		type="string"	size="" />
+			
+			<field name="corp_tel_no" 		type="string"	size="" />
+			<field name="corp_fax_no" 		type="string"	size="" />
+			<field name="building_tel_no" 		type="string"	size="" />
+			<field name="building_fax_no" 		type="string"	size="" />
+			<field name="sex" 		type="string"	size="" />
+			<field name='corp_nm' 		type='String'	size=''/>
+			
+			<field name='cur_pg' type='int'	size=''/>
+			<field name='row_per_page' type='int'	size=''/>
+			
+			<field name='strHcode' 		type='String'	size=''/>
+			<field name='strJicode' 		type='String'	size=''/>
+			<field name='strUserName' 		type='String'	size=''/>
+			<field name='strUserId' 		type='String'	size=''/>
+			<field name='strCorpName' 		type='String'	size=''/>
+			<field name='strMemDiv' 		type='String'	size=''/>
+			
+			<field name='re_corp_post' 		type='String'	size=''/>
+			<field name='re_corp_addr' 		type='String'	size=''/>
+			<field name='re_corp_nm' 		type='String'	size=''/>
+			<field name='re_corp_president' 		type='String'	size=''/>
+			<field name='re_corp_reg_no' 		type='String'	size=''/>
+			<field name='re_corp_tel_no' 		type='String'	size=''/>
+			<field name='re_corp_fax_no' 		type='String'	size=''/>
+			
+			<field name='re_corp_an_end' 		type='String'	size=''/>
+			<field name='re_corp_an_ing' 		type='String'	size=''/>
+		</block>
+	</input>
+
+	<output>
+		<block repeat=''>
+			<field name="user_seq_no" 		type="string"	size="" />	
+			<field name="user_id" 		type="string"	size="" />
+			<field name="password" 		type="string"	size="" properties="encryption:aria"/>
+			<field name='ssn' 		type='String'	size=''/>
+			<field name='user_nm' 		type='String'	size=''/>
+			<field name='corp_nm' 		type='String'	size=''/>
+			<field name='corp_reg_no' 		type='String'	size=''/>
+			<field name='addr' 	type='String'	size=''/>
+			<field name='tel_no' 		type='String'	size=''/>
+			<field name='email' 		type='String'	size=''/>	
+			<field name='cp_code' 		type='String'	size=''/>
+			<field name='ill_no' 		type='String'	size=''/>
+			<field name='mem_div' 		type='String'	size=''/>	
+			<field name='building_nm' 		type='String'	size=''/>
+			<field name='building_addr' 		type='String'	size=''/>
+			<field name='zipcode' 		type='String'	size=''/>
+			<field name='building_zipcode' 		type='String'	size=''/>
+			<field name='post_zipcode' 		type='String'	size=''/>
+			<field name='post_addr' 		type='String'	size=''/>
+			<field name='post_req' 		type='String'	size=''/>
+			<field name='post_tel_no' 		type='String'	size=''/>
+			<field name='account_nm' 		type='String'	size=''/>
+			<field name='trans_yn' 		type='String'	size=''/>
+			<field name="birth_yyyy" 	type="string"	size="" />
+			<field name="birth_mm" 		type="string"	size="" />
+			<field name="birth_dd" 		type="string"	size="" />
+			<field name="corp_tel_no" 		type="string"	size="" />
+			<field name="corp_fax_no" 		type="string"	size="" />
+			<field name="building_tel_no" 		type="string"	size="" />
+			<field name="building_fax_no" 		type="string"	size="" />
+			<field name="sex" 		type="string"	size="" />
+			<field name="close_yn" 		type="string"	size="" />
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='cur_pg' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+		</block>
+		
+		<block name="MEM_INFO" id="MEM_INFO" repeat='99999999'>
+			<field name="user_seq_no" 		type="string"	size="" />	
+			<field name="user_id" 		type="string"	size="" />
+			<field name="password" 		type="string"	size="" properties="encryption:aria"/>
+			<field name='ssn' 		type='String'	size=''/>
+			<field name='user_nm' 		type='String'	size=''/>
+			<field name='corp_nm' 		type='String'	size=''/>
+			<field name='corp_reg_no' 		type='String'	size=''/>
+			<field name='addr' 	type='String'	size=''/>
+			<field name='tel_no' 		type='String'	size=''/>
+			<field name='email' 		type='String'	size=''/>
+			<field name='cp_code' 		type='String'	size=''/>
+			<field name='ill_no' 		type='String'	size=''/>
+			<field name='mem_div' 		type='String'	size=''/>
+			<field name='building_nm' 		type='String'	size=''/>
+			<field name='building_addr' 		type='String'	size=''/>
+			<field name='zipcode' 		type='String'	size=''/>
+			<field name='building_zipcode' 		type='String'	size=''/>
+			<field name='remark' 		type='String'	size=''/>
+			<field name='post_zipcode' 		type='String'	size=''/>
+			<field name='post_addr' 		type='String'	size=''/>
+			<field name='post_req' 		type='String'	size=''/>
+			<field name='post_tel_no' 		type='String'	size=''/>
+			<field name='account_nm' 		type='String'	size=''/>
+			<field name='trans_yn' 		type='String'	size=''/>
+			<field name="birth_yyyy" 	type="string"	size="" />
+			<field name="birth_mm" 		type="string"	size="" />
+			<field name="birth_dd" 		type="string"	size="" />
+			<field name="corp_tel_no" 		type="string"	size="" />
+			<field name="corp_fax_no" 		type="string"	size="" />
+			<field name="building_tel_no" 		type="string"	size="" />
+			<field name="building_fax_no" 		type="string"	size="" />
+			<field name="sex" 		type="string"	size="" />
+			<field name="addr_nm" 		type="string"	size="" />
+			
+			<field name="hcode" 		type="string"	size="" />
+			<field name="jicode" 		type="string"	size="" />
+			<field name="hname" 		type="string"	size="" />
+			<field name="jiname" 		type="string"	size="" />
+			<field name="mem_div_nm" 		type="string"	size="" />
+			<field name="cptel" 		type="string"	size="" />
+			<field name="cpfax" 		type="string"	size="" />
+			<field name="cpost" 		type="string"	size="" />
+			<field name="cp_addr" 		type="string"	size="" />
+			<field name="cp_jibun" 		type="string"	size="" />
+			<field name="rprstt_kr" 		type="string"	size="" />
+			<field name="mb_no" 		type="string"	size="" />
+			<field name="req_date" 		type="string"	size="" />
+			<field name='rnum' type='string'	size=''/>
+			<field name='tot_cnt' type='string'	size=''/>
+		</block>
+	
+		<block name="MEM_REQ_INFO" id="MEM_REQ_INFO" repeat='999'>
+			<field name="user_seq_no" 		type="string"	size="" />	
+			<field name='req_date' 		type='String'	size=''/>
+			<field name='upd_date' 		type='String'	size=''/>
+			<field name='req_status' 		type='String'	size=''/>			
+			<field name='re_corp_post' 		type='String'	size=''/>
+			<field name='re_corp_addr' 		type='String'	size=''/>
+			<field name='re_corp_nm' 		type='String'	size=''/>
+			<field name='re_corp_president' 		type='String'	size=''/>
+			<field name='re_corp_reg_no' 		type='String'	size=''/>
+			<field name='re_corp_tel_no' 		type='String'	size=''/>
+			<field name='re_corp_fax_no' 		type='String'	size=''/>
+			<field name='re_corp_an_end' 		type='String'	size=''/>
+			<field name='re_corp_an_ing' 		type='String'	size=''/>
+		</block>	
+	</output>
+</transaction>

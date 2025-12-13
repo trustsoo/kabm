@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:directive.page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" />
+	
+	<jsp:directive.page extends="jdf.framework.core.http.JspController" />
+	<jsp:directive.page import="java.io.*" />
+	<jsp:directive.page import="java.util.*" />
+	<jsp:directive.page import="java.util.UUID" />
+	<jsp:directive.page import="jdf.framework.core.http.*,jdf.framework.core.data.*" />
+	<jsp:directive.page import="jdf.framework.core.util.*" />
+	<jsp:directive.page import="jdf.framework.core.log.*" />
+	<jsp:directive.page import="jdf.framework.core.*" />
+	<jsp:directive.page import="com.edu.util.*" />
+	<jsp:directive.include file="/common/common.jsp"/>
+	
+	<jsp:directive.page import="net.sf.json.JSONArray" />
+	<jsp:directive.page import="net.sf.json.JSONObject" />
+	
+	<jsp:declaration>
+	<![CDATA[
+	         
+	private final String LIST = "/mng/content/_calendar.jsp";	
+	private final String CALENDAR_LIST = "/mng/content/_calendar_list.jsp";
+	
+  	//일정리스트 화면.
+    public void calendar_list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet output = new DataSet();
+		bind(req, input);
+
+		try
+		{
+			boolean isCalAdmin = isContainUserGroup(req, resp, "CNSLT_ADMIN");
+			input.put( "isCalAdmin" , isCalAdmin);
+			
+			req.setAttribute("input", input);
+			req.setAttribute("output", output);
+			
+			view.setViewPage(CALENDAR_LIST);
+			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+  	
+  	//일정표.
+	public void list(HttpServletRequest req, HttpServletResponse resp, ViewMeta view)
+			throws ServletException, IOException, Exception
+	{
+		DataSet input = new DataSet();
+		DataSet global_output = new DataSet();
+		DataSet tmp_person_output = new DataSet();
+		DataSet person_output = new DataSet();
+		bind(req, input);
+	
+		try
+		{	
+			input.put("cmpny_no" , getUserObject(req,resp).getCmpnyNo() );
+			
+		    HashMap<String, String> colorMap = new HashMap<String, String>();
+            
+		    colorMap.put("GLBL_SCHDL", "label-yellow");
+            colorMap.put("GLBL_HOLIDAY", "label-danger");
+            colorMap.put("PRSN_VCTN", "label-success");
+            colorMap.put("PRSN_SCHDL", "label-info");
+            colorMap.put("DFT_ETC", "label-grey");
+            
+			boolean isCalAdmin = isContainUserGroup(req, resp, "CNSLT_ADMIN");
+			
+            if( isCalAdmin )
+            {
+				input.put("div_cd", "GLOBAL_SCHEDULE");
+				input.put("cmd", "getUseCodeList");
+	            
+				global_output = interact.execute("/common/Code", input);
+            }
+            
+			input.put("div_cd", "PERSONAL_SCHEDULE");
+            input.put("cmd", "getUseCodeList");
+            
+            tmp_person_output = interact.execute("/common/Code", input);
+            
+            int person_idx = 0;
+            List<Map> person_list = new ArrayList<Map>();
+            Map<String, String> person_map = new HashMap<String, String>();
+            for(int idx=0; idx<tmp_person_output.getMaxDataSize(); idx++){
+            	person_map = new HashMap<String, String>();
+            	person_map.put("cd", tmp_person_output.getText("cd", idx));
+            	person_map.put("cd_nm", tmp_person_output.getText("cd_nm", idx));
+            	person_list.add(person_idx , person_map);
+            	person_idx++;
+            }
+            input.put( "isCalAdmin" , isCalAdmin);
+            req.setAttribute("input", input);
+            req.setAttribute("colorMap", colorMap);
+            req.setAttribute("person_output", person_list);
+            
+			view.setViewPage(LIST);			
+		} catch(Exception ex)
+		{
+			throw ex;
+		}
+	}
+	         
+	         
+	]]>
+	</jsp:declaration>
+</jsp:root>

@@ -1,0 +1,347 @@
+<?xml version='1.0' encoding='utf-8'?>
+<transaction name='Survey_detail' protocolName='db1'>
+	<processor-info type='dbms' datasource=''>
+		<property name="sqlLogMode" value="bind"/>
+			
+		<script language="java" import="java.util.*">
+		<![CDATA[
+		
+			String cmd = input.getText("cmd");
+			
+			executeSQL(cmd, connection, input, output);
+		
+		]]>
+		</script>
+		
+		<transaction-type>rollback</transaction-type>
+		
+        <sql id="getSurveyQstnInfo">
+			<query>
+			<![CDATA[
+				SELECT				     
+   					(SELECT QSTN_CNT FROM tb_survey_paper WHERE PAPER_ID=A.PAPER_ID) qstn_cnt,
+					paper_id,
+					a.qstn_no,
+					qstn_answ,
+					answ_type,
+					answ_cnt,
+					multi_yn,
+					multi_cnt,
+					b.exmp_seq_no,
+					b.exmp_sort_no,
+					b.exmp_word,
+					ISNULL(a.connect_yn, 'N') AS connect_yn,
+         			b.connect_qstn_no,
+         			(SELECT count(CASE WHEN ANSW_TYPE = 'S' THEN 1 END) from tb_survey_qstn where paper_id = a.paper_id) as s_cnt,
+         			(SELECT count(CASE WHEN ANSW_TYPE = 'D' THEN 1 END) from tb_survey_qstn where paper_id = a.paper_id) as d_cnt,
+         			a.qstn_ord
+				FROM 
+				    tb_survey_qstn a 
+				    LEFT OUTER JOIN  tb_survey_qstn_exmp b ON a.qstn_no = b.qstn_no 
+				WHERE 
+				    paper_id = ?
+				ORDER BY a.qstn_ord, b.exmp_sort_no
+			]]>
+			</query>
+			<mapping>
+				<setProperty>paper_id</setProperty>
+				<getProperty>qstn_cnt, paper_id, qstn_no, qstn_answ, answ_type, answ_cnt, multi_yn, multi_cnt, 
+							exmp_seq_no, exmp_sort_no, exmp_word, connect_yn,connect_qstn_no, s_cnt,d_cnt,qstn_ord</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="getSurveyAnswResult">
+			<query>
+			<![CDATA[
+				SELECT
+    				a.answ, b.qstn_no, c.exmp_word, c.exmp_seq_no
+				FROM 
+				    tb_survey_answ a 
+				    INNER JOIN tb_survey_qstn b ON a.qstn_no = b.qstn_no
+					LEFT OUTER JOIN tb_survey_qstn_exmp c ON a.answ = CAST(c.exmp_seq_no AS CHAR(50))
+				WHERE  a.user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty>answ, qstn_no, exmp_word, exmp_seq_no</getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="updateSurveyCustFnsh">
+            <query>
+               <![CDATA[
+                    UPDATE tb_survey_cust
+                    SET    proc_yn = 'Y',
+                    	   proc_dt = NOW()
+                    WHERE user_lecture_seq_no = ?
+                ]]>
+            </query>
+            <mapping>
+                <setProperty>
+                	user_lecture_seq_no
+                </setProperty>
+                <getProperty>
+                </getProperty>
+            </mapping>
+        </sql>	
+        
+       
+		<sql id="deleteSurveyAnsw">
+			<query>
+			<![CDATA[
+				DELETE FROM tb_survey_answ
+				WHERE user_lecture_seq_no = ?
+			]]>
+			</query>
+			<mapping>
+				<setProperty>user_lecture_seq_no</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+		<sql id="insertSurveyAnsw">
+			<query type='batch'>
+			<![CDATA[
+				INSERT INTO tb_survey_answ
+				(answ_seq_no, qstn_no, user_lecture_seq_no, answ, paper_id)
+				VALUES
+				((select max(answ_seq_no)+1 from tb_survey_answ), ?, ?, ?, ?)
+			]]>
+			</query>
+			<mapping>
+				<setProperty>qstn_no, user_lecture_seq_no, answ, paper_id</setProperty>
+				<getProperty></getProperty>
+			</mapping>
+		</sql>
+		
+	</processor-info>
+	<input>
+		<block name="arg" repeat="1">					
+			<field name='paper_id' type='String' size=''/>
+			<field name='user_lecture_seq_no' type='int' size=''/>				
+		</block>
+	</input>
+	
+	<output>
+		<block name="arg" repeat="1">
+			<field name='last_cntct' type='String' size=''/>
+			<field name='proc_stat_cd_nm' type='String' size=''/>
+			<field name='cust_seq' type='String' size=''/>
+			<field name='cust_nm'  type='String' size=''/>
+			<field name='cust_type' type='String' size=''/>
+			<field name='proc_dt' type='String' size=''/>
+			<field name='proc_yn' type='String' size=''/>
+			<field name='cnslt_seq_no' type='String' size=''/>
+			<field name='emp_nm' type='String' size=''/>
+			<field name='answ' type='String' size=''/>
+			<field name='paper_id' type='String' size=''/> 
+			<field name='paper_title' type='String' size=''/>
+			<field name='qstn_cnt' type='int' size=''/>
+			<field name='emp_no' type='int' size=''/>
+			
+			<field name='qstn_no' type='String' size=''/>
+			<field name='qstn_answ' type='String' size=''/>
+			<field name='answ_type' type='String' size=''/>
+			<field name='answ_cnt' type='String' size=''/>
+			<field name='multi_yn' type='String' size=''/>
+			<field name='multi_cnt' type='String' size=''/> 
+			
+			<field name='exmp_seq_no' type='String' size=''/>
+			<field name='exmp_sort_no' type='String' size=''/>
+			<field name='exmp_word' type='String' size=''/>	
+			
+			<field name='reg_dt' type='String' size=''/>
+			<field name='upd_dt' type='String' size=''/>
+			<field name='reg_emp_no' type='String' size=''/>
+			<field name='upd_emp_no' type='String' size=''/>		
+			<field name='reg_emp_nm' type='String' size=''/>
+			<field name='upd_emp_nm' type='String' size=''/>
+			
+			<field name='survey_id' type='String' size=''/>
+			<field name='extr_no' type='String' size=''/>
+			<field name='cust_no' type='String' size=''/>
+			<field name='join_type' type='String' size=''/>
+			<field name='survey_rslt' type='String' size=''/>
+			<field name='main_cust_seq' type='String' size=''/>
+			 
+			<field name='schdl_no' type='String' size=''/>
+			<field name='seq_no' type='int' size=''/>
+			<field name='data_no' type='int' size=''/>
+			<field name='exist_yn' type='String' size=''/>
+			<field name='survey_st_dd' type='String' size=''/> 
+			<field name='survey_en_dd' type='String' size=''/>
+			<field name='survey_cust_seq_no' type='String' size=''/>
+			<field name='survey_title' type='String' size=''/>
+			<field name='cust_yn' type='String' size=''/>
+			<field name='dsrd_dt'  type='String' size=''/>
+			<field name='tel' type='String' size=''/>
+			<field name='rnum' type='String' size=''/>
+			
+			<field name='unassgn' type='String' size=''/>
+			<field name='assgn' type='String' size=''/>
+			<field name='cust_type_nm' type='String' size=''/>
+			
+			<field name='no' type='String' size=''/>
+			<field name='cntnt' type='String' size=''/>
+			<field name='cnslt_seq_no' type='String' size=''/>
+			<field name='hst_seq_no' type='String' size=''/>
+			<field name='rcv_data_no' type='String' size=''/>
+			<field name='survey_id' type='String' size=''/>
+			<field name='survey_div_cd' type='String' size=''/>
+			
+		</block>
+		
+		<block id='survey_hist_main' name='survey_hist_main' repeat='9999999'>
+			<field name='no' type='String' size=''/>
+            <field name='survey_title' type='String' size=''/>
+            <field name='cust_nm'  type='String' size=''/>
+            <field name='tel'  type='String' size=''/>
+			<field name='last_cntct' type='String' size=''/>
+			<field name='call_stat_nm' type='String' size=''/>
+			<field name='reg_dt' type='String' size=''/>
+			<field name='survey_dstn_no' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>			
+        </block>
+        
+        <block id='survey_hist' name='survey_hist' repeat='9999999'>
+			<field name='no' type='String' size=''/>
+            <field name='survey_title' type='String' size=''/>
+            <field name='assgn_dt' type='String' size=''/>            
+			<field name='cust_nm'  type='String' size=''/>
+			<field name='last_cntct' type='String' size=''/>
+			<field name='proc_stat_cd_nm' type='String' size=''/>
+			<field name='reg_dt' type='String' size=''/>
+			<field name='survey_dstn_no' type='String' size=''/>			
+			<field name='survey_div_cd' type='String' size=''/>
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='tel' type='String' size=''/>				
+        </block>
+        
+        <block id='survey_prc_hist' name='survey_prc_hist' repeat='9999999'>
+			<field name='no' type='String' size=''/>
+			<field name='seq_no' type='String' size=''/>
+			<field name='cust_nm'  type='String' size=''/>
+			<field name='last_cntct' type='String' size=''/>
+			<field name='proc_stat_cd_nm' type='String' size=''/>
+			<field name='cntct_rslt_cd_nm' type='String' size=''/>
+			<field name='start_dt' type='String' size=''/>
+			<field name='cnslt_seq_no' type='String' size=''/>
+			<field name='hst_seq_no' type='String' size=''/>
+			<field name='rcv_data_no' type='String' size=''/>
+			<field name='survey_id' type='String' size=''/>
+			<field name='tel' type='String' size=''/>
+			<field name='call_stat_nm' type='String' size=''/>
+			<field name='survey_dstn_no' type='String' size=''/>			
+        </block>
+        
+        <block id="detail_qstn_list" name="detail_qstn_list" repeat="999999">
+	  		<field name='qstn_cnt' type='int' size=''/>
+	  		<field name='paper_id' type='String' size=''/>
+			<field name='qstn_no' type='String' size=''/>
+			<field name='qstn_answ' type='String' size=''/>
+			<field name='answ_type' type='String' size=''/>
+			<field name='answ_cnt' type='String' size=''/>
+			<field name='multi_yn' type='String' size=''/>
+			<field name='multi_cnt' type='String' size=''/> 
+			<field name='exmp_seq_no' type='String' size=''/>
+			<field name='exmp_sort_no' type='int' size=''/>
+			<field name='exmp_word' type='String' size=''/>
+			<field name='connect_yn' type='String' size=''/>
+			<field name='connect_qstn_no' type='String' size=''/>
+			<field name='s_cnt' type='String' size=''/>
+			<field name='d_cnt' type='String' size=''/>
+			<field name='qstn_ord' type='String' size=''/>
+		</block>
+		
+		<block id="answ_list" name="answ_list" repeat="999999">
+			<field name='answ' type='String' size=''/>
+			<field name='qstn_no' type='String' size=''/>
+			<field name='exmp_word' type='String' size=''/>
+			<field name='exmp_seq_no' type='String' size=''/> 
+		</block>
+		
+		<block id="survey_detail" name="survey_detail" repeat="1">
+			<field name='cust_no' type='String' size=''/>
+			<field name='rsrv_yn' type='String' size=''/>
+			<field name='rsrv_dt' type='String' size=''/>
+			<field name='rsrv_cntnt' type='String' size=''/>
+			<field name='reg_dt' type='String' size=''/>
+			<field name='tel' type='String' size=''/>
+			<field name='cust_nm' type='String' size=''/>
+			<field name='add_info' type='String' size=''/>
+			<field name='add_info_header' type='String' size=''/>
+			<field name='call_stat_cd' type='String' size=''/>
+			<field name='call_stat_nm' type='String' size=''/>
+			<field name='call_cnt' type='String' size=''/>
+			<field name='call_time' type='String' size=''/>
+			<field name='call_cntnt' type='String' size=''/>
+			<field name='survey_title' type='String' size=''/>
+			<field name='cnslt_seq_no' type='String' size=''/>
+		</block>
+		
+		<block id="property" name="property" repeat="1">
+			<field name='tot_cnt' type='String' size=''/>
+			<field name='cur_pg' type='String' size=''/>			
+			<field name='row_per_page' type='String' size=''/>
+			<field name='tot_pg' type='String' size=''/>
+			<field name='next_key' type='String' size=''/>
+			<field name='prev_key' type='String' size=''/>
+		</block>
+
+		<block id="b_surveyCnsltCntnt" name="b_surveyCnsltCntnt" repeat="1">
+			<field name='cntnt' type='String' size=''/>
+			<field name='cntct_rslt_cd' type='String' size=''/>
+			<field name='rg_chnl_cd' type='String' size=''/>
+		</block>		 
+		
+		<block id='survey_assgn_hist' name='survey_assgn_hist' repeat='9999999'>
+			<field name='no' type='String' size=''/>
+            <field name='assgn_dt' type='String' size=''/>
+            <field name='survey_title' type='String' size=''/>                        				
+			<field name='rsrv_dt'  type='String' size=''/>
+			<field name='rsrv_cntnt'  type='String' size=''/>
+			<field name='call_stat_cd'  type='String' size=''/>
+			<field name='call_stat_nm'  type='String' size=''/>
+			<field name='call_cntnt'  type='String' size=''/>			
+			<field name='call_id'  type='String' size=''/>
+			<field name='reg_dt' type='String' size=''/>
+			<field name='reg_emp_nm' type='String' size=''/>
+			<field name='cust_no' type='String' size=''/>
+			<field name='cust_nm' type='String' size=''/>			
+			<field name='tel' type='String' size=''/>
+			<field name='proc_dt' type='String' size=''/>
+			<field name='proc_yn' type='String' size=''/>		
+			<field name='survey_dstn_no' type='String' size=''/>
+			<field name='survey_id' type='String' size=''/>					
+			<field name='call_time' type='String' size=''/>
+			<field name='last_hst_no' type='String' size=''/>			
+			<field name='tot_cnt' type='String' size=''/>	
+			<field name='email' type='String' size=''/>	
+			<field name='data_key' type='String' size=''/>				 
+        </block>
+        
+        <block id='survey_assgn_hist_sub' name='survey_assgn_hist_sub' repeat='9999999'>
+			<field name='no' type='String' size=''/>
+			<field name='cust_nm' type='String' size=''/>			
+			<field name='rsrv_dt' type='String' size=''/>
+			<field name='rsrv_cntnt' type='String' size=''/>
+			<field name='reg_dt' type='String' size=''/>
+			<field name='call_cntnt' type='String' size=''/>
+			<field name='call_stat_nm' type='String' size=''/>
+			<field name='call_id' type='String' size=''/>     
+			<field name='call_time' type='String' size=''/>			  
+        </block>
+        
+        <block id='survey_assgn_cnt' name='survey_assgn_cnt' repeat='1'>			
+			<field name='all_cnt' type='String' size=''/>
+			<field name='cnt1' type='String' size=''/>
+			<field name='cnt2' type='String' size=''/>
+			<field name='cnt3' type='String' size=''/>
+			<field name='cnt4' type='String' size=''/>
+			<field name='cnt5' type='String' size=''/>
+			<field name='cnt6' type='String' size=''/>
+			<field name='cnt7' type='String' size=''/>
+        </block>	
+	</output>
+</transaction>		
