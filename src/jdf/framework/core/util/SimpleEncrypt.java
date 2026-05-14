@@ -1,9 +1,9 @@
 package jdf.framework.core.util;
 
+import jdf.framework.core.io.SmartFile;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-
-import jdf.framework.core.io.SmartFile;
 
 
 /**

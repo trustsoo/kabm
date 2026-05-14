@@ -1,14 +1,12 @@
 package jdf.framework.view.auth;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
 
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.InteractionBean;
 import jdf.framework.core.log.Logger;
-import jdf.framework.view.auth.SessionManager;
-import jdf.framework.view.auth.User;
 
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 
 
 public class SessionListener implements HttpSessionListener

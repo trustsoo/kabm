@@ -1,8 +1,9 @@
 package jdf.framework.logic.spi.parser;
 
-import java.text.*;
-
 import jdf.framework.core.data.schema.FieldType;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 
 /**
@@ -398,7 +399,7 @@ public class FieldParser implements FieldType
     }
 
     /**
-     * @see java.lang.Object#hashCode()
+     * @see Object#hashCode()
      */
     public int hashCode()
     {

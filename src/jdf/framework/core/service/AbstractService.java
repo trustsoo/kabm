@@ -26,13 +26,18 @@
 package jdf.framework.core.service;
 
 
+import jdf.framework.core.Config;
 
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
-import jdf.framework.core.Config;
-
-/** * Service의 한 형태중 통신을 listening하고 처리하기 위한 서비스를  * 구현한 추상클래스이다. *  * @author * @version 1.0 */
+/**
+ * Service의 한 형태중 통신을 listening하고 처리하기 위한 서비스를 
+ * 구현한 추상클래스이다.
+ * 
+ * @author
+ * @version 1.0
+ */
   
 public abstract class AbstractService implements Service, Runnable
 {
@@ -247,7 +252,7 @@ public abstract class AbstractService implements Service, Runnable
         thisService.start();
     }
 
-    public javax.naming.Reference getReference() throws javax.naming.NamingException
+    public Reference getReference() throws javax.naming.NamingException
     {
         Reference ref = new Reference (this.getClass().getName(), 
                                        "jdf.framework.core.service.ServiceFactory",

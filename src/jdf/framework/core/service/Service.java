@@ -26,11 +26,21 @@
 package jdf.framework.core.service;
 
 
+import javax.naming.Referenceable;
 import java.io.Serializable;
 
-import javax.naming.Referenceable;
-
-/** * 기본적으로 서버단의 서비스는  * <pre> * 1) 독립적으로 실행가능하며, 결과를 기다리지 않는다. * 2) 시작,중지,멈춤등의 제어가 가능해야 한다. * 3) 현재서비스의 상태를 알수 있어야 한다. * 4) 시작시만 매개 변수(Config형태)를 정의할 수 있다. * </pre> *  * @author * @version 1.0 */
+/**
+ * 기본적으로 서버단의 서비스는 
+ * <pre>
+ * 1) 독립적으로 실행가능하며, 결과를 기다리지 않는다.
+ * 2) 시작,중지,멈춤등의 제어가 가능해야 한다.
+ * 3) 현재서비스의 상태를 알수 있어야 한다.
+ * 4) 시작시만 매개 변수(Config형태)를 정의할 수 있다.
+ * </pre>
+ * 
+ * @author
+ * @version 1.0
+ */
 public interface Service extends Configurable,Startable,Stoppable,Serializable,Referenceable
 {
     

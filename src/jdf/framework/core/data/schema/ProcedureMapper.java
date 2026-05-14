@@ -6,9 +6,9 @@
  */
 package jdf.framework.core.data.schema;
 
-import java.sql.Types;
-
 import jdf.framework.core.util.SmartStringArray;
+
+import java.sql.Types;
 
 
 /**

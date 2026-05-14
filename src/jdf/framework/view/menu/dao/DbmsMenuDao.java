@@ -6,10 +6,6 @@
  */
 package jdf.framework.view.menu.dao;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.DefaultConnectionFactory;
@@ -20,6 +16,10 @@ import jdf.framework.core.util.Utility;
 import jdf.framework.view.layout.entity.Layout;
 import jdf.framework.view.menu.entity.MenuItem;
 import jdf.framework.view.menu.entity.WebSiteMenu;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -51,7 +51,7 @@ public class DbmsMenuDao extends MenuDaoBase implements MenuDao
 
     /**
      * 
-     * @see seemile.framework.view.menu.dao.MenuDao#setSourceInfo(java.lang.String)
+     * @see seemile.framework.view.menu.dao.MenuDao#setSourceInfo(String)
      */
     public void setSourceInfo(String source)
     {

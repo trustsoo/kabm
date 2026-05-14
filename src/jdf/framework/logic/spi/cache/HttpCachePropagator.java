@@ -6,6 +6,12 @@
  */
 package jdf.framework.logic.spi.cache;
 
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.io.MultiOutputStream;
+import jdf.framework.core.log.Logger;
+import jdf.framework.core.util.SmartStringArray;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -13,13 +19,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-import jdf.framework.core.io.MultiOutputStream;
-import jdf.framework.core.log.Logger;
-import jdf.framework.core.util.SmartStringArray;
-
 
 
 /**
@@ -114,7 +113,7 @@ public class HttpCachePropagator extends Thread
     /**
      * 
      * 
-     * @see java.lang.Thread#start()
+     * @see Thread#start()
      */
     public void run()
     {

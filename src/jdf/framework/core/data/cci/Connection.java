@@ -1,7 +1,7 @@
 package jdf.framework.core.data.cci;
 
 
-import jdf.framework.core.data.*;
+import jdf.framework.core.data.ResourceException;
 
 
 /**

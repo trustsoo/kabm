@@ -1,10 +1,5 @@
 package jdf.framework.view.menu.dao;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import jdf.framework.core.Configuration;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.xml.XMLReferer;
@@ -12,6 +7,10 @@ import jdf.framework.view.layout.entity.Layout;
 import jdf.framework.view.menu.entity.MenuItem;
 import jdf.framework.view.menu.entity.WebSiteMenu;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -41,7 +40,7 @@ public class XmlMenuDao extends MenuDaoBase implements MenuDao {
 
 	/**
 	 * 
-	 * @see jdf.framework.view.menu.dao.MenuDao#setSourceInfo(java.lang.String)
+	 * @see MenuDao#setSourceInfo(String)
 	 */
 	public void setSourceInfo(String source) {
 		this.filename = source;

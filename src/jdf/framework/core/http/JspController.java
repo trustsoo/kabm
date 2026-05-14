@@ -1,15 +1,14 @@
 package jdf.framework.core.http;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentHashMap;
+import jdf.framework.core.HTTPResultConstant;
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.data.InteractionBean;
+import jdf.framework.core.log.Logger;
+import jdf.framework.core.util.HtmlFormat;
+import jdf.framework.core.util.StringFormater;
+import jdf.framework.core.xml.XMLUtil;
+import jdf.framework.logic.transform.*;
+import jxl.write.WritableWorkbook;
 import net.sf.json.JSONArray;
 
 import javax.servlet.ServletConfig;
@@ -19,22 +18,16 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.HttpJspPage;
-
-import jdf.framework.core.HTTPResultConstant;
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.data.InteractionBean;
-import jdf.framework.core.log.Logger;
-import jdf.framework.core.util.HtmlFormat;
-import jdf.framework.core.util.StringFormater;
-import jdf.framework.core.xml.XMLUtil;
-import jdf.framework.logic.transform.TransFormConstant;
-import jdf.framework.logic.transform.Transformer;
-import jdf.framework.logic.transform.TransformerFactory;
-import jdf.framework.logic.transform.TransformerType;
-import jdf.framework.logic.transform.XlsTransformerImpl;
-import jdf.framework.logic.transform.XmlTransformer;
-
-import jxl.write.WritableWorkbook;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -228,8 +221,8 @@ abstract public class JspController extends WebController implements HttpJspPage
 
 	/**
 	 * 
-	 * @see javax.servlet.jsp.HttpJspPage#_jspService(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
+	 * @see HttpJspPage#_jspService(HttpServletRequest,
+	 *      HttpServletResponse)
 	 */
 	abstract public void _jspService(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException,
 			IOException;
@@ -291,7 +284,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 			dest.setProperty(TransFormConstant.ROW_PER_PAGE, data.getText(TransFormConstant.ROW_PER_PAGE));
 			dest.setProperty(TransFormConstant.GRID_TYPE, data.getText(TransFormConstant.GRID_TYPE));
 			
-			bos = new java.io.ByteArrayOutputStream();
+			bos = new ByteArrayOutputStream();
 			TransformerFactory factory = TransformerFactory.getInstance();
 			Transformer former = factory.getTransformer(TransformerType.GRID_TYPE);
 			former.setDefaultEncoding(encoding);
@@ -317,7 +310,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 	
 	protected String getJsTreeJson(DataSet data, String[] blockNames, String encoding) throws Exception
 	{
-		java.io.ByteArrayOutputStream bos = null;
+		ByteArrayOutputStream bos = null;
 		String result = null;
 		try
 		{
@@ -325,7 +318,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 			DataSet dest = data.copyDataSetByBlockNames(blockNames);
 			
 			
-			bos = new java.io.ByteArrayOutputStream();
+			bos = new ByteArrayOutputStream();
 			TransformerFactory factory = TransformerFactory.getInstance();
 			Transformer former = factory.getTransformer(TransformerType.TREE_JSON_TYPE);
 			former.setDefaultEncoding("UTF-8");
@@ -456,7 +449,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 	
 	protected String getJsTreeJsonEx(DataSet data, String[] blockNames, String encoding) throws Exception
 	{
-		java.io.ByteArrayOutputStream bos = null;
+		ByteArrayOutputStream bos = null;
 		String result = null;
 		try
 		{
@@ -464,7 +457,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 			DataSet dest = data.copyDataSetByBlockNames(blockNames);
 			
 			
-			bos = new java.io.ByteArrayOutputStream();
+			bos = new ByteArrayOutputStream();
 			TransformerFactory factory = TransformerFactory.getInstance();
 			Transformer former = factory.getTransformer(TransformerType.TREE_JSON_TYPE_EX);
 			former.setDefaultEncoding(encoding);
@@ -509,13 +502,13 @@ abstract public class JspController extends WebController implements HttpJspPage
 	 */
 	protected String getDynamicTreeJson(DataSet data, String[] blockNames, String encoding) throws Exception
 	{
-		java.io.ByteArrayOutputStream bos = null;
+		ByteArrayOutputStream bos = null;
 		String result = null;
 		try
 		{	
 			DataSet dest = data.copyDataSetByBlockNames(blockNames);
 			
-			bos = new java.io.ByteArrayOutputStream();
+			bos = new ByteArrayOutputStream();
 			TransformerFactory factory = TransformerFactory.getInstance();
 			Transformer former = factory.getTransformer(TransformerType.DYNAMIC_TREE_JSON_TYPE);
 			former.setDefaultEncoding(encoding);
@@ -560,7 +553,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 	 */
 	protected String getJson(DataSet data, String[] blockNames, String encoding) throws Exception
 	{
-		java.io.ByteArrayOutputStream bos = null;
+		ByteArrayOutputStream bos = null;
 		String result = null;
 		try
 		{	
@@ -614,19 +607,19 @@ abstract public class JspController extends WebController implements HttpJspPage
 			dest.put(TransFormConstant.JSON_DATA_TYPE, json_type);
 			
 			
-			if(!"".equals(data.getText(jdf.framework.logic.transform.TransFormConstant.PAGE_KEY)))
+			if(!"".equals(data.getText(TransFormConstant.PAGE_KEY)))
 			{
 				
 				int temp = 0;
 				try
 				{
-					temp = data.getInt(jdf.framework.logic.transform.TransFormConstant.DATA_KEY, 0);
+					temp = data.getInt(TransFormConstant.DATA_KEY, 0);
 				} catch(Exception ex)
 				{}
 				
 				if(temp == 0)
 				{
-					prev_key =  data.getInt(jdf.framework.logic.transform.TransFormConstant.PAGE_KEY) - row_per_page;
+					prev_key =  data.getInt(TransFormConstant.PAGE_KEY) - row_per_page;
 				} else
 				{
 					prev_key = temp - row_per_page - 1;
@@ -641,7 +634,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 				{
 					try
 					{
-						next_key = data.getInt(jdf.framework.logic.transform.TransFormConstant.DATA_KEY, data.getMaxDataSize()-1);
+						next_key = data.getInt(TransFormConstant.DATA_KEY, data.getMaxDataSize()-1);
 					} catch(Exception ex)
 					{
 						
@@ -651,14 +644,14 @@ abstract public class JspController extends WebController implements HttpJspPage
 				
 				if(next_key < 0) next_key = -1; 
 				
-				dest.put(jdf.framework.logic.transform.TransFormConstant.NEXT_KEY, next_key+"");
-				dest.put(jdf.framework.logic.transform.TransFormConstant.PREV_KEY , prev_key+"");
+				dest.put(TransFormConstant.NEXT_KEY, next_key+"");
+				dest.put(TransFormConstant.PREV_KEY , prev_key+"");
 			}
 				
 			
 			
 			
-			bos = new java.io.ByteArrayOutputStream();
+			bos = new ByteArrayOutputStream();
 			TransformerFactory factory = TransformerFactory.getInstance();
 			Transformer former = factory.getTransformer(TransformerType.JSON_TYPE);
 			former.setDefaultEncoding(encoding);
@@ -787,7 +780,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 	
 	protected String getSOAP(DataSet data, String[] blockNames, String encoding) throws Exception
 	{
-		java.io.ByteArrayOutputStream bos = null;
+		ByteArrayOutputStream bos = null;
 		String result = null;			
 		try
 		{
@@ -814,7 +807,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 			}
 			
 			dest.put(TransFormConstant.TOT_PAGE, tot_page);
-			bos = new java.io.ByteArrayOutputStream();
+			bos = new ByteArrayOutputStream();
 			TransformerFactory factory = TransformerFactory.getInstance();
 			Transformer former = factory.getTransformer(TransformerType.SOAP_TYPE);
 			former.setDefaultEncoding(encoding);			
@@ -862,7 +855,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 	 */
 	protected String getXML(DataSet data, String[] blockNames, String encoding) throws Exception
 	{
-		java.io.ByteArrayOutputStream bos = null;
+		ByteArrayOutputStream bos = null;
 		String result = null;			
 		try
 		{
@@ -889,7 +882,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 			}
 			
 			dest.put(TransFormConstant.TOT_PAGE, tot_page);
-			bos = new java.io.ByteArrayOutputStream();
+			bos = new ByteArrayOutputStream();
 			TransformerFactory factory = TransformerFactory.getInstance();
 			XmlTransformer former = factory.newXmlTransformer();
 			former.setDefaultEncoding(encoding);
@@ -990,11 +983,11 @@ abstract public class JspController extends WebController implements HttpJspPage
    
 	public String getXls(String title, String condition, WritableWorkbook workbook, File infile, DataSet data, String[] blockNames, String encoding) throws Exception
 	{
-		java.io.ByteArrayOutputStream bos = null;
+		ByteArrayOutputStream bos = null;
 		File file = null;
 		try
 		{
-			bos = new java.io.ByteArrayOutputStream();
+			bos = new ByteArrayOutputStream();
 			TransformerFactory factory = TransformerFactory.getInstance();  
 
 			DataSet dest = data.copyDataSetByBlockNames(blockNames);
@@ -1043,7 +1036,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 			input.put("cmpny_no", (cmpny_no == null ? "" : cmpny_no));
 			input.put("cmd", cmd);
 			
-			jdf.framework.core.data.InteractionBean interact = new jdf.framework.core.data.InteractionBean();
+			InteractionBean interact = new InteractionBean();
 			output = interact.execute(xml_path, input);
 			
 			String[] blockNames = new String[1];
@@ -1081,7 +1074,7 @@ abstract public class JspController extends WebController implements HttpJspPage
 			}
 			input.put("cmd", cmd);
 			
-			jdf.framework.core.data.InteractionBean interact = new jdf.framework.core.data.InteractionBean();
+			InteractionBean interact = new InteractionBean();
 			output = interact.execute(xml_path, input);
 			
 			String[] blockNames = new String[1];

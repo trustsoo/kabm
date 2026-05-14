@@ -1,5 +1,15 @@
 package jdf.framework.core.http;
 
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.data.InteractionBean;
+import jdf.framework.core.data.ResourceException;
+import jdf.framework.core.log.Logger;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -10,17 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.data.InteractionBean;
-import jdf.framework.core.data.ResourceException;
-import jdf.framework.core.log.Logger;
 
 
 /**
@@ -596,7 +595,7 @@ public class WebController extends HttpServlet
 			m.invoke(bean, new Object[] { val });
 		}
 		// 타입이 맞지 않는 exception이 발생하면, 그때 체크
-		catch (java.lang.IllegalArgumentException iae) {
+		catch (IllegalArgumentException iae) {
 
 			Object setValue = null;
 

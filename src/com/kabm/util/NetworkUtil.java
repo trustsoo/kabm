@@ -1,17 +1,11 @@
 package com.kabm.util;
 
 
-
-import java.io.BufferedReader;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
-
-import javax.servlet.http.HttpServletRequest;
-
-import jdf.framework.core.util.Utility;
 
 public class NetworkUtil {
 

@@ -2,7 +2,9 @@ package jdf.framework.core.io.compress;
 
 /* "CodeInputUnpacker.java" */
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /** Unpacks N bit codes from source bytes,
  * provided as either an array or stream.

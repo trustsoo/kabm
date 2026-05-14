@@ -10,7 +10,7 @@
 package jdf.framework.core.util;
 
 
-import java.util.*;
+import java.util.LinkedList;
 
 
 /**

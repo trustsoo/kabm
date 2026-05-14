@@ -4,6 +4,7 @@
 
 package jdf.framework.core.naming.server;
 
+import javax.naming.Name;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -14,8 +15,6 @@ import java.rmi.server.Operation;
 import java.rmi.server.RemoteCall;
 import java.rmi.server.Skeleton;
 import java.rmi.server.SkeletonMismatchException;
-
-import javax.naming.Name;
 
 // Referenced classes of package anyframex.naming.server:
 //            NamingServer

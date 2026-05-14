@@ -57,7 +57,7 @@
 
 package jdf.framework.core.xml;
 
-import java.util.*;
+import java.util.Hashtable;
 
 /**
  * MIME2Java is a convenience class which handles conversions between MIME charset names

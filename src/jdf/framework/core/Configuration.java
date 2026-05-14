@@ -13,18 +13,14 @@
 
 package jdf.framework.core;
 
+import jdf.framework.core.xml.Registry;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Properties;
-import java.util.ResourceBundle;
-
-import jdf.framework.core.xml.Registry;
+import java.util.*;
 
 
 /**

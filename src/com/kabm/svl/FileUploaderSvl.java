@@ -1,35 +1,8 @@
 package com.kabm.svl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.ProgressListener;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FileCleaningTracker;
-import org.apache.commons.io.FileDeleteStrategy;
-
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-import jdf.framework.core.ConfigurationException;
-import jdf.framework.core.Message;
-import jdf.framework.core.MessageBox;
+import com.kabm.util.NetworkUtil;
+import com.kabm.util.UserAgentUtil;
+import jdf.framework.core.*;
 import jdf.framework.core.data.InteractionBean;
 import jdf.framework.core.data.ResourceException;
 import jdf.framework.core.http.WebController;
@@ -38,9 +11,24 @@ import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.DateTime;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.util.Utility;
-import com.kabm.util.NetworkUtil;
-import com.kabm.util.SitePropertyManager;
-import com.kabm.util.UserAgentUtil;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.ProgressListener;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FileCleaningTracker;
+import org.apache.commons.io.FileDeleteStrategy;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class FileUploaderSvl extends HttpServlet implements Servlet
 {
@@ -317,7 +305,7 @@ public class FileUploaderSvl extends HttpServlet implements Servlet
 									returnUrl = conf.getString("photoUploadCallback");
 							}
 							
-							_dir = new File(publicDir+java.io.File.separator+currMM);	
+							_dir = new File(publicDir+ File.separator+currMM);
 							
 							if(!_dir.exists()) _dir.mkdirs();	
 							
@@ -326,7 +314,7 @@ public class FileUploaderSvl extends HttpServlet implements Servlet
 							
 						} else
 						{
-							_dir = new File(dir+java.io.File.separator+currMM);				
+							_dir = new File(dir+ File.separator+currMM);
 							
 							if(!_dir.exists()) _dir.mkdirs();
 							
@@ -462,7 +450,7 @@ public class FileUploaderSvl extends HttpServlet implements Servlet
 			
 			if(isPublic)
 			{	
-				_dir = new File(publicDir+java.io.File.separator+currMM);	
+				_dir = new File(publicDir+ File.separator+currMM);
 				
 				if(!_dir.exists()) _dir.mkdirs();	
 				
@@ -473,7 +461,7 @@ public class FileUploaderSvl extends HttpServlet implements Servlet
 				
 			} else
 			{
-				_dir = new File(dir+java.io.File.separator+currMM);				
+				_dir = new File(dir+ File.separator+currMM);
 				
 				if(!_dir.exists()) _dir.mkdirs();
 				
@@ -487,7 +475,7 @@ public class FileUploaderSvl extends HttpServlet implements Servlet
 			try
 			{
 				in = request.getInputStream();
-				fos = new FileOutputStream(_dir.getAbsoluteFile()+java.io.File.separator+fileName);
+				fos = new FileOutputStream(_dir.getAbsoluteFile()+ File.separator+fileName);
 				StreamUtil.copy(in, fos);				
 				Logger.info.println(CLASS_NAME+uploadedFile.getAbsolutePath()+" upload complete.");
 				

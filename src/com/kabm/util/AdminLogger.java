@@ -1,11 +1,5 @@
 package com.kabm.util;
 
-import java.net.URI;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-
-import javax.servlet.http.HttpServletRequest;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.data.DataSet;
@@ -13,6 +7,11 @@ import jdf.framework.core.db.ConnectionManager;
 import jdf.framework.core.http.SessionAttributes;
 import jdf.framework.view.auth.User;
 import jdf.framework.view.menu.entity.MenuItem;
+
+import javax.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 public class AdminLogger
 {

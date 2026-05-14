@@ -1,5 +1,10 @@
 package jdf.framework.core.log;
 
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.ConfigurationException;
+import jdf.framework.core.io.*;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -8,16 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-import jdf.framework.core.ConfigurationException;
-import jdf.framework.core.io.DummyOutputStream;
-import jdf.framework.core.io.MultiOutputStream;
-import jdf.framework.core.io.ReconnectOutputStream;
-import jdf.framework.core.io.RotationFileOutputStream;
-import jdf.framework.core.io.UDPOutputStream;
-
 
 
 /**

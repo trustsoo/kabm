@@ -1,11 +1,8 @@
 package com.kabm.filter.auth;
 
-import java.io.PrintWriter;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.kabm.util.NetworkUtil;
+import com.kabm.util.SitePropertyManager;
+import com.kabm.util.UserAgentUtil;
 import jdf.framework.core.Message;
 import jdf.framework.core.MessageBox;
 import jdf.framework.core.data.DataSet;
@@ -18,23 +15,17 @@ import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.util.StringUtil;
 import jdf.framework.core.util.Utility;
 import jdf.framework.core.util.encrypt.CipherUtil;
-import jdf.framework.view.auth.AclInfo;
-import jdf.framework.view.auth.AclUser;
-import jdf.framework.view.auth.DefaultAuthUser;
-import jdf.framework.view.auth.NotLoginException;
-import jdf.framework.view.auth.PermissionException;
-import jdf.framework.view.auth.RoleInfo;
-import jdf.framework.view.auth.SessionManager;
-import jdf.framework.view.auth.User;
+import jdf.framework.view.auth.*;
 import jdf.framework.view.menu.entity.MenuItem;
 import jdf.framework.view.menu.util.RequestURL;
-import com.kabm.util.NetworkUtil;
-import com.kabm.util.SitePropertyManager;
-import com.kabm.util.UserAgentUtil;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 
 
-
-public class FileAuthUser extends jdf.framework.view.auth.User
+public class FileAuthUser extends User
 {
     /**
 	 * 

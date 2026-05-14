@@ -17,34 +17,17 @@ package jdf.framework.core.mail;
  *
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.Properties;
-
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.io.*;
+import java.util.Properties;
 
 /**
  * <xmp>
@@ -107,7 +90,7 @@ import jdf.framework.core.util.SmartStringArray;
 public class Mail 
 {
 	private final String LOG_ID="<at:Mail> ";
-	javax.mail.Message msg = null;
+	Message msg = null;
 	InternetAddress cc = null;
 	Session session = null;
 	InternetAddress[] toAddr = null;
@@ -200,7 +183,7 @@ public class Mail
 				
 				String mailAuth = conf.getString("auth", "false");
 				
-				props = new java.util.Properties();
+				props = new Properties();
 				props.put("mail.smtp.host", conf.getString("host"));
 				props.put("mail.smtp.port", conf.getString("port", "25"));
 				props.put("mail.smtp.auth", mailAuth);				
@@ -332,7 +315,7 @@ public class Mail
 		}
 	}
 
-	public void setContent(java.lang.Object o,  java.lang.String type)  throws MailException 
+	public void setContent(Object o, String type)  throws MailException
 	{
 		try {
 			msg.setContent(o,type);
@@ -365,7 +348,7 @@ public class Mail
 	 * 명시적으로 발신자를 바꾸고자 할 때 사용하세요....
 	 *
 	 * @param from java.lang.String
-	 * @see #setFrom(java.lang.String, java.lang.String)
+	 * @see #setFrom(String, String)
 	 */
 	public void setFrom(String address) throws MailException {
 		try {
@@ -388,9 +371,9 @@ public class Mail
 	 * @param from java.lang.String
 	 * @param from java.lang.String
 	 *
-	 * @see #setFrom(java.lang.String)
+	 * @see #setFrom(String)
 	 */
-	public void setFrom(java.lang.String address, java.lang.String personal) throws MailException {
+	public void setFrom(String address, String personal) throws MailException {
 		try {
 			InternetAddress user = new InternetAddress(address, personal, "utf-8");
 			msg.setFrom(user);
@@ -447,7 +430,7 @@ public class Mail
 	 * @param address e-mail address
 	 * @param personal sender name
 	 */
-	public void setRecipient(java.lang.String address, java.lang.String personal) throws MailException {
+	public void setRecipient(String address, String personal) throws MailException {
 		try {
 			InternetAddress[] users = { new InternetAddress(address, personal,"utf-8") };
 			msg.setRecipients(Message.RecipientType.TO, users);
@@ -558,7 +541,7 @@ public class Mail
 			mbp1.setHeader("Content-Transfer-Encoding", "7bit");
 			*/
 			
-			mbp1.setDataHandler(new javax.activation.DataHandler(new ByteArrayDataSource(new java.io.ByteArrayInputStream(html.getBytes("UTF-8")), "text/html; charset=utf-8")));			
+			mbp1.setDataHandler(new DataHandler(new ByteArrayDataSource(new ByteArrayInputStream(html.getBytes("UTF-8")), "text/html; charset=utf-8")));
 			mbp1.setHeader("Content-Transfer-Encoding", "base64");
 			mp.addBodyPart(mbp1);
 			
@@ -583,8 +566,8 @@ public class Mail
 					for(int idx=0; idx<file.length; idx++)
 					{
 						MimeBodyPart mbp_file = new MimeBodyPart();					
-				        javax.activation.DataSource source = new javax.activation.FileDataSource(file[idx]);
-				        mbp_file.setDataHandler(new javax.activation.DataHandler(source));
+				        DataSource source = new javax.activation.FileDataSource(file[idx]);
+				        mbp_file.setDataHandler(new DataHandler(source));
 				        mbp_file.setFileName(MimeUtility.encodeText( file[idx].getName(), "utf-8", "B") );
 				        
 				        mp.addBodyPart(mbp_file);

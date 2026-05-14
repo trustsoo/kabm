@@ -1,15 +1,15 @@
 package jdf.framework.logic.transform;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
 import jdf.framework.core.data.schema.FieldType;
 import jdf.framework.logic.spi.parser.ParseUtil;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 
 
 /**
@@ -74,10 +74,10 @@ public class BinaryTransformerImpl extends TransformerBase {
 					if (x == null)
 						iterationNum = 1;
 
-					else if (x.getClass() == java.lang.String.class)
+					else if (x.getClass() == String.class)
 						iterationNum = Integer.parseInt((String) x);
 
-					else if (x.getClass() == java.lang.Integer.class)
+					else if (x.getClass() == Integer.class)
 						iterationNum = ((Integer) x).intValue();
 				}
 
@@ -94,7 +94,7 @@ public class BinaryTransformerImpl extends TransformerBase {
 
 						if (val == null) {
 							val = field.getDefaultValue();
-							if (val instanceof java.lang.String) {
+							if (val instanceof String) {
 								String x = val.toString();
 
 								int z = x.indexOf(".count");
@@ -165,8 +165,8 @@ public class BinaryTransformerImpl extends TransformerBase {
 	}
 
 	/**
-	 * @see jdf.framework.logic.transform.Transformer#transform(jdf.framework.core.data.DataSet,
-	 *      java.io.Writer)
+	 * @see Transformer#transform(DataSet,
+	 *      Writer)
 	 */
 	public int transform(DataSet source, Writer writer) throws TransformerException {
 		throw new TransformerException("not support");

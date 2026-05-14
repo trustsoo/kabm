@@ -11,14 +11,12 @@
 
 package jdf.framework.core.http;
 
-import java.io.*;
-
-import javax.servlet.http.HttpServletRequest;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.log.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 
 
 /**

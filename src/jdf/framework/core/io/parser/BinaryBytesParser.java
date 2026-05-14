@@ -14,13 +14,6 @@
  
 package jdf.framework.core.io.parser;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.io.BytesParser;
@@ -29,6 +22,13 @@ import jdf.framework.core.io.ParsingException;
 import jdf.framework.core.util.ByteToStringPool;
 import jdf.framework.core.util.ReflectUtil;
 import jdf.framework.core.util.StringFormater;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>

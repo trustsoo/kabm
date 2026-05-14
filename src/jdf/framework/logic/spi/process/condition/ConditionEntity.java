@@ -6,7 +6,7 @@
  */
 package jdf.framework.logic.spi.process.condition;
 
-import jdf.framework.core.data.*;
+import jdf.framework.core.data.DataSet;
 
 /**
  * 

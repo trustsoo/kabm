@@ -1,11 +1,10 @@
 package com.kabm.filter;
 
 
+import jdf.framework.core.util.StringFormater;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-
-import jdf.framework.core.util.StringFormater;
 
 public class RequestWrapper extends HttpServletRequestWrapper 
 {

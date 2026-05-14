@@ -14,13 +14,6 @@
  
 package jdf.framework.core.io.parser;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.io.BytesParser;
@@ -31,7 +24,21 @@ import jdf.framework.core.util.ByteToStringPool;
 import jdf.framework.core.util.ReflectUtil;
 import jdf.framework.core.util.StringFormater;
 
-/** * <p> * 문자뿐만 아니라 숫자도 ASCII형태로 파싱한다. * </p> *  * @author advan94 * @version 1.1 */
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * <p>
+ * 문자뿐만 아니라 숫자도 ASCII형태로 파싱한다.
+ * </p>
+ * 
+ * @author advan94
+ * @version 1.1
+ */
 public final class AsciiBytesParser implements BytesParser
 {
     private static String ENCODE = "KSC5601";

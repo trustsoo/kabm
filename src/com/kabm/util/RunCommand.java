@@ -1,11 +1,11 @@
 package com.kabm.util;
 
+import jdf.framework.core.log.Logger;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-
-import jdf.framework.core.log.Logger;
 
 public class RunCommand 
 {

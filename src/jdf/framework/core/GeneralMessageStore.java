@@ -14,9 +14,9 @@
  */
  
 package jdf.framework.core;
- 
- 
-import jdf.framework.core.util.*;
+
+
+import jdf.framework.core.util.CharConversion;
 
 /**
  * <b><code>GeneralMessageStore</code></b>

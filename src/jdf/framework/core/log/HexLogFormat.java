@@ -1,6 +1,7 @@
 package jdf.framework.core.log;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 
 /**
  * <p>

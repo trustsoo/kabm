@@ -1,12 +1,12 @@
 package jdf.framework.logic.adapter.dbms;
 
-import java.sql.SQLException;
-
 import jdf.framework.core.data.ResourceException;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.ConnectionFactory;
 import jdf.framework.core.data.cci.ConnectionSpec;
 import jdf.framework.core.db.ConnectionManager;
+
+import java.sql.SQLException;
 
 
 /**
@@ -27,7 +27,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory
     /**
      *
      * 
-     * @see jdf.framework.core.data.cci.ConnectionFactory#getConnection()
+     * @see ConnectionFactory#getConnection()
      */
     public Connection getConnection() throws ResourceException
     {
@@ -35,7 +35,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory
     }
 
     /**
-     * @see jdf.framework.core.data.cci.ConnectionFactory#getConnection(jdf.framework.core.data.cci.ConnectionSpec)
+     * @see ConnectionFactory#getConnection(ConnectionSpec)
      */
     public Connection getConnection(ConnectionSpec spec) throws ResourceException
     {

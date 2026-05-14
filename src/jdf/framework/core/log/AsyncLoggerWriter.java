@@ -1,14 +1,9 @@
 package jdf.framework.core.log;
 
-import java.io.File;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.io.MultiOutputStream;
 
+import java.io.*;
 
 
 /**
@@ -592,7 +587,7 @@ public final class AsyncLoggerWriter implements LoggerWriter
 	}
 
 	/**
-     * @see jdf.framework.core.log.LoggerWriter#getDirectoryName()
+     * @see LoggerWriter#getDirectoryName()
      */
 	public String getDirectoryName()
 	{
@@ -601,7 +596,7 @@ public final class AsyncLoggerWriter implements LoggerWriter
 
 	/**
      * 
-     * @see jdf.framework.core.log.LoggerWriter#setDirectoryName(java.lang.String)
+     * @see LoggerWriter#setDirectoryName(String)
      */
 	public void setDirectoryName(String dir)
 	{

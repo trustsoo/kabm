@@ -14,6 +14,15 @@
 
 package jdf.framework.core.http;
 
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.http.multipart.MemoryBasedMultipartProcessor;
+import jdf.framework.core.http.multipart.MultipartProcessor;
+import jdf.framework.core.util.BeanUtil;
+import jdf.framework.core.util.SmartStringArray;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,16 +30,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Properties;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.http.multipart.MemoryBasedMultipartProcessor;
-import jdf.framework.core.http.multipart.MultipartProcessor;
-import jdf.framework.core.util.BeanUtil;
-import jdf.framework.core.util.SmartStringArray;
 
 
 /**

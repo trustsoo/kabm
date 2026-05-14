@@ -1,11 +1,9 @@
 package jdf.framework.core.naming.rmi;
 
 
-
+import javax.naming.NamingEnumeration;
 import java.util.Collection;
 import java.util.Iterator;
-
-import javax.naming.NamingEnumeration;
 
 /**
  *   <description> 

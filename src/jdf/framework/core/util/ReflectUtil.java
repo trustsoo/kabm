@@ -1,13 +1,13 @@
 package jdf.framework.core.util;
 
+import jdf.framework.core.log.Logger;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Hashtable;
 import java.util.Properties;
-
-import jdf.framework.core.log.Logger;
 
 
 /**

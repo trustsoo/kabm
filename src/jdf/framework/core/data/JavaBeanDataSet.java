@@ -6,12 +6,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -114,10 +109,10 @@ public class JavaBeanDataSet extends DataSet {
 
 		try {
 			return this.storeClass.newInstance();
-		} catch (java.lang.InstantiationException ie) {
+		} catch (InstantiationException ie) {
 			ie.printStackTrace();
 			return null;
-		} catch (java.lang.IllegalAccessException iae) {
+		} catch (IllegalAccessException iae) {
 			iae.printStackTrace();
 			return null;
 		}
@@ -196,7 +191,7 @@ public class JavaBeanDataSet extends DataSet {
 			m.invoke(bean, new Object[] { val });
 		}
 		// 타입이 맞지 않는 exception이 발생하면, 그때 체크
-		catch (java.lang.IllegalArgumentException iae) {
+		catch (IllegalArgumentException iae) {
 
 			Object setValue = null;
 

@@ -1,21 +1,17 @@
 package jdf.framework.logic.servlet;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-
-import java.util.List;
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-
-
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.List;
 
 
 /**

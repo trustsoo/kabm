@@ -2,15 +2,15 @@
 
 package jdf.framework.logic.spi.management;
 
-import java.io.File;
-import java.util.Properties;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.ConnectionSpec;
 import jdf.framework.core.data.cci.SimpleConnectionSpec;
 import jdf.framework.core.data.schema.IOSchema;
 import jdf.framework.logic.spi.ResourceAdapter;
+
+import java.io.File;
+import java.util.Properties;
 
 
 /**
@@ -195,7 +195,7 @@ public class BusinessLogicContext implements ConnectionSpec
     /**
      * 속성정보를 가져온다.
      * 
-     * @see jdf.framework.core.data.cci.ConnectionSpec#getProperty(java.lang.String)
+     * @see ConnectionSpec#getProperty(String)
      */
     public String getProperty(String key)
     {
@@ -205,7 +205,7 @@ public class BusinessLogicContext implements ConnectionSpec
     /**
      * 트랜잭션 지원여부
      * 
-     * @see jdf.framework.core.data.cci.ConnectionSpec#isTransactionSupport()
+     * @see ConnectionSpec#isTransactionSupport()
      */
     public boolean isTransactionSupport()
     {
@@ -215,7 +215,7 @@ public class BusinessLogicContext implements ConnectionSpec
     /** 
      * jdf.framework.core.data.cci.Connection 구현객체를 얻는다.
      * 
-     * @see jdf.framework.core.data.cci.ConnectionSpec#getAdapterConnection()
+     * @see ConnectionSpec#getAdapterConnection()
      */
     public Connection getAdapterConnection()
     {
@@ -224,7 +224,7 @@ public class BusinessLogicContext implements ConnectionSpec
     /**
      * Login 정보(DataSet) 를 얻는다.
      * 
-     * @see jdf.framework.core.data.cci.ConnectionSpec#getLoginDataSet()
+     * @see ConnectionSpec#getLoginDataSet()
      */
     public DataSet getLoginDataSet()
     {
@@ -234,7 +234,7 @@ public class BusinessLogicContext implements ConnectionSpec
     /**
      * jdf.framework.core.data.cci.Connection 구현객체를 설정한다.
      * 
-     * @see jdf.framework.core.data.cci.ConnectionSpec#setAdapterConnection(jdf.framework.core.data.cci.Connection)
+     * @see ConnectionSpec#setAdapterConnection(Connection)
      */
     public void setAdapterConnection(Connection conn)
     {
@@ -245,7 +245,7 @@ public class BusinessLogicContext implements ConnectionSpec
     /**
      * login 정보를 가지고 있는 DataSet을 설정한다.
      * 
-     * @see jdf.framework.core.data.cci.ConnectionSpec#setLoginDataSet(jdf.framework.core.data.DataSet)
+     * @see ConnectionSpec#setLoginDataSet(DataSet)
      */
     public void setLoginDataSet(DataSet input)
     {

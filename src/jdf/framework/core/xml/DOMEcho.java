@@ -1,21 +1,17 @@
 package jdf.framework.core.xml;
 
 // JAXP packages
-import java.io.File;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentType;
-import org.w3c.dom.Entity;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
+import org.w3c.dom.*;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
 /**
  * This is a program to echo a DOM tree using DOM Level 2 interfaces. Use JAXP

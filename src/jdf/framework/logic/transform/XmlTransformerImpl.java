@@ -1,14 +1,5 @@
 package jdf.framework.logic.transform;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.net.URL;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ResultSetDataSet;
 import jdf.framework.core.data.schema.Block;
@@ -16,6 +7,14 @@ import jdf.framework.core.data.schema.Field;
 import jdf.framework.core.data.schema.FieldType;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.StringFormater;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.net.URL;
 
 
 /**
@@ -111,8 +110,8 @@ public class XmlTransformerImpl implements XmlTransformer {
 	 * 
 	 * 
 	 * 
-	 * @see jdf.framework.logic.transform.Transformer#transform(jdf.framework.core.data.DataSet,
-	 *      java.io.Writer)
+	 * @see jdf.framework.logic.transform.Transformer#transform(DataSet,
+	 *      Writer)
 	 */
 	public int transform(String rootElementName, DataSet source, Writer writer) throws TransformerException {
 		try {
@@ -195,11 +194,11 @@ public class XmlTransformerImpl implements XmlTransformer {
 
 				try {
 					x = dataset.get(block.getIterationRefName());
-					if (x.getClass() == java.lang.String.class)
+					if (x.getClass() == String.class)
 						
 						iterationNum = Integer.parseInt((String) x);
 
-					else if (x.getClass() == java.lang.Integer.class)
+					else if (x.getClass() == Integer.class)
 						iterationNum = ((Integer) x).intValue();
 				} catch (Exception ee) {
 					iterationNum = 0;
@@ -251,7 +250,7 @@ public class XmlTransformerImpl implements XmlTransformer {
 
 					if (val == null) {
 						val = field.getDefaultValue();
-						if (val instanceof java.lang.String) {
+						if (val instanceof String) {
 							String x = val.toString();
 
 							int z = x.indexOf(".count");
@@ -432,10 +431,10 @@ public class XmlTransformerImpl implements XmlTransformer {
 				else {
 					Object x = dataset.get(block.getIterationRefName());
 
-					if (x.getClass() == java.lang.String.class)
+					if (x.getClass() == String.class)
 						iterationNum = Integer.parseInt((String) x);
 
-					else if (x.getClass() == java.lang.Integer.class)
+					else if (x.getClass() == Integer.class)
 						iterationNum = ((Integer) x).intValue();
 				}
 
@@ -460,7 +459,7 @@ public class XmlTransformerImpl implements XmlTransformer {
 
 						if (val == null) {
 							val = field.getDefaultValue();
-							if (val instanceof java.lang.String) {
+							if (val instanceof String) {
 								String x = val.toString();
 
 								int z = x.indexOf(".count");
@@ -501,7 +500,7 @@ public class XmlTransformerImpl implements XmlTransformer {
 	/**
 	 * <xs:schema>�� ���� prefix �� localName�� �����Ѵ�.
 	 * 
-	 * @see jdf.framework.logic.transform.XmlTransformer#setLocalName(java.lang.String)
+	 * @see XmlTransformer#setLocalName(String)
 	 */
 	public void setLocalName(String name) {
 		this.nsPrefix = ":" + name;
@@ -511,7 +510,7 @@ public class XmlTransformerImpl implements XmlTransformer {
 	/**
 	 * 
 	 * 
-	 * @see jdf.framework.logic.transform.XmlTransformer#setNamespace(java.lang.String)
+	 * @see XmlTransformer#setNamespace(String)
 	 */
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;

@@ -1,10 +1,9 @@
 package jdf.framework.core.naming.rmi;
 
-import java.util.Hashtable;
-
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
+import java.util.Hashtable;
 
 /**
  *   <description> 

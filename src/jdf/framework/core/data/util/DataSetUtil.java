@@ -1,11 +1,5 @@
 package jdf.framework.core.data.util;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ExternalData;
 import jdf.framework.core.data.ResourceException;
@@ -14,6 +8,12 @@ import jdf.framework.logic.spi.management.BLContextFactory;
 import jdf.framework.logic.spi.parser.DataSetParser;
 import jdf.framework.logic.spi.parser.Protocol;
 import jdf.framework.logic.spi.parser.ProtocolFactory;
+
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 
 
 /**

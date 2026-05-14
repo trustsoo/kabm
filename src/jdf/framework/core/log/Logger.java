@@ -71,16 +71,16 @@ public class Logger
      * <p>
      * See the <code>println</code> methods in class <code>LoggerWriter</code>. 
      *
-     * @see     jdf.framework.core.log.LoggerWriter#println()
-     * @see     jdf.framework.core.log.LoggerWriter#println(boolean)
-     * @see     jdf.framework.core.log.LoggerWriter#println(char)
-     * @see     jdf.framework.core.log.LoggerWriter#println(char[])
-     * @see     jdf.framework.core.log.LoggerWriter#println(double)
-     * @see     jdf.framework.core.log.LoggerWriter#println(float)
-     * @see     jdf.framework.core.log.LoggerWriter#println(int)
-     * @see     jdf.framework.core.log.LoggerWriter#println(long)
-     * @see     jdf.framework.core.log.LoggerWriter#println(java.lang.Object)
-     * @see     jdf.framework.core.log.LoggerWriter#println(java.lang.String)
+     * @see     LoggerWriter#println()
+     * @see     LoggerWriter#println(boolean)
+     * @see     LoggerWriter#println(char)
+     * @see     LoggerWriter#println(char[])
+     * @see     LoggerWriter#println(double)
+     * @see     LoggerWriter#println(float)
+     * @see     LoggerWriter#println(int)
+     * @see     LoggerWriter#println(long)
+     * @see     LoggerWriter#println(Object)
+     * @see     LoggerWriter#println(String)
      */
     public final static LoggerWriter warn = getLoggerWriter(LoggerWriter.WARN);
     
@@ -96,16 +96,16 @@ public class Logger
      * <p>
      * See the <code>println</code> methods in class <code>LoggerWriter</code>. 
      *
-     * @see     jdf.framework.core.log.LoggerWriter#println()
-     * @see     jdf.framework.core.log.LoggerWriter#println(boolean)
-     * @see     jdf.framework.core.log.LoggerWriter#println(char)
-     * @see     jdf.framework.core.log.LoggerWriter#println(char[])
-     * @see     jdf.framework.core.log.LoggerWriter#println(double)
-     * @see     jdf.framework.core.log.LoggerWriter#println(float)
-     * @see     jdf.framework.core.log.LoggerWriter#println(int)
-     * @see     jdf.framework.core.log.LoggerWriter#println(long)
-     * @see     jdf.framework.core.log.LoggerWriter#println(java.lang.Object)
-     * @see     jdf.framework.core.log.LoggerWriter#println(java.lang.String)
+     * @see     LoggerWriter#println()
+     * @see     LoggerWriter#println(boolean)
+     * @see     LoggerWriter#println(char)
+     * @see     LoggerWriter#println(char[])
+     * @see     LoggerWriter#println(double)
+     * @see     LoggerWriter#println(float)
+     * @see     LoggerWriter#println(int)
+     * @see     LoggerWriter#println(long)
+     * @see     LoggerWriter#println(Object)
+     * @see     LoggerWriter#println(String)
      */
     public final static LoggerWriter info = getLoggerWriter(LoggerWriter.INFO);
 

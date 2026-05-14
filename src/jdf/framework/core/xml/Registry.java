@@ -14,19 +14,17 @@
 
 package jdf.framework.core.xml;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
 import jdf.framework.core.GeneralConfiguration;
 import jdf.framework.core.util.StringFormater;
-
 import org.w3c.dom.Document;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**

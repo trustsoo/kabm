@@ -13,17 +13,17 @@
 
 package jdf.framework.core.io;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-
 import jdf.framework.core.Entity;
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.ReflectUtil;
 import jdf.framework.core.util.Utility;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * <b><code>FormatedEntity</code></b>

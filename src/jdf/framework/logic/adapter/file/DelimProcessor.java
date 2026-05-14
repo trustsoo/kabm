@@ -1,13 +1,13 @@
 package jdf.framework.logic.adapter.file;
 
-import java.io.File;
-import java.io.RandomAccessFile;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
 import jdf.framework.core.data.schema.IOSchema;
 import jdf.framework.core.data.schema.Processor;
+
+import java.io.File;
+import java.io.RandomAccessFile;
 
 
 public class DelimProcessor extends Processor implements ProcessProperties

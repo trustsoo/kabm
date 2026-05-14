@@ -13,13 +13,12 @@
  
 package jdf.framework.core.io;
 
+import jdf.framework.core.util.AsciiUtil;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import jdf.framework.core.util.AsciiUtil;
-
 
 
 /**

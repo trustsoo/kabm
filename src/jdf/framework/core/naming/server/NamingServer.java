@@ -1,32 +1,18 @@
 package jdf.framework.core.naming.server;
 
 
+import jdf.framework.core.naming.rmi.Naming;
+import jdf.framework.core.naming.rmi.NamingContext;
+import jdf.framework.core.naming.rmi.NamingParser;
+
+import javax.naming.*;
+import javax.naming.spi.ResolveResult;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import javax.naming.Binding;
-import javax.naming.Context;
-import javax.naming.InvalidNameException;
-import javax.naming.Name;
-import javax.naming.NameAlreadyBoundException;
-import javax.naming.NameClassPair;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
-import javax.naming.NotContextException;
-import javax.naming.Reference;
-import javax.naming.spi.ResolveResult;
 
-import jdf.framework.core.naming.rmi.Naming;
-import jdf.framework.core.naming.rmi.NamingContext;
-import jdf.framework.core.naming.rmi.NamingParser;
-
-
-
-
-
- 
 public class NamingServer implements Naming, java.io.Serializable
 {
    // Constants -----------------------------------------------------

@@ -1,9 +1,8 @@
 package com.kabm.util;
 
-import java.util.concurrent.BlockingQueue;
-
 import jdf.framework.core.log.Logger;
 
+import java.util.concurrent.BlockingQueue;
 
 
 public class BlockingQueueMoinitor extends Thread

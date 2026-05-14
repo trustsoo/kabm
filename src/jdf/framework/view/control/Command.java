@@ -1,11 +1,11 @@
 package jdf.framework.view.control;
 
+import jdf.framework.core.http.HttpAttributes;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import jdf.framework.core.http.HttpAttributes;
 
 
 /**

@@ -1,16 +1,14 @@
 package jdf.framework.core.log;
 
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.ConfigurationException;
+import jdf.framework.core.io.MultiOutputStream;
+
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-import jdf.framework.core.ConfigurationException;
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.io.MultiOutputStream;
-
 
 
 /**
@@ -838,7 +836,7 @@ public class NormalLoggerWriter implements LoggerWriter
 	}
 
 	/**
-     * @see jdf.framework.core.log.LoggerWriter#getDirectoryName()
+     * @see LoggerWriter#getDirectoryName()
      */
 	public String getDirectoryName()
 	{
@@ -847,7 +845,7 @@ public class NormalLoggerWriter implements LoggerWriter
 
 	/**
      * 
-     * @see jdf.framework.core.log.LoggerWriter#setDirectoryName(java.lang.String)
+     * @see LoggerWriter#setDirectoryName(String)
      */
 	public void setDirectoryName(String dir)
 	{

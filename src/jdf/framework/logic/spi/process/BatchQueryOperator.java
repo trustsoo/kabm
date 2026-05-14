@@ -1,11 +1,11 @@
 package jdf.framework.logic.spi.process;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.schema.IOSchema;
 import jdf.framework.core.log.Logger;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 
 /**
@@ -34,7 +34,7 @@ public class BatchQueryOperator extends QueryOperator {
 	 * 
 	 */
 	public void execute(java.sql.Connection conn, IOSchema schema,
-			DataSet input, DataSet output) throws java.sql.SQLException {
+			DataSet input, DataSet output) throws SQLException {
 		PreparedStatement pstmt = null;
 
 		boolean isLogPrint = Logger.sql.isPrintMode();
@@ -70,7 +70,7 @@ public class BatchQueryOperator extends QueryOperator {
 			}
 
 			if (isSelectQuery())
-				throw new java.sql.SQLException(
+				throw new SQLException(
 						"batch 모드에서는 select 쿼리를 사용할 수 없습니다.");
 
 			for (int i = 0; isLoop; i++) {

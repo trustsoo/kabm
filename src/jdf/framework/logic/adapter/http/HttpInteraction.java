@@ -1,23 +1,16 @@
 package jdf.framework.logic.adapter.http;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.http.client.ClientProtocolException;
-
 import jdf.framework.core.ConfigurationException;
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ResourceException;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.Interaction;
-import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.IOSchema;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.log.LoggerFactory;
 import jdf.framework.core.log.LoggerWriter;
 import jdf.framework.logic.spi.management.BLContextFactory;
-
+import org.apache.http.client.ClientProtocolException;
 
 
 public class HttpInteraction implements Interaction

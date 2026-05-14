@@ -1,26 +1,5 @@
 package jdf.framework.logic.servlet;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.xml.bind.DatatypeConverter;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
@@ -38,6 +17,21 @@ import jdf.framework.logic.spi.auth.UserManagerFactory;
 import jdf.framework.logic.spi.management.DeploymentManager;
 import jdf.framework.logic.spi.management.RADeployDescriptor;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.*;
+import javax.xml.bind.DatatypeConverter;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 
 /**
@@ -391,7 +385,7 @@ public class AnyLogicControlServlet extends HttpServlet {
 				// ee.printStackTrace();
 			}
 
-		} catch (java.lang.Exception ioe) {
+		} catch (Exception ioe) {
 			ioe.printStackTrace();
 		}
 
@@ -436,7 +430,7 @@ public class AnyLogicControlServlet extends HttpServlet {
 
 		try {
 
-			jdf.framework.core.Config conf = jdf.framework.core.Configuration
+			Config conf = Configuration
 					.lookup("/resource/anylogic");
 
 			if ("true".equals(conf.getString("packetCapture")))
@@ -950,7 +944,7 @@ public class AnyLogicControlServlet extends HttpServlet {
 
 		String remoteIp = getRemoteAddr(req);
 		String token = getToken(req);
-		String[] items = jdf.framework.core.util.SmartStringArray.split(token, val);
+		String[] items = SmartStringArray.split(token, val);
 		if (items.length != 4) {
 			Logger.warn.println(LOG_ID + "auth temp key invalid case:2");
 			return false;

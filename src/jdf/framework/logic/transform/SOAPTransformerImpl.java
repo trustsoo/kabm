@@ -1,22 +1,14 @@
 package jdf.framework.logic.transform;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
-import javax.xml.soap.SOAPMessage;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.InteractionBean;
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
 import jdf.framework.core.log.Logger;
 
+import javax.xml.soap.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 
 public class SOAPTransformerImpl extends TransformerBase
@@ -97,7 +89,7 @@ public class SOAPTransformerImpl extends TransformerBase
 			
 			
 			SOAPMessage sMessage = mf.createMessage();			
-			sMessage.setProperty(javax.xml.soap.SOAPMessage.CHARACTER_SET_ENCODING, defaultEncoding);
+			sMessage.setProperty(SOAPMessage.CHARACTER_SET_ENCODING, defaultEncoding);
 			
 			sMessage.getSOAPPart().getEnvelope().removeNamespaceDeclaration("SOAP-ENV");
 			sMessage.getSOAPPart().getEnvelope().setPrefix("soapenv");

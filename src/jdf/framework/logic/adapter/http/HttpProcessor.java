@@ -1,34 +1,18 @@
 package jdf.framework.logic.adapter.http;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.ConfigurationException;
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.data.schema.Block;
+import jdf.framework.core.data.schema.Field;
+import jdf.framework.core.data.schema.IOSchema;
+import jdf.framework.core.data.schema.Processor;
+import jdf.framework.core.log.Logger;
+import jdf.framework.core.log.LoggerFactory;
+import jdf.framework.core.log.LoggerWriter;
+import jdf.framework.core.util.Utility;
+import jdf.framework.core.xml.DocBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -45,7 +29,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -53,25 +39,20 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-import jdf.framework.core.ConfigurationException;
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.data.schema.Block;
-import jdf.framework.core.data.schema.Field;
-import jdf.framework.core.data.schema.IOSchema;
-import jdf.framework.core.data.schema.Processor;
-import jdf.framework.core.log.Logger;
-import jdf.framework.core.log.LoggerFactory;
-import jdf.framework.core.log.LoggerWriter;
-import jdf.framework.core.util.StringFormater;
-import jdf.framework.core.util.Utility;
-import jdf.framework.core.xml.DocBuilder;
-
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 public class HttpProcessor extends Processor
@@ -484,7 +465,7 @@ public class HttpProcessor extends Processor
 	
 	private String makeXMLRequestString(DataSet input, String xmlSchemaUri) throws Exception
 	{
-		org.w3c.dom.Document doc;
+		Document doc;
 		StringWriter writer = null;
 		String result = null;
 		try 
@@ -565,7 +546,7 @@ public class HttpProcessor extends Processor
         
         for(int i=0; i<inBlock.length; i++)
         {
-        	jdf.framework.core.data.schema.Field[] fields = inBlock[i].getFields();
+        	Field[] fields = inBlock[i].getFields();
         	
         	for(int k=0; k<fields.length; k++)
         	{

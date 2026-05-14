@@ -41,7 +41,7 @@ public class BaseConnectionFactory implements ConnectionFactory
     /**
      * Connection 구현객체를 얻는다.
      * 
-     * @see jdf.framework.core.data.cci.ConnectionFactory#getConnection(jdf.framework.core.data.cci.ConnectionSpec)
+     * @see ConnectionFactory#getConnection(ConnectionSpec)
      */
     public Connection getConnection(ConnectionSpec sepc) throws ResourceException
     {

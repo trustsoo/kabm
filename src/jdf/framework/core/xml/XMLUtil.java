@@ -6,20 +6,11 @@
  */
 package jdf.framework.core.xml;
 
-import java.io.File;
+import jdf.framework.core.util.StringFormater;
+import org.apache.xpath.XPathAPI;
+import org.w3c.dom.*;
 
 import javax.xml.transform.TransformerException;
-
-import org.apache.xpath.XPathAPI;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import jdf.framework.core.util.StringFormater;
-import jdf.framework.logic.transform.XmlTransformerImpl;
 
 /**
  * XML 관련 Utility 성 class

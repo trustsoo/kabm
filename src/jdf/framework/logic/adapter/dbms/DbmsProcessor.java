@@ -7,12 +7,13 @@
 package jdf.framework.logic.adapter.dbms;
 
 
-import java.util.*;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.InteractionBean;
 import jdf.framework.core.data.schema.Processor;
 import jdf.framework.core.data.schema.StoredQuery;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * DbmsProcessor

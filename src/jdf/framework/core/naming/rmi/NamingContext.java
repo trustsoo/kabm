@@ -1,5 +1,8 @@
 package jdf.framework.core.naming.rmi;
 
+import javax.naming.*;
+import javax.naming.spi.NamingManager;
+import javax.naming.spi.ResolveResult;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,23 +12,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.StringTokenizer;
-
-import javax.naming.CommunicationException;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.InvalidNameException;
-import javax.naming.LinkRef;
-import javax.naming.Name;
-import javax.naming.NameParser;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.NotContextException;
-import javax.naming.OperationNotSupportedException;
-import javax.naming.Reference;
-import javax.naming.Referenceable;
-import javax.naming.ServiceUnavailableException;
-import javax.naming.spi.NamingManager;
-import javax.naming.spi.ResolveResult;
 
 public class NamingContext implements Context, java.io.Serializable
 {

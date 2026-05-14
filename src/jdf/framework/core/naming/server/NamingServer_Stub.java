@@ -4,6 +4,11 @@
 
 package jdf.framework.core.naming.server;
 
+import jdf.framework.core.naming.rmi.Naming;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NamingException;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -17,12 +22,6 @@ import java.rmi.server.RemoteCall;
 import java.rmi.server.RemoteRef;
 import java.rmi.server.RemoteStub;
 import java.util.Collection;
-
-import javax.naming.Context;
-import javax.naming.Name;
-import javax.naming.NamingException;
-
-import jdf.framework.core.naming.rmi.Naming;
 
 public final class NamingServer_Stub extends RemoteStub
     implements Naming
@@ -428,28 +427,28 @@ public final class NamingServer_Stub extends RemoteStub
     {
         try
         {
-            (java.rmi.server.RemoteRef.class).getMethod("invoke", new Class[] {
-                java.rmi.Remote.class, java.lang.reflect.Method.class, java.lang.Object[].class, Long.TYPE
+            (RemoteRef.class).getMethod("invoke", new Class[] {
+                java.rmi.Remote.class, Method.class, Object[].class, Long.TYPE
             });
             useNewInvoke = true;
             $method_bind_0 = (Naming.class).getMethod("bind", new Class[] {
-                javax.naming.Name.class, java.lang.Object.class, java.lang.String.class
+                Name.class, Object.class, String.class
             });
             $method_createSubcontext_1 = (Naming.class).getMethod("createSubcontext", new Class[] {
-                javax.naming.Name.class
+                Name.class
             });
             $method_getIndetity_2 = (Naming.class).getMethod("getIndetity", new Class[0]);
             $method_list_3 = (Naming.class).getMethod("list", new Class[] {
-                javax.naming.Name.class
+                Name.class
             });
             $method_lookup_4 = (Naming.class).getMethod("lookup", new Class[] {
-                javax.naming.Name.class
+                Name.class
             });
             $method_rebind_5 = (Naming.class).getMethod("rebind", new Class[] {
-                javax.naming.Name.class, java.lang.Object.class, java.lang.String.class
+                Name.class, Object.class, String.class
             });
             $method_unbind_6 = (Naming.class).getMethod("unbind", new Class[] {
-                javax.naming.Name.class
+                Name.class
             });
         }
         catch(NoSuchMethodException _ex)

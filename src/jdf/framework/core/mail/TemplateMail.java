@@ -16,14 +16,15 @@ package jdf.framework.core.mail;
  * @author  WonYoung Lee, wyounglee@lgeds.lg.co.kr.
  *
  */
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Properties;
 
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.io.StreamUtil;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 /**
  * <xmp>
@@ -274,9 +275,9 @@ public class TemplateMail extends Mail
 	/**
 	 * @param template java.lang.String
 	 *
-	 * @see #setTemplate(java.lang.String)
-	 * @see #setTextTemplate(java.lang.String)
-	 * @see #setTextAndHtmlTemplate(java.lang.String,java.lang.String)
+	 * @see #setTemplate(String)
+	 * @see #setTextTemplate(String)
+	 * @see #setTextAndHtmlTemplate(String, String)
 	 */
 	public void setHtmlTemplate(String template) throws MailException
 	{
@@ -285,7 +286,7 @@ public class TemplateMail extends Mail
 		FileInputStream fi = null;
 		try
 		{
-			java.io.File file = new java.io.File(template);
+			File file = new File(template);
 			
 			ByteArrayOutputStream bo = new ByteArrayOutputStream();
 			fi = new FileInputStream(file);
@@ -327,9 +328,9 @@ public class TemplateMail extends Mail
 	 * Same as setTextTemplate(String template);
 	 * @param template java.lang.String
 	 *
-	 * @see #setTextTemplate(java.lang.String)
-	 * @see #setHtmlTemplate(java.lang.String)
-	 * @see #setTextAndHtmlTemplate(java.lang.String,java.lang.String)
+	 * @see #setTextTemplate(String)
+	 * @see #setHtmlTemplate(String)
+	 * @see #setTextAndHtmlTemplate(String, String)
 	 */
 	public void setTemplate(String template) throws MailException
 	{
@@ -340,9 +341,9 @@ public class TemplateMail extends Mail
 	 * @param textTemplate java.lang.String
 	 * @param htmlTemplate java.lang.String
 	 *
-	 * @see #setTemplate(java.lang.String)
-	 * @see #setTextTemplate(java.lang.String)
-	 * @see #setHtmlTemplate(java.lang.String)
+	 * @see #setTemplate(String)
+	 * @see #setTextTemplate(String)
+	 * @see #setHtmlTemplate(String)
 	 */
 	public void setTextAndHtmlTemplate(String textTemplate, String htmlTemplate) throws MailException
 	{
@@ -355,9 +356,9 @@ public class TemplateMail extends Mail
 	 * @deprecated
 	 * @param template java.lang.String
 	 *
-	 * @see #setTemplate(java.lang.String)
-	 * @see #setHtmlTemplate(java.lang.String)
-	 * @see #setTextAndHtmlTemplate(java.lang.String,java.lang.String)
+	 * @see #setTemplate(String)
+	 * @see #setHtmlTemplate(String)
+	 * @see #setTextAndHtmlTemplate(String, String)
 	 */
 	public void setTextTemplate(String template) throws MailException
 	{
@@ -367,7 +368,7 @@ public class TemplateMail extends Mail
 		try
 		{
 			Config conf = Configuration.getInitial();
-			java.io.File file = new java.io.File(template);
+			File file = new File(template);
 			in = new java.io.BufferedReader(new java.io.FileReader(file));
 			StringBuffer buf = new StringBuffer();
 			String line;

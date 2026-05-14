@@ -6,15 +6,14 @@
  */
 package jdf.framework.logic.servlet;
 
-import java.io.IOException;
+import jdf.framework.core.pool.cache.CacheManagerFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import jdf.framework.core.pool.cache.CacheManagerFactory;
+import java.io.IOException;
 
 
 /**

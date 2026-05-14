@@ -2,13 +2,12 @@ package jdf.framework.core.log;
 
 
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
+import java.util.List;
+import java.util.Vector;
 
-import java.util.*;
 
-
-
-public class MultiPrintStream extends PrintStream 
+public class MultiPrintStream extends PrintStream
 {
     List streams= new Vector();
     //List streams= new ArrayList();

@@ -7,9 +7,10 @@
 package jdf.framework.logic.spi.process.condition;
 
 
-import java.util.*;
+import jdf.framework.core.data.DataSet;
 
-import jdf.framework.core.data.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 

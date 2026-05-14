@@ -1,9 +1,8 @@
 package jdf.framework.core.http;
 
-import java.util.Enumeration;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import java.util.Enumeration;
 
 /**
  * <p>

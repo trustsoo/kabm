@@ -42,15 +42,15 @@ package jdf.framework.logic.spi.classloader;
 
 
 // io packages
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 // io exceptions
-import java.io.IOException;
-import java.io.FileNotFoundException;
-
 // zip packages
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
 
 /**
  * <P>A <CODE>Resource</CODE> that is an entry in 
@@ -59,8 +59,8 @@ import java.util.zip.ZipEntry;
  *
  * @author Kristen Pol, Lutris Technologies
  * @version $Revision : 1.1 $
- * @see java.util.zip.ZipFile
- * @see java.util.zip.ZipEntry
+ * @see ZipFile
+ * @see ZipEntry
  */
 public class LocalZipResource extends Resource {
 

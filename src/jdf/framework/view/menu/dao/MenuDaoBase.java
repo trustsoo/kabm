@@ -1,13 +1,13 @@
 package jdf.framework.view.menu.dao;
 
+import jdf.framework.core.log.Logger;
+import jdf.framework.view.layout.LayoutManager;
+import jdf.framework.view.menu.entity.MenuItem;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import jdf.framework.core.log.Logger;
-import jdf.framework.view.layout.LayoutManager;
-import jdf.framework.view.menu.entity.MenuItem;
 
 
 public class MenuDaoBase
@@ -31,7 +31,7 @@ public class MenuDaoBase
     
     /**
      * 
-     * @see jdf.framework.view.menu.dao.MenuDao#setContextPath(java.lang.String)
+     * @see MenuDao#setContextPath(String)
      */
     public void setContextPath(String contextPath)
     {

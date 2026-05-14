@@ -1,9 +1,9 @@
 package jdf.framework.core.jsp;
 
-import java.util.Vector;
-import java.util.Collection;
+import jdf.framework.core.log.Logger;
 
-import jdf.framework.core.log.*;
+import java.util.Collection;
+import java.util.Vector;
 
 /**
  * The <code>PageVector</code> class implements a page-readable Vector.
@@ -11,7 +11,7 @@ import jdf.framework.core.log.*;
  * @version 1.0, 10/29/99
  * @see Vector
  */
-public class PageVector extends java.util.Vector
+public class PageVector extends Vector
 {
 	/**
 	 * 페이지의 크기
@@ -415,7 +415,7 @@ public class PageVector extends java.util.Vector
 	* @param none
 	*
 	* @return int[] (num)
-	* @exception java.lang.ArrayIndexOutOfBoundsException
+	* @exception ArrayIndexOutOfBoundsException
 	*/
 	public int[] Arraynum()
 	{
@@ -452,7 +452,7 @@ public class PageVector extends java.util.Vector
 				//Logger.debug.println("num["+i+"] : "+  num[i]);
 			}
 		}
-		catch (java.lang.ArrayIndexOutOfBoundsException e)
+		catch (ArrayIndexOutOfBoundsException e)
 		{
 			Logger.sys.println(e.toString());
 		}

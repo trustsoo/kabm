@@ -6,9 +6,6 @@
  */
 package jdf.framework.logic.spi.cache;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.log.Logger;
@@ -16,6 +13,8 @@ import jdf.framework.core.pool.cache.CacheManager;
 import jdf.framework.core.pool.cache.CacheManagerImpl;
 import jdf.framework.core.util.SmartStringArray;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -84,7 +83,7 @@ public class MultiServerCacheManager extends CacheManagerImpl implements CacheMa
 	/**
      * 데이터를 caching 한다.
      * 
-	 * @see jdf.framework.core.pool.cache.CacheManager#insert(java.lang.Object, java.lang.Object)
+	 * @see CacheManager#insert(Object, Object)
 	 */
 	public synchronized void insert(Object key, Object obj)
 	{
@@ -102,7 +101,7 @@ public class MultiServerCacheManager extends CacheManagerImpl implements CacheMa
 	/**
      * 이 caching 된 내용을 초기화 한다.
      * 
-	 * @see jdf.framework.core.pool.cache.CacheManager#reset()
+	 * @see CacheManager#reset()
 	 */
 	public synchronized void reset()
 	{
@@ -126,7 +125,7 @@ public class MultiServerCacheManager extends CacheManagerImpl implements CacheMa
      * isProp가 true 이면 다른 WAS 서버로 캐쉬 내용을 전파하고,
      * 그렇지 않으면 내부 메모리로만 보관한다.
      * 
-	 * @see jdf.framework.core.pool.cache.CacheManager#insert(java.lang.Object, java.lang.Object, boolean)
+	 * @see CacheManager#insert(Object, Object, boolean)
 	 */
 	public void insert(Object key, Object obj, boolean isProp)
 	{
@@ -140,7 +139,7 @@ public class MultiServerCacheManager extends CacheManagerImpl implements CacheMa
 	 * isProp 가 true 이면 다른 WAS 도 캐쉬 를 초기화 하고
      * 그렇지 않은 경우 자신만 초기화한다.
      * 
-	 * @see jdf.framework.core.pool.cache.CacheManager#reset(boolean)
+	 * @see CacheManager#reset(boolean)
 	 */
 	public void reset(boolean isProp)
 	{

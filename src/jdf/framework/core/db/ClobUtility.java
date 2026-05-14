@@ -16,16 +16,10 @@
 package jdf.framework.core.db;
 
 
-import java.sql.CallableStatement;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 
+import java.sql.*;
 
 
 /**
@@ -132,7 +126,7 @@ public final class ClobUtility {
 	 * @param java.sql.Clob clob
 	 * @param java.lang.String content 저장할 문자열
 	 * @param java.sql.Connection conn
-     * @exception java.sql.SQLException
+     * @exception SQLException
 	 */
 	public static void write(Clob clob, String content, Connection conn)
 		throws SQLException
@@ -177,7 +171,7 @@ public final class ClobUtility {
 	 * @param java.sql.Clob clob
 	 * @param java.sql.Connection conn
 	 * @return java.lang.String content 읽어온 문자열
-     * @exception java.sql.SQLException
+     * @exception SQLException
 	 */
 	public static String read(Clob clob, Connection conn)
 		throws SQLException

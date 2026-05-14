@@ -36,7 +36,7 @@ public abstract class AbstractConnection implements Connection
     /**
      * Connection을 종료한다.
      * 
-     * @see jdf.framework.core.data.cci.Connection#close()
+     * @see Connection#close()
      */
     abstract public void close() throws ResourceException;
 

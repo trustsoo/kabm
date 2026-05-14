@@ -1,13 +1,13 @@
 package jdf.framework.core.db;
 
 
+import oracle.sql.CLOB;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.Clob;
 import java.sql.SQLException;
-
-import oracle.sql.CLOB;
 
 public class LobUtility
 {

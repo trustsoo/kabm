@@ -1,28 +1,11 @@
 package jdf.framework.view.layout.filter;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.http.JDFrameContextListener;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
-import jdf.framework.view.auth.AclInfo;
 import jdf.framework.view.auth.RedirectPermissionException;
-import jdf.framework.view.auth.RoleInfo;
 import jdf.framework.view.auth.User;
 import jdf.framework.view.control.Command;
 import jdf.framework.view.layout.LayoutManager;
@@ -33,6 +16,12 @@ import jdf.framework.view.menu.entity.MenuItem;
 import jdf.framework.view.menu.entity.WebSiteMenu;
 import jdf.framework.view.xslt.TransformerHelper;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 
 /**
@@ -316,7 +305,7 @@ public class UIFilter implements Filter, MenuContext {
 	 * 
 	 */
 	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws java.io.IOException, ServletException {
+			FilterChain chain) throws IOException, ServletException {
 		
 		
 		// if( request.getAttribute(KEY_TEMPLET_BYPASS_INNER) !=null ) return;

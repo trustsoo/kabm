@@ -1,10 +1,10 @@
 package jdf.framework.core.data.schema;
 
+import jdf.framework.core.util.SmartStringArray;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import jdf.framework.core.util.SmartStringArray;
 
 
 /**

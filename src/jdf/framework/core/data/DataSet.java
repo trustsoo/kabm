@@ -1,17 +1,5 @@
 package jdf.framework.core.data;
 
-import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
 import jdf.framework.core.data.schema.IOSchema;
@@ -19,6 +7,12 @@ import jdf.framework.core.data.schema.format.Formatter;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.util.Utility;
+
+import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -177,7 +171,7 @@ public class DataSet extends ConcurrentHashMap<Object, Object> implements Serial
 	 * @param schema
 	 * @param type
 	 * 
-	 * @see jdf.framework.core.data.schema.IOSchema
+	 * @see IOSchema
 	 */
 	public void setIOSchema(IOSchema schema, int type) {
 		this.schema = schema;
@@ -189,7 +183,7 @@ public class DataSet extends ConcurrentHashMap<Object, Object> implements Serial
 	 * BLD xml 파일의 내용을 담고있는 jdf.framework.core.data.schema.IOSchema 객체를 반환한다.
 	 * 
 	 * @return IOSchema
-	 * @see jdf.framework.core.data.schema.IOSchema
+	 * @see IOSchema
 	 */
 	public IOSchema getIOSchema() {
 		return schema;
@@ -1098,7 +1092,7 @@ public class DataSet extends ConcurrentHashMap<Object, Object> implements Serial
 					byte[] bre = (byte[]) x;
 
 					x = new String(bre);
-				} catch (java.lang.ClassCastException e) {
+				} catch (ClassCastException e) {
 
 				}
 			} else {
@@ -1139,7 +1133,7 @@ public class DataSet extends ConcurrentHashMap<Object, Object> implements Serial
 				} catch (IllegalArgumentException ee) 
 				{
 					// ee.printStackTrace();
-					jdf.framework.core.log.Logger.debug.println(LOG_ID + "[" + key
+					Logger.debug.println(LOG_ID + "[" + key
 							+ "] format err. " + ee.getMessage());
 				}
 			} else if (x != null) 
@@ -1551,7 +1545,7 @@ public class DataSet extends ConcurrentHashMap<Object, Object> implements Serial
 	 * @author
 	 * 
 	 */
-	final class ValueArray implements java.io.Serializable, Cloneable {
+	final class ValueArray implements Serializable, Cloneable {
 		/**
 		 * 
 		 */
@@ -1666,7 +1660,7 @@ public class DataSet extends ConcurrentHashMap<Object, Object> implements Serial
 
 	/**
 	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
+	 * @see Object#equals(Object)
 	 */
 	public boolean equals(Object arg) {
 		Object v1 = this.toString();
@@ -1684,7 +1678,7 @@ public class DataSet extends ConcurrentHashMap<Object, Object> implements Serial
 
 	/**
 	 * 
-	 * @see java.lang.Object#hashCode()
+	 * @see Object#hashCode()
 	 */
 	public int hashCode() {
 		return this.toString().hashCode();

@@ -14,9 +14,11 @@
  
 package jdf.framework.core.io;
 
-import java.io.*;
-import java.util.*;
-
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**

@@ -35,7 +35,7 @@ public final class SmartCookie extends HttpAttributes
 		response = res;
 		domainName = getDomainName(req);
 
-		javax.servlet.http.Cookie[] cookies = req.getCookies();
+		Cookie[] cookies = req.getCookies();
 		if (cookies != null)
 		{
 

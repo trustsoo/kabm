@@ -31,7 +31,7 @@ public abstract class AbstractProcessorFactory implements ProcessorFactory
 	 * Processor 객체를 만든다. 이부분은 <process-info> 내에서 공통적으로 처리해야할 내용을 먼저 처리한다. 가령 <script>이라던가 <property>등...
 	 * 
 	 * 
-	 * @see jdf.framework.logic.spi.management.ProcessorFactory#getProcessor(jdf.framework.logic.spi.management.IOSchemaContext)
+	 * @see ProcessorFactory#getProcessor(IOSchemaContext)
 	 */
 	public Processor getProcessor(RADeployDescriptor radd, IOSchemaContext ctx) throws Exception
 	{

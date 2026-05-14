@@ -2,7 +2,9 @@ package jdf.framework.core.io.compress;
 
 /* "LZW.java" */
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /** The Limpel, Ziv, Welch (LZW) algorithm compresses any sequence of byte data.
  * The resulting compressed codes are larger than bytes,

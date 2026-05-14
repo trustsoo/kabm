@@ -1,12 +1,11 @@
 package jdf.framework.logic.transform;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import jdf.framework.core.data.DataSet;
-import jdf.framework.core.data.ResultSetDataSet;
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 
 /**
@@ -79,10 +78,10 @@ public class CommaTransformerImpl extends TransformerBase
 
 					try
 					{
-						if (x.getClass() == java.lang.String.class)
+						if (x.getClass() == String.class)
 							iterationNum = Integer.parseInt((String) x);
 
-						else if (x.getClass() == java.lang.Integer.class)
+						else if (x.getClass() == Integer.class)
 							iterationNum = ((Integer) x).intValue();
 					}
 					catch (Exception ee)
@@ -128,7 +127,7 @@ public class CommaTransformerImpl extends TransformerBase
                         if (val == null)
                         {
                             val= field.getDefaultValue();
-                            if (val instanceof java.lang.String)
+                            if (val instanceof String)
                             {
                                 String x= val.toString();
 

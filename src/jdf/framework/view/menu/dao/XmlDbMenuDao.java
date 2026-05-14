@@ -6,9 +6,6 @@
  */
 package jdf.framework.view.menu.dao;
 
-import java.io.ByteArrayInputStream;
-import java.util.List;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.DefaultConnectionFactory;
@@ -18,8 +15,10 @@ import jdf.framework.core.xml.DocBuilder;
 import jdf.framework.core.xml.XMLReferer;
 import jdf.framework.view.menu.entity.MenuItem;
 import jdf.framework.view.menu.entity.WebSiteMenu;
-
 import org.w3c.dom.Document;
+
+import java.io.ByteArrayInputStream;
+import java.util.List;
 
 
 /**

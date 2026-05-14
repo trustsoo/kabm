@@ -24,7 +24,7 @@ public class OutputStreamDumpInputStream extends FilterInputStream
 
     /**
      * 
-     * @see java.io.FilterInputStream#read()
+     * @see FilterInputStream#read()
      */
     public int read() throws IOException
     {
@@ -36,7 +36,7 @@ public class OutputStreamDumpInputStream extends FilterInputStream
 
     /**
      * 
-     * @see java.io.FilterInputStream#read(byte[], int, int)
+     * @see FilterInputStream#read(byte[], int, int)
      */
     public int read(byte[] arg0, int arg1, int arg2) throws IOException
     {
@@ -47,7 +47,7 @@ public class OutputStreamDumpInputStream extends FilterInputStream
 
     /**
      * 
-     * @see java.io.FilterInputStream#read(byte[])
+     * @see FilterInputStream#read(byte[])
      */
     public int read(byte[] arg0) throws IOException
     {

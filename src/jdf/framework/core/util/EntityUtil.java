@@ -1,14 +1,14 @@
 package jdf.framework.core.util;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import jdf.framework.core.Entity;
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.io.FormatedEntity;
 import jdf.framework.core.log.Logger;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public final class EntityUtil
 {

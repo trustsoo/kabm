@@ -1,10 +1,9 @@
 package jdf.framework.logic.transform;
 
-import java.io.IOException;
-import java.io.Writer;
-
 import jdf.framework.core.data.DataSet;
 
+import java.io.IOException;
+import java.io.Writer;
 
 
 /**

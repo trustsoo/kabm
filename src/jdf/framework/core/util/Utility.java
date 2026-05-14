@@ -16,6 +16,8 @@
 
 package jdf.framework.core.util;
 
+import jdf.framework.core.log.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -23,9 +25,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import jdf.framework.core.log.Logger;
-
 
 
 /**
@@ -49,7 +48,7 @@ public final class Utility {
 	 *            java.lang.Object[]
 	 * @return java.lang.Object[]
 	 * 
-	 * @see #clone(java.lang.Object)
+	 * @see #clone(Object)
 	 */
 	public synchronized static Object[] clone(Object[] objects) {
 		int length = objects.length;
@@ -72,7 +71,7 @@ public final class Utility {
 	 *            java.lang.Object
 	 * @return java.lang.Object
 	 * 
-	 * @see #clone(java.lang.Object[])
+	 * @see #clone(Object[])
 	 * 
 	 */
 	public synchronized static Object clone(Object object) {
@@ -105,8 +104,8 @@ public final class Utility {
 	 *            java.util.Vector
 	 * @return java.util.Vector
 	 * 
-	 * @see #clone(java.lang.Object)
-	 * @see #clone(java.lang.Object[])
+	 * @see #clone(Object)
+	 * @see #clone(Object[])
 	 */
 	public synchronized static Vector clone(Vector objects) {
 		Vector newObjects = new Vector();
@@ -147,7 +146,7 @@ public final class Utility {
 	 * @param java.lang.Object
 	 *            Object내의 public java.lang.String 형의 member variable에만 영향을 준다.
 	 * 
-	 * @see #fixNullAll(java.lang.Object)
+	 * @see #fixNullAll(Object)
 	 * @see #trim(String)
 	 */
 	public synchronized static void fixNull(Object o) {
@@ -201,7 +200,7 @@ public final class Utility {
 	 *            Object내의 public String 형뿐만 아니라, Object[], Vector 등과 같은 public
 	 *            Object형 Member Variable에 영향을 준다.
 	 * 
-	 * @see #fixNull(java.lang.Object)
+	 * @see #fixNull(Object)
 	 * @see #trim(String)
 	 * 
 	 * @author 김형기, 이원영
@@ -333,7 +332,7 @@ public final class Utility {
     	PrintWriter writer = null;    	
     	try
 		{
-    		bos = new java.io.ByteArrayOutputStream();
+    		bos = new ByteArrayOutputStream();
     		writer = new PrintWriter(bos);
     		e.printStackTrace(writer);
     		

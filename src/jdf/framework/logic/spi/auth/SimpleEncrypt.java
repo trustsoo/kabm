@@ -1,10 +1,9 @@
 package jdf.framework.logic.spi.auth;
 
-import java.security.MessageDigest;
-import java.util.Random;
-
 import jdf.framework.core.util.URLUtil;
 
+import java.security.MessageDigest;
+import java.util.Random;
 
 
 /**

@@ -1,11 +1,5 @@
 package jdf.framework.view.menu.bean;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
 import jdf.framework.core.http.JDFrameContextListener;
 import jdf.framework.core.log.Logger;
 import jdf.framework.view.menu.WebPagePublisher;
@@ -13,6 +7,11 @@ import jdf.framework.view.menu.dao.MenuDao;
 import jdf.framework.view.menu.dao.XmlMenuDao;
 import jdf.framework.view.menu.entity.MenuItem;
 import jdf.framework.view.menu.entity.WebSiteMenu;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**

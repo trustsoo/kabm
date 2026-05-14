@@ -1,9 +1,5 @@
 package com.kabm.util;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Properties;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
@@ -12,6 +8,10 @@ import jdf.framework.core.data.InteractionBean;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.mail.MailException;
 import jdf.framework.core.mail.TemplateMail;
+
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Properties;
 
 
 public class SendMailThread extends Thread

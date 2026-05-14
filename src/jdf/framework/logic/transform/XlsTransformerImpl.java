@@ -1,19 +1,11 @@
 package jdf.framework.logic.transform;
 
-import java.io.File;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import jdf.framework.core.Configuration;
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
 import jdf.framework.core.data.schema.FieldType;
-import jdf.framework.core.util.StringFormater;
 import jdf.framework.core.util.StringUtil;
-
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.Alignment;
@@ -21,14 +13,13 @@ import jxl.format.Border;
 import jxl.format.BorderLineStyle;
 import jxl.format.Colour;
 import jxl.format.VerticalAlignment;
-import jxl.write.Label;
-import jxl.write.NumberFormat;
-import jxl.write.NumberFormats;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
+import jxl.write.*;
+
+import java.io.File;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Xls 문서로 DataSet 을 변환한다.
@@ -66,7 +57,7 @@ public class XlsTransformerImpl extends TransformerBase
     public File transform(String title, String condition, WritableWorkbook workbook, File infile, DataSet ds, String blockName, OutputStream out) throws TransformerException
     {               
         Block[] blocks = ds.getIOSchema().getOutputBlocks();
-        jxl.write.Label label =null;
+        Label label =null;
         jxl.write.Blank blank=null;
         //FileInputStream fin = null;
         cellMap = new HashMap<String , WritableCellFormat>();
@@ -89,7 +80,7 @@ public class XlsTransformerImpl extends TransformerBase
     	        File dir = new File(dataDir);
     	        if(!dir.exists()) dir.mkdirs();
     	        
-    	        file = new File(dataDir+java.io.File.separator+System.currentTimeMillis()+".xls");
+    	        file = new File(dataDir+ File.separator+System.currentTimeMillis()+".xls");
     	        
     	        WorkbookSettings ws = new WorkbookSettings();
     			ws.setUseTemporaryFileDuringWrite(true);

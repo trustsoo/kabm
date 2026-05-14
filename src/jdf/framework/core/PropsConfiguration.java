@@ -14,10 +14,17 @@ package jdf.framework.core;
  * 
  * @author  WonYoung Lee, wyounglee@lgeds.lg.co.kr.
  */
-import java.util.*;
-import java.io.*; // File, FileInputStream, InputStream
 
-import jdf.framework.core.util.*;
+import jdf.framework.core.util.StringFormater;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Properties;
 
 
 /**

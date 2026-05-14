@@ -6,15 +6,15 @@
  */
 package jdf.framework.logic.spi.process;
 
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.schema.Field;
 import jdf.framework.core.data.schema.IOSchema;
 import jdf.framework.core.data.schema.ProcedureMapper;
 import jdf.framework.core.log.Logger;
+
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 
 /**
@@ -54,7 +54,7 @@ public class ProcedureQueryOperator extends QueryOperator
      * 
      */
     public void execute(java.sql.Connection conn, IOSchema schema, DataSet input, DataSet output)
-            throws java.sql.SQLException
+            throws SQLException
     {
         CallableStatement pstmt = null;
         ResultSet rset = null;

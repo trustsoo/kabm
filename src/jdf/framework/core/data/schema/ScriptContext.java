@@ -1,16 +1,15 @@
 package jdf.framework.core.data.schema;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.URL;
-
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.util.StringFormater;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.net.URL;
 
 
 /**
@@ -307,7 +306,7 @@ public class ScriptContext implements java.io.Serializable
 				}
 
 				// , 로 구분되어 여러개가 올수있다.
-				String[] lib_dirs = jdf.framework.core.util.SmartStringArray.split(",", lib_dir);
+				String[] lib_dirs = SmartStringArray.split(",", lib_dir);
 				StringBuffer classPathBuf = new StringBuffer();
 
 				for (int k = 0; lib_dirs != null && k < lib_dirs.length; k++) {

@@ -1,28 +1,15 @@
 package jdf.framework.logic.adapter.file;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.charset.Charset;
-
-import org.apache.commons.io.input.ReversedLinesFileReader;
-
 import jdf.framework.core.data.DataSet;
-import jdf.framework.core.data.schema.Block;
-import jdf.framework.core.data.schema.Field;
-import jdf.framework.core.data.schema.FieldType;
-import jdf.framework.core.data.schema.IOSchema;
-import jdf.framework.core.data.schema.Processor;
+import jdf.framework.core.data.schema.*;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.util.StringFormater;
 import jdf.framework.logic.spi.parser.ParseUtil;
 import jdf.framework.logic.spi.parser.TranslationException;
+import org.apache.commons.io.input.ReversedLinesFileReader;
+
+import java.io.*;
+import java.nio.charset.Charset;
 
 
 /**

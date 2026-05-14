@@ -14,12 +14,6 @@
 package jdf.framework.core.schedule;
 
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configurable;
 import jdf.framework.core.Configuration;
@@ -29,7 +23,18 @@ import jdf.framework.core.service.AbstractManager;
 import jdf.framework.core.util.DateTime;
 import jdf.framework.core.xml.XMLReferer;
 
-/** * <b><code>SchedulerRegister</code></b> * <p> * 화면 Tr code에 관계된 내용을 읽어 메모리에 적재하는 작업과  * Screen code객체를 return한다. * </p> *  * @author * @version 1.0 */
+import java.util.*;
+
+/**
+ * <b><code>SchedulerRegister</code></b>
+ * <p>
+ * 화면 Tr code에 관계된 내용을 읽어 메모리에 적재하는 작업과 
+ * Screen code객체를 return한다.
+ * </p>
+ * 
+ * @author
+ * @version 1.0
+ */
  
 
 public class ScheduleRegister extends AbstractManager

@@ -13,22 +13,21 @@
 
 package jdf.framework.core.db;
 
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.log.Logger;
+import jdf.framework.core.util.PropertyManager;
+import jdf.framework.core.util.SmartStringArray;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-import jdf.framework.core.log.Logger;
-import jdf.framework.core.util.PropertyManager;
-import jdf.framework.core.util.SmartStringArray;
 
 /**
  * <b><code>ConnectionManager</code></b>
@@ -318,7 +317,7 @@ public final class ConnectionManager
      * Connection 연결을 끝는다.
      *
      **/
-    public static void close(java.sql.Connection conn)
+    public static void close(Connection conn)
     {
         try
         {

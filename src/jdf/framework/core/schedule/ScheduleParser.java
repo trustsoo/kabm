@@ -1,11 +1,10 @@
 package jdf.framework.core.schedule;
 
-import java.util.Calendar;
-import java.util.Date;
-
-import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.DateTime;
 import jdf.framework.core.util.SmartStringArray;
+
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * 스케줄 주기를 구하기 위한 클래스 아래 구문형식으로 스트링을 받아, 어떤 시점부터

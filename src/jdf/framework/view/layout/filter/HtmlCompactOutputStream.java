@@ -1,10 +1,6 @@
 package jdf.framework.view.layout.filter;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
@@ -79,7 +75,7 @@ public class HtmlCompactOutputStream extends FilterOutputStream
 	}
 
 	/**
-	 * @see java.io.OutputStream#write(byte[], int, int)
+	 * @see OutputStream#write(byte[], int, int)
 	 */
 	public void write(byte b[], int off, int len) throws IOException
 	{
@@ -100,7 +96,7 @@ public class HtmlCompactOutputStream extends FilterOutputStream
 	}
 
 	/**
-	 * @see java.io.OutputStream#write(byte[])
+	 * @see OutputStream#write(byte[])
 	 */
 	public void write(byte[] b) throws IOException
 	{
@@ -114,7 +110,7 @@ public class HtmlCompactOutputStream extends FilterOutputStream
 	}
 
 	/**
-	 * @see java.io.OutputStream#write(int)
+	 * @see OutputStream#write(int)
 	 */
 	private void writeToOutputStream(int val, OutputStream tmpOut) throws IOException
 	{

@@ -1,18 +1,13 @@
 package jdf.framework.view.xslt;
 
+import jdf.framework.core.log.Logger;
+
+import javax.servlet.ServletContext;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.ServletContext;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.URIResolver;
-import javax.xml.transform.stream.StreamSource;
-
-import jdf.framework.core.log.Logger;
 
 
 /**

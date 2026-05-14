@@ -1,18 +1,12 @@
 package jdf.framework.view.layout.filter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.zip.GZIPOutputStream;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.*;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * BufferTextStream
@@ -74,7 +68,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper {
 		return pw.getStream();
 	}
 
-	public void flush() throws java.io.IOException {
+	public void flush() throws IOException {
 		// System.out.println("flush");
 		pw.getWriter().flush();
 		pw.getStream().flush();
@@ -116,12 +110,12 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper {
 
 	}
 
-	public void addHeader(java.lang.String name, java.lang.String value) {
+	public void addHeader(String name, String value) {
 		hList.add(new HeaderInfo(HeaderInfo.MODE_ADD, name, value));
 		// super.addHeader(name, value);
 	}
 
-	public void setHeader(java.lang.String name, java.lang.String value) {
+	public void setHeader(String name, String value) {
 		// Tomcat에서 header에 ETag 나 Last-Modifed가 setting된후 이상징후 발생
 		if ("ETag".equals(name) || "Last-Modified".equals(name))
 			return;
@@ -157,13 +151,13 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper {
 			this.baos = baos;
 		}
 
-		public void write(int param) throws java.io.IOException {
+		public void write(int param) throws IOException {
 			// System.out.print(param);
 			baos.write(param);
 		}
 
 		/**
-		 * @see javax.servlet.ServletOutputStream#println(String)
+		 * @see ServletOutputStream#println(String)
 		 */
 		public void println(String arg0) throws IOException {
 			System.out.println(arg0);
@@ -320,7 +314,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper {
 
 	/**
 	 * 
-	 * @see javax.servlet.ServletResponse#setContentType(java.lang.String)
+	 * @see javax.servlet.ServletResponse#setContentType(String)
 	 */
 	public void setContentType(String arg0) {
 		super.setContentType(arg0);
@@ -343,7 +337,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper {
 
 	/**
 	 * 
-	 * @see javax.servlet.http.HttpServletResponse#setStatus(int)
+	 * @see HttpServletResponse#setStatus(int)
 	 */
 	public void setStatus(int code) {
 		this.isSetStatus = true;
@@ -354,7 +348,7 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper {
 
 	/**
 	 * 
-	 * @see javax.servlet.http.HttpServletResponseWrapper#sendRedirect(java.lang.String)
+	 * @see HttpServletResponseWrapper#sendRedirect(String)
 	 */
 	public void sendRedirect(String arg0) throws IOException {
 		this.isRedirect = true;
@@ -366,8 +360,8 @@ public class ByteArrayServletResponse extends HttpServletResponseWrapper {
 	}
 
 	/**
-	 * @see javax.servlet.http.HttpServletResponse#setStatus(int,
-	 *      java.lang.String)
+	 * @see HttpServletResponse#setStatus(int,
+	 *      String)
 	 */
 	/*
 	 * public void setStatus(int code, String desc) { this.isSetStatus = true;

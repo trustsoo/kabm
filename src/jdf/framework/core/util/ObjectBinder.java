@@ -89,7 +89,7 @@ public class ObjectBinder
 
     public Object[] list(String name)
     {
-        jdf.framework.core.util.PartialSearcher searcher = new jdf.framework.core.util.PartialSearcher(_Ref);
+        PartialSearcher searcher = new PartialSearcher(_Ref);
 
         Object[] keys = searcher.match((String) name);
 

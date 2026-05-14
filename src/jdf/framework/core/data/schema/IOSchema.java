@@ -1,15 +1,14 @@
 package jdf.framework.core.data.schema;
 
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.data.JavaBeanDataSet;
+import jdf.framework.core.data.ResultSetDataSet;
+import org.w3c.dom.Node;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.data.JavaBeanDataSet;
-import jdf.framework.core.data.ResultSetDataSet;
-
-import org.w3c.dom.Node;
 
 
 /**

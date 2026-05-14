@@ -1,6 +1,7 @@
 package jdf.framework.logic.spi.parser;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <b><code>Protocol</code> </b>

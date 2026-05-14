@@ -42,12 +42,13 @@ package jdf.framework.logic.spi.classloader;
 
 
 // io packages
-import java.io.InputStream;
+
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 // io exceptions
-import java.io.IOException;
-import java.io.FileNotFoundException;
 
 /**
  * <P>A resource that is a file existing on the local machine or a remote

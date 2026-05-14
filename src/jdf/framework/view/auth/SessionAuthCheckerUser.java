@@ -6,12 +6,12 @@
  */
 package jdf.framework.view.auth;
 
+import jdf.framework.core.log.Logger;
+import jdf.framework.view.menu.entity.MenuItem;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import jdf.framework.core.log.Logger;
-import jdf.framework.view.menu.entity.MenuItem;
 
 
 /**
@@ -46,9 +46,9 @@ public class SessionAuthCheckerUser extends DefaultAuthUser
 
     /**
      * 
-     * @see jdf.framework.view.auth.User#checkPrivilege(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse,
-     *      jdf.framework.view.menu.entity.MenuItem)
+     * @see User#checkPrivilege(HttpServletRequest,
+     *      HttpServletResponse,
+     *      MenuItem)
      */
     public void checkPrivilege(HttpServletRequest req, HttpServletResponse res, MenuItem menu)
             throws PermissionException

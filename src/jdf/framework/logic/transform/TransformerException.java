@@ -35,7 +35,7 @@ public class TransformerException extends RuntimeException
 
 	/**
 	 * 
-	 * @see java.lang.Throwable#printStackTrace()
+	 * @see Throwable#printStackTrace()
 	 */
 	public void printStackTrace()
 	{

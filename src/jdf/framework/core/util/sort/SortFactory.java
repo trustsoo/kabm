@@ -1,6 +1,7 @@
 package jdf.framework.core.util.sort;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
 
 /**
  * <b><code>SortFactory</code></b>

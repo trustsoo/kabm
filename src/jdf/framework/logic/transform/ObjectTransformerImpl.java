@@ -1,11 +1,11 @@
 package jdf.framework.logic.transform;
 
+import jdf.framework.core.data.DataSet;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-
-import jdf.framework.core.data.DataSet;
 
 
 /**
@@ -50,8 +50,8 @@ public class ObjectTransformerImpl implements Transformer {
 	}
 
 	/**
-	 * @see jdf.framework.logic.transform.Transformer#transform(jdf.framework.core.data.DataSet,
-	 *      java.io.Writer)
+	 * @see Transformer#transform(DataSet,
+	 *      Writer)
 	 */
 	public int transform(DataSet source, Writer writer) throws TransformerException {
 		throw new TransformerException("not support");

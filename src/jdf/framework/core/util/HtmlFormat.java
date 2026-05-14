@@ -17,7 +17,7 @@ import java.text.NumberFormat;
  *         메쏘드명을 translateNewline 로 변경 및 추가
  */
 
-public final class HtmlFormat extends jdf.framework.core.util.StringFormater
+public final class HtmlFormat extends StringFormater
 {
 
 	private final static String DOUBLE_PATTERN = "###,##0.00";

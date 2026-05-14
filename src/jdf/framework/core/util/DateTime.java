@@ -1,10 +1,11 @@
 package jdf.framework.core.util;
 
+import jdf.framework.core.log.Logger;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import jdf.framework.core.log.Logger;
 /**
  * <b><code>DateTime</code></b>
  * <p>
@@ -48,7 +49,7 @@ public final class DateTime
 			throw new NullPointerException("format string to check date is null");
 
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat(format, java.util.Locale.US);
-		java.util.Date date = null;
+		Date date = null;
 		try
 		{
 			date = formatter.parse(s);
@@ -89,7 +90,7 @@ public final class DateTime
 					throw new NullPointerException("format string to check date is null");
 		*/
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat(format, java.util.Locale.US);
-		java.util.Date date = null;
+		Date date = null;
 		try
 		{
 			date = formatter.parse(s);
@@ -116,7 +117,7 @@ public final class DateTime
 	public static String getDateString()
 	{
 
-		return form1.format(new java.util.Date());
+		return form1.format(new Date());
 	}
 
 	/**
@@ -129,7 +130,7 @@ public final class DateTime
 	public static String getFormatString(String pattern)
 	{
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat(pattern, java.util.Locale.US);
-		String dateString = formatter.format(new java.util.Date());
+		String dateString = formatter.format(new Date());
 		return dateString;
 	}
 
@@ -143,7 +144,7 @@ public final class DateTime
 	public static String getShortDateString()
 	{
 
-		return form3.format(new java.util.Date());
+		return form3.format(new Date());
 	}
 
 	private final static java.text.SimpleDateFormat form2 =
@@ -156,7 +157,7 @@ public final class DateTime
 	public static String getShortTimeString()
 	{
 
-		return form2.format(new java.util.Date());
+		return form2.format(new Date());
 	}
 	
 	private final static java.text.SimpleDateFormat formS1 =
@@ -170,7 +171,7 @@ public final class DateTime
 	public static String getShortMilliTimeString()
 	{
 
-		return formS1.format(new java.util.Date());
+		return formS1.format(new Date());
 	}	
 	
 
@@ -184,7 +185,7 @@ public final class DateTime
 	{
 
 		//java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat ("yyyy-MM-dd HH:mm:ss:SSS", java.util.Locale.US);
-		return form5.format(new java.util.Date());
+		return form5.format(new Date());
 	}
 
 	/**
@@ -194,7 +195,7 @@ public final class DateTime
 	public static String getTimeString()
 	{
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US);
-		return formatter.format(new java.util.Date());
+		return formatter.format(new Date());
 	}
 
 	private final static java.text.SimpleDateFormat form4 =
@@ -206,7 +207,7 @@ public final class DateTime
 	public static String getMilliTimeString()
 	{
 
-		return form4.format(new java.util.Date());
+		return form4.format(new Date());
 	}
 
 	private final static java.text.SimpleDateFormat form10 =
@@ -214,7 +215,7 @@ public final class DateTime
 
 	public static String getTimestampString()
 	{
-		return form10.format(new java.util.Date());
+		return form10.format(new Date());
 	}
 
 	public static String getAdjustDateString(int yy, int mm, int dd)
@@ -250,7 +251,7 @@ public final class DateTime
 	 * @param formate 형식 예) yyyy-MM-dd HH:mm:ss, yyyy/mm/dd 
 	 * @return 입력받은 시간의 정규화된 문자열
 	 */
-	public static String getString(java.util.Date date, String format)
+	public static String getString(Date date, String format)
 	{
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat(format, java.util.Locale.US);
 		return formatter.format(date);
@@ -266,7 +267,7 @@ public final class DateTime
 	 * @param formate 형식 예) yyyy-MM-dd HH:mm:ss, yyyy/mm/dd 
 	 * @return 입력받은 시간의 정규화된 문자열
 	 */
-	public static java.util.Date getDate(String date, String format)
+	public static Date getDate(String date, String format)
 	{
 		try
 		{
@@ -295,7 +296,7 @@ public final class DateTime
 		try
 		{
 			formUS.setTimeZone(TimeZone.getTimeZone(timezone));	
-			time =  formUS.format(new java.util.Date());
+			time =  formUS.format(new Date());
 		} catch(Exception ex)
 		{
 			Logger.warn.println(ex.toString());
@@ -337,7 +338,7 @@ public final class DateTime
 	{
 		try
 		{
-			java.util.Date dat = getDate(date, format);
+			Date dat = getDate(date, format);
 			return dat.getTime();
 		}
 		catch (Exception e)

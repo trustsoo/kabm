@@ -1,10 +1,9 @@
 package jdf.framework.view.menu.taglibs;
 
-import java.io.IOException;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
+import java.io.IOException;
 
 /**
  * 메뉴리스트에서 구분선을 넣을지 여부 판단.

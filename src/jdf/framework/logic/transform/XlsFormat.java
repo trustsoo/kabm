@@ -1,17 +1,9 @@
 package jdf.framework.logic.transform;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
-
+import jdf.framework.core.data.schema.Block;
+import jdf.framework.core.data.schema.Field;
+import jdf.framework.core.data.schema.FieldType;
+import jdf.framework.core.io.StreamUtil;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -21,11 +13,13 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
-import jdf.framework.core.data.schema.Block;
-import jdf.framework.core.data.schema.Field;
-import jdf.framework.core.data.schema.FieldType;
-import jdf.framework.core.io.StreamUtil;
-
+import java.io.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 
 public class XlsFormat

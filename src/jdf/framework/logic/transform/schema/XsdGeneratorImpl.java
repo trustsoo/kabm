@@ -131,7 +131,7 @@ public class XsdGeneratorImpl implements XsdGenerator
 	/**
 	 * 
 	 * 
-	 * @see jdf.framework.logic.transform.schema.XsdGenerator#generate(jdf.framework.core.data.schema.Block, java.lang.String)
+	 * @see XsdGenerator#generate(Block, String)
 	 */
 	public String generate(Block b, String elementName, boolean isAppend)
 	{
@@ -258,7 +258,7 @@ public class XsdGeneratorImpl implements XsdGenerator
 	/**
 	 * 
 	 * 
-	 * @see jdf.framework.logic.transform.schema.XsdGenerator#generate(jdf.framework.core.data.schema.IOSchema, int, java.lang.String)
+	 * @see XsdGenerator#generate(IOSchema, int, String)
 	 */
 	public String generate(IOSchema ioschema, int in_out, String elementName) throws TransformerException
 	{
@@ -293,7 +293,7 @@ public class XsdGeneratorImpl implements XsdGenerator
 	/**
 	 * 추가 schema 정보를 text 형태로 추가한다.
 	 * 
-	 * @see jdf.framework.logic.transform.schema.XsdGenerator#appendXsdText(java.lang.String)
+	 * @see XsdGenerator#appendXsdText(String)
 	 */
 	public void appendXsdText(String txt)
 	{

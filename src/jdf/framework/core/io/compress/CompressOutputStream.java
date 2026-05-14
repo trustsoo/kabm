@@ -1,6 +1,9 @@
 package jdf.framework.core.io.compress;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class CompressOutputStream extends FilterOutputStream
 {

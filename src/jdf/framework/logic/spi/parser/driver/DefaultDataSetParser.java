@@ -1,8 +1,5 @@
 package jdf.framework.logic.spi.parser.driver;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import jdf.framework.core.data.BytesData;
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ExternalData;
@@ -14,6 +11,9 @@ import jdf.framework.core.log.Logger;
 import jdf.framework.logic.spi.parser.DataSetParser;
 import jdf.framework.logic.spi.parser.FieldParser;
 import jdf.framework.logic.spi.parser.TranslationException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 
 /**
@@ -159,10 +159,10 @@ public class DefaultDataSetParser extends DataSetParser
                         // throw new TranslationException(refNm+" is not exist
                         // in IOSchema");
                         iterationNum = 1;
-                    } else if (x.getClass() == java.lang.String.class)
+                    } else if (x.getClass() == String.class)
                         iterationNum = Integer.parseInt((String) x);
 
-                    else if (x.getClass() == java.lang.Integer.class)
+                    else if (x.getClass() == Integer.class)
                         iterationNum = ((Integer) x).intValue();
                 }
 
@@ -182,7 +182,7 @@ public class DefaultDataSetParser extends DataSetParser
                         if (val == null)
                         {
                             val = field.getDefaultValue();
-                            if (val instanceof java.lang.String)
+                            if (val instanceof String)
                             {
                                 String x = val.toString();
 
@@ -276,7 +276,7 @@ public class DefaultDataSetParser extends DataSetParser
                         if (x == null)
                             iterationNum = 1;
 
-                        else if (x.getClass() == java.lang.String.class)
+                        else if (x.getClass() == String.class)
                         {
 
                             try
@@ -289,7 +289,7 @@ public class DefaultDataSetParser extends DataSetParser
                             }
                         }
 
-                        else if (x.getClass() == java.lang.Integer.class)
+                        else if (x.getClass() == Integer.class)
                             iterationNum = ((Integer) x).intValue();
 
                     }

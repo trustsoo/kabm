@@ -1,6 +1,5 @@
 package jdf.framework.logic.adapter.file;
 
-import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.StringFormater;
 
 /**

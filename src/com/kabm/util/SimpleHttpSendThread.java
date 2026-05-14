@@ -1,8 +1,8 @@
 package com.kabm.util;
 
-import java.util.List;
-
 import jdf.framework.core.log.Logger;
+
+import java.util.List;
 
 public class SimpleHttpSendThread extends Thread
 {

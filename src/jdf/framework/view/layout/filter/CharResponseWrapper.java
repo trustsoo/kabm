@@ -9,11 +9,10 @@ package jdf.framework.view.layout.filter;
  * 
  */
 
-import java.io.CharArrayWriter;
-import java.io.PrintWriter;
-
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
 
 public class CharResponseWrapper extends HttpServletResponseWrapper
 {

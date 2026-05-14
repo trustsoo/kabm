@@ -1,13 +1,13 @@
 package jdf.framework.logic.transform;
 
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.data.schema.Block;
+import jdf.framework.core.data.schema.Field;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.data.schema.Block;
-import jdf.framework.core.data.schema.Field;
 
 
 /**
@@ -23,7 +23,7 @@ public class HtmlTransformerImpl extends TransformerBase
      * 
      * HTML 로 데이터를 변환한다.
      * 
-     * @see jdf.framework.logic.transform.TransformerBase#transform(jdf.framework.core.data.DataSet, java.io.OutputStream)
+     * @see TransformerBase#transform(DataSet, OutputStream)
      */
 	public int transform(DataSet ds, OutputStream out) throws TransformerException
 	{

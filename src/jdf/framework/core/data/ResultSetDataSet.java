@@ -1,11 +1,11 @@
 package jdf.framework.core.data;
 
+import jdf.framework.core.data.schema.IOSchema;
+import jdf.framework.core.data.schema.StoredQuery;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import jdf.framework.core.data.schema.IOSchema;
-import jdf.framework.core.data.schema.StoredQuery;
 
 
 /**

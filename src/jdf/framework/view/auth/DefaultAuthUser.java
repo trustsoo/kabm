@@ -1,23 +1,19 @@
 package jdf.framework.view.auth;
 
 
-
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.DefaultConnectionFactory;
 import jdf.framework.core.data.cci.Interaction;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
-import jdf.framework.core.util.Utility;
 import jdf.framework.view.menu.entity.MenuItem;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.Enumeration;
 
 
 public class DefaultAuthUser extends User

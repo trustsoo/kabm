@@ -38,14 +38,14 @@
 package jdf.framework.logic.spi.classloader;
 
 // util packages
-import java.util.Vector;
+
+import java.io.File;
+import java.net.URL;
 import java.util.Enumeration;
+import java.util.Vector;
 
 // io packages
-import java.io.File;
-
 // net packages
-import java.net.URL;
 
 /**
  * <P>A class path that is composed of <CODE>ClassPathEntry</CODE> objects.

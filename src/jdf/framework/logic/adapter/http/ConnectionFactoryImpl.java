@@ -17,7 +17,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory
     /**
      *
      * 
-     * @see jdf.framework.core.data.cci.ConnectionFactory#getConnection()
+     * @see ConnectionFactory#getConnection()
      */
     public Connection getConnection() throws ResourceException
     {
@@ -25,7 +25,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory
     }
 
     /**
-     * @see jdf.framework.core.data.cci.ConnectionFactory#getConnection(jdf.framework.core.data.cci.ConnectionSpec)
+     * @see ConnectionFactory#getConnection(ConnectionSpec)
      */
     public Connection getConnection(ConnectionSpec spec) throws ResourceException
     {        

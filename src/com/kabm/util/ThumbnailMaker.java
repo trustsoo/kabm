@@ -1,19 +1,17 @@
 package com.kabm.util;
 
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.log.Logger;
+import org.imgscalr.Scalr;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.imageio.ImageIO;
-
-import org.imgscalr.Scalr;
-
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-import jdf.framework.core.log.Logger;
 
 public class ThumbnailMaker 
 {
@@ -91,7 +89,7 @@ public class ThumbnailMaker
 			File dir = new File(destDir);			
 			if(!dir.exists()) dir.mkdirs();
 			
-			String thumbName = destDir+java.io.File.separator+thumbPrefixName+filePrefixName+"."+fileAssociationName;
+			String thumbName = destDir+ File.separator+thumbPrefixName+filePrefixName+"."+fileAssociationName;
 			Logger.debug.println("thumbName:"+thumbName+", fileAssociationName:"+fileAssociationName);
 			File thumbFile = new File(thumbName); 
 			ImageIO.write(destImg, fileAssociationName.toUpperCase(), thumbFile);
@@ -192,7 +190,7 @@ public class ThumbnailMaker
 				command.add("-depth");
 				command.add("8");					
 				command.add(files[idx].getAbsolutePath());
-				command.add(destDir[idx]+java.io.File.separator+thumbPrefixName+filePrefixName+fileAssociationName);
+				command.add(destDir[idx]+ File.separator+thumbPrefixName+filePrefixName+fileAssociationName);
 				
 				
 				for(int kdx=0; kdx<command.size(); kdx++)

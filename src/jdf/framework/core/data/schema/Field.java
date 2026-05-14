@@ -1,14 +1,14 @@
 package jdf.framework.core.data.schema;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
 import jdf.framework.core.data.schema.format.Formatter;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.DateTime;
 import jdf.framework.core.util.SmartStringArray;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 
 /**
@@ -20,7 +20,7 @@ import jdf.framework.core.util.SmartStringArray;
  * @author
  * @version 1.0
  */
-public class Field implements FieldType, java.io.Serializable
+public class Field implements FieldType, Serializable
 {
 
 	private static final long serialVersionUID = 1L;

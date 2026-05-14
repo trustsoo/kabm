@@ -1,14 +1,13 @@
 package jdf.framework.view.auth;
 
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.log.Logger;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.log.Logger;
-
 
 
 public class SessionManager

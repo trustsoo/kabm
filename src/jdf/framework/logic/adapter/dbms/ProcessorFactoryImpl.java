@@ -1,8 +1,5 @@
 package jdf.framework.logic.adapter.dbms;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jdf.framework.core.Configuration;
 import jdf.framework.core.data.schema.ProcedureMapper;
 import jdf.framework.core.data.schema.Processor;
@@ -17,6 +14,8 @@ import jdf.framework.logic.spi.process.BatchQueryOperator;
 import jdf.framework.logic.spi.process.ProcedureQueryOperator;
 import jdf.framework.logic.spi.process.QueryOperator;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**

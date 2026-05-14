@@ -1,7 +1,11 @@
 package jdf.framework.logic.util;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * 멀티파트 방식을 통하여 데이터를 업로드 한다.

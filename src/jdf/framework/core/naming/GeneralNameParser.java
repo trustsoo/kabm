@@ -1,11 +1,10 @@
 package jdf.framework.core.naming;
 
-import java.util.Properties;
-
 import javax.naming.CompoundName;
 import javax.naming.Name;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
+import java.util.Properties;
 
 /**
  * Basic name parser used for java:comp naming space

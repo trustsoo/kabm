@@ -13,13 +13,10 @@ package com.kabm.filter.auth;
  * 01     2009-05-03   조은호       최초작성
  ********************************************************************************/
 
-import java.util.Calendar;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import com.kabm.filter.JDFContext;
+import com.kabm.util.NetworkUtil;
+import com.kabm.util.SitePropertyManager;
+import com.kabm.util.UserAgentUtil;
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.DefaultConnectionFactory;
@@ -30,18 +27,13 @@ import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.util.StringUtil;
 import jdf.framework.core.util.Utility;
 import jdf.framework.core.util.encrypt.CipherUtil;
-import jdf.framework.view.auth.AclInfo;
-import jdf.framework.view.auth.AclUser;
-import jdf.framework.view.auth.DefaultAuthUser;
-import jdf.framework.view.auth.NotLoginException;
-import jdf.framework.view.auth.PermissionException;
-import jdf.framework.view.auth.RoleInfo;
-import jdf.framework.view.auth.SessionManager;
-import jdf.framework.view.auth.User;
+import jdf.framework.view.auth.*;
 import jdf.framework.view.menu.entity.MenuItem;
-import com.kabm.util.NetworkUtil;
-import com.kabm.util.SitePropertyManager;
-import com.kabm.util.UserAgentUtil;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.util.Calendar;
 
 
 public class DbmsAuthCheckerUser extends User
@@ -449,7 +441,7 @@ public class DbmsAuthCheckerUser extends User
         }
         catch (Exception e)
         {
-        	jdf.framework.core.log.Logger.warn.println(jdf.framework.core.util.Utility.getStackTrace(e));
+        	Logger.warn.println(Utility.getStackTrace(e));
         }
         finally
         {

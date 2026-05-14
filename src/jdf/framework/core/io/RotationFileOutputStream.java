@@ -14,13 +14,13 @@
 
 package jdf.framework.core.io;
 
+import jdf.framework.core.util.DateTime;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
-
-import jdf.framework.core.util.DateTime;
 
 
 /**
@@ -155,7 +155,7 @@ public class RotationFileOutputStream extends OutputStream {
 			if (this.logPreservationDay > 0) {
 
 				String deleteDay = DateTime.getAdjustDate(today,
-						java.util.Calendar.DATE, this.logPreservationDay * -1);
+						Calendar.DATE, this.logPreservationDay * -1);
 
 				int deleteDayInt = Integer.parseInt(deleteDay);
 

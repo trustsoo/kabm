@@ -1,13 +1,13 @@
 package jdf.framework.core.data.util;
 
+import jdf.framework.core.data.JavaBeanDataSet;
+import jdf.framework.core.log.Logger;
+import jdf.framework.core.util.StringUtil;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import jdf.framework.core.data.JavaBeanDataSet;
-import jdf.framework.core.log.Logger;
-import jdf.framework.core.util.StringUtil;
 
 
 /**
@@ -103,7 +103,7 @@ public class PropertyComparator implements Comparator
 	 *            the input List
 	 * @param sortDefinition
 	 *            the parameters to sort by
-	 * @throws java.lang.IllegalArgumentException
+	 * @throws IllegalArgumentException
 	 *             in case of a missing propertyName
 	 */
 	public static void sort(List source, SortDefinition sortDefinition)
@@ -122,7 +122,7 @@ public class PropertyComparator implements Comparator
 	 *            input source
 	 * @param sortDefinition
 	 *            the parameters to sort by
-	 * @throws java.lang.IllegalArgumentException
+	 * @throws IllegalArgumentException
 	 *             in case of a missing propertyName
 	 */
 	public static void sort(Object[] source, SortDefinition sortDefinition)

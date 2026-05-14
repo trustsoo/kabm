@@ -6,13 +6,12 @@
  */
 package jdf.framework.view.xslt;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import javax.servlet.ServletContext;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * XSL transform Helper

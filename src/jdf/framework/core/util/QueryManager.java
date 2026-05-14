@@ -1,16 +1,12 @@
 package jdf.framework.core.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Vector;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
 import jdf.framework.core.log.Logger;
+
+import java.io.*;
+import java.util.Vector;
 
 /**
  * <b><code>QueryManager</code></b>

@@ -6,9 +6,8 @@
  */
 package jdf.framework.core.service;
 
-import java.util.Hashtable;
-
 import javax.naming.InitialContext;
+import java.util.Hashtable;
 
 /**
  * @author Administrator

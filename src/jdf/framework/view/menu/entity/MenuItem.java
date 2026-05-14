@@ -1,9 +1,10 @@
 package jdf.framework.view.menu.entity;
 
-import java.util.*;
-
 import jdf.framework.view.auth.User;
-import jdf.framework.view.layout.entity.*;
+import jdf.framework.view.layout.entity.Layout;
+
+import java.util.HashMap;
+import java.util.List;
 
 
 /**

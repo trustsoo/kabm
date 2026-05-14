@@ -159,7 +159,7 @@ import java.util.zip.ZipFile;
  *
  * @author Kristen Pol, Lutris Technologies
  * @version $Revision : 1.0 $
- * @see java.net.URL
+ * @see URL
  */
 public class ClassPathEntry 
 {
@@ -484,11 +484,11 @@ public class ClassPathEntry
      *         was not successful.
      */
     private static URL convertEntryToURL(Object object) {
-        if (object instanceof java.net.URL) {
+        if (object instanceof URL) {
             return (URL)object;
-        } else if (object instanceof java.lang.String) {
+        } else if (object instanceof String) {
             return convertEntryToURL((String)object);
-        } else if (object instanceof java.io.File) {
+        } else if (object instanceof File) {
             return convertEntryToURL(object.toString());
         } else {
             // FIXME: Log. Cannot use logChannel because it's not static.

@@ -6,41 +6,12 @@
  */
 package jdf.framework.logic.spi.process;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Map;
-
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.xssf.streaming.SXSSFCell;
-import org.apache.poi.xssf.streaming.SXSSFRow;
-import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-
 import com.opencsv.CSVWriter;
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ResultSetDataSet;
-import jdf.framework.core.data.schema.Block;
-import jdf.framework.core.data.schema.Field;
-import jdf.framework.core.data.schema.FieldType;
-import jdf.framework.core.data.schema.IOSchema;
-import jdf.framework.core.data.schema.StoredQuery;
+import jdf.framework.core.data.schema.*;
 import jdf.framework.core.data.schema.format.Formatter;
 import jdf.framework.core.data.schema.format.UnEscapeHtmlFormatter;
 import jdf.framework.core.log.Logger;
@@ -49,7 +20,15 @@ import jdf.framework.core.util.StringFormater;
 import jdf.framework.core.util.encrypt.CipherUtil;
 import jdf.framework.core.util.encrypt.KISA_SHA256;
 import jdf.framework.logic.transform.XlsFormat;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import java.io.*;
+import java.sql.*;
+import java.util.Map;
 
 
 /**
@@ -719,7 +698,7 @@ public class QueryOperator extends StoredQuery
 			break;
 
 		case FieldType.CLOB:
-			java.sql.Clob clob = rset.getClob(idx);
+			Clob clob = rset.getClob(idx);
 
 			if (clob != null) {
 
@@ -817,7 +796,7 @@ public class QueryOperator extends StoredQuery
 			break;
 
 		case FieldType.CLOB:
-			java.sql.Clob clob = rset.getClob(dbColumnNm);
+			Clob clob = rset.getClob(dbColumnNm);
 
 			if (clob != null) {
 
@@ -1074,12 +1053,12 @@ public class QueryOperator extends StoredQuery
 	        if(!dir.exists()) dir.mkdirs();
 			
 			
-			writer =  new CSVWriter(new OutputStreamWriter(new FileOutputStream(dir.getPath()+java.io.File.separator+filename+".csv"), "UTF-8"),',', '"');
+			writer =  new CSVWriter(new OutputStreamWriter(new FileOutputStream(dir.getPath()+ File.separator+filename+".csv"), "UTF-8"),',', '"');
 			writer.writeAll(rset, true);
 			
 			output.put(XlsFormat.RESULT_FILE_NAME, filename+".csv");
-            output.put(XlsFormat.RESULT_FILE_PATH, dir.getPath()+java.io.File.separator);
-            output.put(XlsFormat.RESULT_FILE_SIZE, new File(dir.getPath()+java.io.File.separator+filename+".csv").length());
+            output.put(XlsFormat.RESULT_FILE_PATH, dir.getPath()+ File.separator);
+            output.put(XlsFormat.RESULT_FILE_SIZE, new File(dir.getPath()+ File.separator+filename+".csv").length());
 		} catch(Exception ex)
 		{
 			throw ex;
@@ -1233,7 +1212,7 @@ public class QueryOperator extends StoredQuery
 			row = null;
 			
 			String filename = System.currentTimeMillis()+"";
-			out = new FileOutputStream(dir.getPath()+java.io.File.separator+filename+".xlsx");
+			out = new FileOutputStream(dir.getPath()+ File.separator+filename+".xlsx");
 	        wb.write(out);
 	        out.flush();
 	        out.close();
@@ -1241,8 +1220,8 @@ public class QueryOperator extends StoredQuery
 			wb.dispose();
 			
 			output.put(XlsFormat.RESULT_FILE_NAME, filename+".xlsx");
-            output.put(XlsFormat.RESULT_FILE_PATH, dir.getPath()+java.io.File.separator);
-            output.put(XlsFormat.RESULT_FILE_SIZE, new File(dir.getPath()+java.io.File.separator+filename+".xlsx").length());
+            output.put(XlsFormat.RESULT_FILE_PATH, dir.getPath()+ File.separator);
+            output.put(XlsFormat.RESULT_FILE_SIZE, new File(dir.getPath()+ File.separator+filename+".xlsx").length());
 	        
 			
 		} catch(Exception ex)
@@ -1280,8 +1259,8 @@ public class QueryOperator extends StoredQuery
      * BLD 를 수행한다.
      * 
      */
-	public void execute(java.sql.Connection conn, IOSchema schema, DataSet input, DataSet output)
-			throws java.sql.SQLException, Exception
+	public void execute(Connection conn, IOSchema schema, DataSet input, DataSet output)
+			throws SQLException, Exception
 	{
 		boolean isLogPrint = Logger.sql.isPrintMode();
 
@@ -1459,10 +1438,10 @@ public class QueryOperator extends StoredQuery
      * @param input
      * @param output
      * @return
-     * @throws java.sql.SQLException
+     * @throws SQLException
      */
-	public SQLResult getSQLResult(java.sql.Connection conn, IOSchema schema, DataSet input, DataSet output)
-			throws java.sql.SQLException
+	public SQLResult getSQLResult(Connection conn, IOSchema schema, DataSet input, DataSet output)
+			throws SQLException
 	{
 		PreparedStatement pstmt = null;
 

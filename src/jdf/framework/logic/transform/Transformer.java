@@ -1,12 +1,9 @@
 package jdf.framework.logic.transform;
 
-import java.io.OutputStream;
-import java.io.Writer;
-
 import jdf.framework.core.data.DataSet;
 
-
-
+import java.io.OutputStream;
+import java.io.Writer;
 
 
 /**

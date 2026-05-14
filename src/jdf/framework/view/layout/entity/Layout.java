@@ -1,6 +1,6 @@
 package jdf.framework.view.layout.entity;
 
-import java.util.*;
+import java.util.HashMap;
 
 
 /**

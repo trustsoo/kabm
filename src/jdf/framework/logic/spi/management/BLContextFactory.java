@@ -1,38 +1,25 @@
 package jdf.framework.logic.spi.management;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.data.ResourceException;
-import jdf.framework.core.data.schema.Block;
-import jdf.framework.core.data.schema.CacheInfo;
-import jdf.framework.core.data.schema.Field;
-import jdf.framework.core.data.schema.IOSchema;
-import jdf.framework.core.data.schema.Processor;
-import jdf.framework.core.data.schema.StoredQuery;
+import jdf.framework.core.data.schema.*;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.pool.cache.CacheManager;
 import jdf.framework.core.pool.cache.CacheManagerFactory;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.xml.XMLReferer;
 import jdf.framework.logic.spi.ResourceAdapter;
-
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.*;
 
 
 /**

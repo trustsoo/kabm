@@ -1,11 +1,13 @@
 package jdf.framework.view.layout.filter;
 
-import java.io.*;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Locale;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 /**
  * BufferTextStream
@@ -31,7 +33,7 @@ public class NullServletResponse implements HttpServletResponse
     }
     
     /**
-     * @see javax.servlet.ServletResponse#flushBuffer()
+     * @see ServletResponse#flushBuffer()
      */
     public void flushBuffer() throws IOException
     {
@@ -39,7 +41,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#getBufferSize()
+     * @see ServletResponse#getBufferSize()
      */
     public int getBufferSize()
     {
@@ -48,7 +50,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#getCharacterEncoding()
+     * @see ServletResponse#getCharacterEncoding()
      */
     public String getCharacterEncoding()
     {
@@ -57,7 +59,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#getLocale()
+     * @see ServletResponse#getLocale()
      */
     public Locale getLocale()
     {
@@ -66,7 +68,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#getOutputStream()
+     * @see ServletResponse#getOutputStream()
      */
     public ServletOutputStream getOutputStream() throws IOException
     {
@@ -75,7 +77,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#getWriter()
+     * @see ServletResponse#getWriter()
      */
     public PrintWriter getWriter() throws IOException
     {
@@ -84,7 +86,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#isCommitted()
+     * @see ServletResponse#isCommitted()
      */
     public boolean isCommitted()
     {
@@ -93,7 +95,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#reset()
+     * @see ServletResponse#reset()
      */
     public void reset()
     {
@@ -101,7 +103,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#resetBuffer()
+     * @see ServletResponse#resetBuffer()
      */
     public void resetBuffer()
     {
@@ -109,7 +111,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#setBufferSize(int)
+     * @see ServletResponse#setBufferSize(int)
      */
     public void setBufferSize(int arg0)
     {
@@ -117,7 +119,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#setContentLength(int)
+     * @see ServletResponse#setContentLength(int)
      */
     public void setContentLength(int arg0)
     {
@@ -125,7 +127,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#setContentType(String)
+     * @see ServletResponse#setContentType(String)
      */
     public void setContentType(String arg0)
     {
@@ -133,7 +135,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.ServletResponse#setLocale(Locale)
+     * @see ServletResponse#setLocale(Locale)
      */
     public void setLocale(Locale arg0)
     {
@@ -149,7 +151,7 @@ public class NullServletResponse implements HttpServletResponse
 
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#addCookie(Cookie)
+     * @see HttpServletResponse#addCookie(Cookie)
      */
     public void addCookie(Cookie arg0)
     {
@@ -157,7 +159,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#addDateHeader(String, long)
+     * @see HttpServletResponse#addDateHeader(String, long)
      */
     public void addDateHeader(String arg0, long arg1)
     {
@@ -165,7 +167,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#addHeader(String, String)
+     * @see HttpServletResponse#addHeader(String, String)
      */
     public void addHeader(String arg0, String arg1)
     {
@@ -173,7 +175,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#addIntHeader(String, int)
+     * @see HttpServletResponse#addIntHeader(String, int)
      */
     public void addIntHeader(String arg0, int arg1)
     {
@@ -181,7 +183,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#containsHeader(String)
+     * @see HttpServletResponse#containsHeader(String)
      */
     public boolean containsHeader(String arg0)
     {
@@ -190,7 +192,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#encodeRedirectUrl(String)
+     * @see HttpServletResponse#encodeRedirectUrl(String)
      * @deprecated
      */
     public String encodeRedirectUrl(String arg0)
@@ -200,7 +202,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#encodeRedirectURL(String)
+     * @see HttpServletResponse#encodeRedirectURL(String)
      */
     public String encodeRedirectURL(String arg0)
     {
@@ -209,7 +211,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#encodeUrl(String)
+     * @see HttpServletResponse#encodeUrl(String)
      * @deprecated
      */
     public String encodeUrl(String arg0)
@@ -219,7 +221,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#encodeURL(String)
+     * @see HttpServletResponse#encodeURL(String)
      */
     public String encodeURL(String arg0)
     {
@@ -228,7 +230,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
+     * @see HttpServletResponse#sendError(int, String)
      */
     public void sendError(int arg0, String arg1) throws IOException
     {
@@ -236,7 +238,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#sendError(int)
+     * @see HttpServletResponse#sendError(int)
      */
     public void sendError(int arg0) throws IOException
     {
@@ -244,7 +246,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#sendRedirect(String)
+     * @see HttpServletResponse#sendRedirect(String)
      */
     public void sendRedirect(String arg0) throws IOException
     {
@@ -252,7 +254,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#setDateHeader(String, long)
+     * @see HttpServletResponse#setDateHeader(String, long)
      */
     public void setDateHeader(String arg0, long arg1)
     {
@@ -260,7 +262,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#setHeader(String, String)
+     * @see HttpServletResponse#setHeader(String, String)
      */
     public void setHeader(String arg0, String arg1)
     {
@@ -268,7 +270,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#setIntHeader(String, int)
+     * @see HttpServletResponse#setIntHeader(String, int)
      */
     public void setIntHeader(String arg0, int arg1)
     {
@@ -276,7 +278,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#setStatus(int, String)
+     * @see HttpServletResponse#setStatus(int, String)
      * @deprecated
      */
     public void setStatus(int arg0, String arg1)
@@ -285,7 +287,7 @@ public class NullServletResponse implements HttpServletResponse
     }
 
     /**
-     * @see javax.servlet.http.HttpServletResponse#setStatus(int)
+     * @see HttpServletResponse#setStatus(int)
      */
     public void setStatus(int arg0)
     {

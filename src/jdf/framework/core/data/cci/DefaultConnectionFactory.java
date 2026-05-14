@@ -35,7 +35,7 @@ public class DefaultConnectionFactory {
 	/**
 	 * Connection 구현객체를 얻는다.
 	 * 
-	 * @see jdf.framework.core.data.cci.ConnectionFactory#getConnection()
+	 * @see ConnectionFactory#getConnection()
 	 */
 	public static Connection getConnection() throws ResourceException {
 		if (defaultFactory == null)

@@ -1,10 +1,9 @@
 package jdf.framework.core.util.encrypt;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import javax.xml.bind.DatatypeConverter;
 
 public class MD5Cipher {
 

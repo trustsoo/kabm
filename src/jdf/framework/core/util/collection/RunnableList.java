@@ -1,7 +1,7 @@
 package jdf.framework.core.util.collection;
 
-import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 
 /**
  * <p>

@@ -1,17 +1,18 @@
 package jdf.framework.core.naming;
 
 
-
-import java.util.Hashtable;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Hashtable;
 
 //import org.objectweb.jonas.common.Trace;
 //import org.enhydra.naming.ContainerNaming;
 
-/** * Naming Manager for an EJB Server. * this singleton class must exist in each jonas server. */
+/**
+ * Naming Manager for an EJB Server.
+ * this singleton class must exist in each jonas server.
+ */
 public class NamingManager //implements ContainerNaming 
 {
 

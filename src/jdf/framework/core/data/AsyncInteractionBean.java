@@ -1,9 +1,9 @@
 package jdf.framework.core.data;
 
-import java.io.Serializable;
-
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.Queue;
+
+import java.io.Serializable;
 
 
 /**

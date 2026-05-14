@@ -2,14 +2,6 @@
 
 package jdf.framework.logic.spi.management;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.io.SmartFile;
@@ -21,6 +13,9 @@ import jdf.framework.logic.adapter.java.ProcessorFactoryImpl;
 import jdf.framework.logic.adapter.java.ResourceAdapterImtpl;
 import jdf.framework.logic.spi.ResourceAdapter;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.*;
 
 
 /**

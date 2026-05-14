@@ -1,12 +1,11 @@
 package jdf.framework.core.naming.rmi;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.Collection;
-
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NamingException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.Collection;
 
 
 /**

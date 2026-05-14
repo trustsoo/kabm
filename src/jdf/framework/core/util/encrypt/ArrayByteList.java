@@ -1,9 +1,9 @@
 package jdf.framework.core.util.encrypt;
 
-import java.io.Serializable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;

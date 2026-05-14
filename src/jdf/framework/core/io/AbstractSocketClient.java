@@ -15,8 +15,12 @@
 package jdf.framework.core.io;
 
 
-import java.net.*;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 /**

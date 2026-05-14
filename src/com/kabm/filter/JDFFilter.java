@@ -1,29 +1,9 @@
 package com.kabm.filter;
 
 
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.kabm.util.AdminLogger;
 import com.kabm.util.NetworkUtil;
 import com.kabm.util.UserAgentUtil;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
@@ -31,12 +11,7 @@ import jdf.framework.core.http.JDFrameContextListener;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.util.StringFormater;
-import jdf.framework.view.auth.AclInfo;
-import jdf.framework.view.auth.NotLoginException;
-import jdf.framework.view.auth.PermissionException;
-import jdf.framework.view.auth.RedirectPermissionException;
-import jdf.framework.view.auth.RoleInfo;
-import jdf.framework.view.auth.User;
+import jdf.framework.view.auth.*;
 import jdf.framework.view.control.Command;
 import jdf.framework.view.layout.LayoutManager;
 import jdf.framework.view.layout.entity.Layout;
@@ -48,6 +23,15 @@ import jdf.framework.view.menu.entity.MenuItem;
 import jdf.framework.view.menu.entity.WebSiteMenu;
 import jdf.framework.view.xslt.TransformerHelper;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
 
 
 /**
@@ -381,7 +365,7 @@ public class JDFFilter implements Filter, MenuContext, JDFContext {
      * 
      */
     public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain chain) throws java.io.IOException, ServletException {
+            FilterChain chain) throws IOException, ServletException {
 
         boolean isAjax = false;
         

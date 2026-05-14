@@ -1,11 +1,11 @@
 package jdf.framework.core.log;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.db.ConnectionManager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 public class DBLogWriter
 {

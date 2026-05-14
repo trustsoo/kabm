@@ -5,7 +5,7 @@ package jdf.framework.core.util;
  * 
  * 
  * @author
- * @see jdf.framework.core.util.ObjectBinderException
+ * @see ObjectBinderException
  * 
  */
 public class ObjectBinderException extends RuntimeException 

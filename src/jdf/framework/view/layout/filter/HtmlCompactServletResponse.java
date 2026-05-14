@@ -1,13 +1,12 @@
 package jdf.framework.view.layout.filter;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * 
@@ -49,7 +48,7 @@ public class HtmlCompactServletResponse extends HttpServletResponseWrapper
     }
     
 
-	public void flushBuffer() throws java.io.IOException
+	public void flushBuffer() throws IOException
 	{
 		//System.out.println("flush");
 		super.flushBuffer();
@@ -68,14 +67,14 @@ public class HtmlCompactServletResponse extends HttpServletResponseWrapper
             this.baos= baos;
 			//System.out.println("--- HtmlCompactServletStream 생성");
         }
-        public void write(int param) throws java.io.IOException
+        public void write(int param) throws IOException
         {
             //System.out.print("*"+param);
             baos.write(param);
         }
 
         /**
-         * @see javax.servlet.ServletOutputStream#println(String)
+         * @see ServletOutputStream#println(String)
          */
         public void println(String arg0) throws IOException
         {

@@ -6,12 +6,12 @@
  */
 package jdf.framework.logic.transform;
 
+import jdf.framework.core.data.DataSet;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
-
-import jdf.framework.core.data.DataSet;
 
 
 /**
@@ -48,7 +48,7 @@ public abstract class AbstractTransformer implements Transformer
 	 * 실제 변환 메쏘드
 	 * 반환 숫자는 총 반환된 문자의 길이수이다.
      * 
-	 * @see jdf.framework.logic.transform.Transformer#transform(jdf.framework.core.data.DataSet, java.io.OutputStream)
+	 * @see Transformer#transform(DataSet, OutputStream)
 	 */
 	abstract public int transform(DataSet source, OutputStream out) throws TransformerException;
 	
@@ -58,7 +58,7 @@ public abstract class AbstractTransformer implements Transformer
 	/**
 	 * 실제 변환 메쏘드
 	 * 
-	 * @see jdf.framework.logic.transform.Transformer#transform(jdf.framework.core.data.DataSet, java.io.Writer)
+	 * @see Transformer#transform(DataSet, Writer)
 	 */
 	public int transform(DataSet source, Writer writer) throws TransformerException
 	{

@@ -1,10 +1,10 @@
 package jdf.framework.core.pool;
 
-import java.io.*;
-import java.util.*;
+import jdf.framework.core.util.collection.RunnableList;
 
-import jdf.framework.core.log.*;
-import jdf.framework.core.util.collection.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -430,7 +430,7 @@ public final class ThreadPool extends ThreadGroup {
 		/***********************************************************************
 		 * Enqueue an object
 		 */
-		public synchronized final void enqueue(Runnable new_element) throws BlockingQueue.Closed {
+		public synchronized final void enqueue(Runnable new_element) throws Closed {
 			if (closed)
 				throw new Closed();
 
@@ -452,7 +452,7 @@ public final class ThreadPool extends ThreadGroup {
 		 * @see enqueue
 		 * @return s the dequeued object always
 		 */
-		public synchronized final Runnable dequeue() throws InterruptedException, BlockingQueue.Closed {
+		public synchronized final Runnable dequeue() throws InterruptedException, Closed {
 			try {
 				while (elements.size() <= 0) {
 					wait();

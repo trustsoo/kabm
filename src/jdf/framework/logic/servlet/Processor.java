@@ -1,14 +1,5 @@
 package jdf.framework.logic.servlet;
 
-import java.io.IOException;
-import java.util.Enumeration;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.ConnectionFactory;
@@ -17,6 +8,14 @@ import jdf.framework.core.log.Logger;
 import jdf.framework.logic.adapter.BaseConnectionFactory;
 import jdf.framework.logic.transform.Transformer;
 import jdf.framework.logic.transform.TransformerFactory;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Enumeration;
 
 
 /**

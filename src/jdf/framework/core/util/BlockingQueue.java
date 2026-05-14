@@ -104,7 +104,7 @@ public final class BlockingQueue extends LinkedList
      * Enqueue an object
      */
 
-    public synchronized final void enqueue(Object new_element) throws BlockingQueue.Closed
+    public synchronized final void enqueue(Object new_element) throws Closed
     {
         if (closed)
             throw new Closed();
@@ -157,7 +157,7 @@ public final class BlockingQueue extends LinkedList
      * @see enqueue
      * @return s the dequeued object always
      */
-    public synchronized final Object dequeue() throws InterruptedException, BlockingQueue.Closed
+    public synchronized final Object dequeue() throws InterruptedException, Closed
     {
         try
         {

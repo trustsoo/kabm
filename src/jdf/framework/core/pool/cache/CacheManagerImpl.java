@@ -6,10 +6,10 @@
  */
 package jdf.framework.core.pool.cache;
 
+import jdf.framework.core.log.Logger;
+
 import java.util.LinkedList;
 import java.util.Map;
-
-import jdf.framework.core.log.Logger;
 
 
 /**
@@ -129,7 +129,7 @@ public class CacheManagerImpl implements CacheManager
 	/**
 	 * 초기화
 	 * 
-	 * @see jdf.framework.core.pool.cache.CacheManager#reset()
+	 * @see CacheManager#reset()
 	 */
 	public synchronized void reset()
 	{
@@ -144,7 +144,7 @@ public class CacheManagerImpl implements CacheManager
 	 * 객체를 캐쉬한다.
      * osProp 가 true 이면 캐쉬내용을 다른 서버로 전파시킨다.
      * 
-	 * @see jdf.framework.core.pool.cache.CacheManager#insert(java.lang.Object, java.lang.Object, boolean)
+	 * @see CacheManager#insert(Object, Object, boolean)
 	 */
 	public void insert(Object key, Object obj, boolean isProp)
 	{
@@ -156,7 +156,7 @@ public class CacheManagerImpl implements CacheManager
 	 * 초기화
      * isProp 가 true 이면 다른 서버도 초기화
      * 
-	 * @see jdf.framework.core.pool.cache.CacheManager#reset(boolean)
+	 * @see CacheManager#reset(boolean)
 	 */
 	public void reset(boolean isProp)
 	{

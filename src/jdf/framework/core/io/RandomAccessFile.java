@@ -31,18 +31,9 @@
 
 package jdf.framework.core.io;
 
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UTFDataFormatException;
-
-import java.util.Random; // used in test method
+import java.io.*;
 import java.util.Date;
+import java.util.Random; // used in test method
 
 /** 
  * A buffered drop-in replacement for java.io.RandomAccessFile.
@@ -145,8 +136,8 @@ public class RandomAccessFile implements DataOutput, DataInput {
      *               is called with the name argument to see if the application
      *               is allowed write access to the file. Either of these may
      *               result in a security exception.
-     * @see        java.lang.SecurityException
-     * @see        java.lang.SecurityManager#checkRead(java.lang.String)
+     * @see        SecurityException
+     * @see        SecurityManager#checkRead(String)
      */
    public RandomAccessFile( String filename, String modeString )
        throws IOException {
@@ -182,8 +173,8 @@ public class RandomAccessFile implements DataOutput, DataInput {
      *               is called with the name argument to see if the application
      *               is allowed write access to the file. Either of these may
      *               result in a security exception.
-     * @see        java.lang.SecurityException
-     * @see        java.lang.SecurityManager#checkRead(java.lang.String)
+     * @see        SecurityException
+     * @see        SecurityManager#checkRead(String)
      */
    public RandomAccessFile( String filename, String modeString, int bufferSize )
        throws IOException {
@@ -221,8 +212,8 @@ public class RandomAccessFile implements DataOutput, DataInput {
      *               <code>checkWrite</code> method also is called with the
      *               pathname to see if the application is allowed write access
      *               to the file.
-     * @see        java.io.File#getPath()
-     * @see        java.lang.SecurityManager#checkRead(java.lang.String)
+     * @see        File#getPath()
+     * @see        SecurityManager#checkRead(String)
      */
     public RandomAccessFile(File file, String modeString) throws IOException {
 	this(file.getPath(), modeString);
@@ -258,8 +249,8 @@ public class RandomAccessFile implements DataOutput, DataInput {
      *               <code>checkWrite</code> method also is called with the
      *               pathname to see if the application is allowed write access
      *               to the file.
-     * @see        java.io.File#getPath()
-     * @see        java.lang.SecurityManager#checkRead(java.lang.String)
+     * @see        File#getPath()
+     * @see        SecurityManager#checkRead(String)
      */
     public RandomAccessFile(File file, String modeString, int bufferSize) 
 	throws IOException {
@@ -987,7 +978,7 @@ public class RandomAccessFile implements DataOutput, DataInput {
     *             four bytes.
     * @exception  IOException   if an I/O error occurs.
     * @see        java.io.RandomAccessFile#readInt()
-    * @see        java.lang.Float#intBitsToFloat(int)
+    * @see        Float#intBitsToFloat(int)
     */
    public final float readFloat() throws IOException {
       return Float.intBitsToFloat(readInt());
@@ -1009,7 +1000,7 @@ public class RandomAccessFile implements DataOutput, DataInput {
     *             eight bytes.
     * @exception  IOException   if an I/O error occurs.
     * @see        java.io.RandomAccessFile#readLong()
-    * @see        java.lang.Double#longBitsToDouble(long)
+    * @see        Double#longBitsToDouble(long)
     */
    public final double readDouble() throws IOException {
       return Double.longBitsToDouble(readLong());
@@ -1160,7 +1151,7 @@ public class RandomAccessFile implements DataOutput, DataInput {
     *
     * @param      v   a <code>float</code> value to be written.
     * @exception  IOException  if an I/O error occurs.
-    * @see        java.lang.Float#floatToIntBits(float)
+    * @see        Float#floatToIntBits(float)
     */
    public final void writeFloat(float v) throws IOException {
       writeInt(Float.floatToIntBits(v));
@@ -1174,7 +1165,7 @@ public class RandomAccessFile implements DataOutput, DataInput {
     *
     * @param      v   a <code>double</code> value to be written.
     * @exception  IOException  if an I/O error occurs.
-    * @see        java.lang.Double#doubleToLongBits(double)
+    * @see        Double#doubleToLongBits(double)
     */
    public final void writeDouble(double v) throws IOException {
       writeLong(Double.doubleToLongBits(v));

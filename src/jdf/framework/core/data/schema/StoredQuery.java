@@ -1,10 +1,10 @@
 package jdf.framework.core.data.schema;
 
+import jdf.framework.core.data.DataSet;
+
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import jdf.framework.core.data.DataSet;
 
 
 /**

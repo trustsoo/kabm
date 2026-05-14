@@ -1,9 +1,5 @@
 package jdf.framework.logic.transform;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
@@ -11,6 +7,10 @@ import jdf.framework.core.data.schema.IOSchema;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.HtmlFormat;
 import jdf.framework.core.util.StringFormater;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 
 /**

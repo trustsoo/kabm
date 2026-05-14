@@ -1,9 +1,5 @@
 package jdf.framework.core.data.schema;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ResourceException;
 import jdf.framework.core.data.cci.Connection;
@@ -11,6 +7,9 @@ import jdf.framework.core.data.cci.DefaultConnectionFactory;
 import jdf.framework.core.data.cci.Interaction;
 import jdf.framework.core.pool.cache.CacheManager;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 ;
 

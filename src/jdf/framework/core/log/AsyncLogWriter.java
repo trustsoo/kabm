@@ -11,13 +11,13 @@
 
 package jdf.framework.core.log;
 
+import jdf.framework.core.pool.ThreadPool;
+import jdf.framework.core.util.Queue;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.util.Hashtable;
-
-import jdf.framework.core.pool.ThreadPool;
-import jdf.framework.core.util.Queue;
 
 
 /**

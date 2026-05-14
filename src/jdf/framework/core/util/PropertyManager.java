@@ -15,12 +15,12 @@ package jdf.framework.core.util;
  ********************************************************************************/
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.InteractionBean;
 import jdf.framework.core.log.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PropertyManager
 {

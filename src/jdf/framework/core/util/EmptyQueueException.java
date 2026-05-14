@@ -6,7 +6,7 @@ package jdf.framework.core.util;
  * 
  * 
  * @author
- * @see jdf.framework.core.util.Queue
+ * @see Queue
  */
 public class EmptyQueueException extends RuntimeException
 {

@@ -1,18 +1,12 @@
 package jdf.framework.core.pool;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
 
-
+import java.io.IOException;
+import java.net.Socket;
+import java.util.*;
 
 
 /**

@@ -1,13 +1,9 @@
 package jdf.framework.view.menu.entity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import jdf.framework.view.menu.WebPagePublisher;
 import jdf.framework.view.menu.util.PartialSearcher;
+
+import java.util.*;
 
 
 /**

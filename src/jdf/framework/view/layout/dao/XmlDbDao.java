@@ -6,10 +6,6 @@
  */
 package jdf.framework.view.layout.dao;
 
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Map;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.DefaultConnectionFactory;
@@ -18,8 +14,11 @@ import jdf.framework.core.log.Logger;
 import jdf.framework.core.xml.DocBuilder;
 import jdf.framework.core.xml.XMLReferer;
 import jdf.framework.view.layout.entity.Layout;
-
 import org.w3c.dom.Document;
+
+import java.io.ByteArrayInputStream;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -42,7 +41,7 @@ public class XmlDbDao implements LayoutDao
     /**
      * 
      * 
-     * @see jdf.framework.view.layout.dao.LayoutDao#getDefaultLayout()
+     * @see LayoutDao#getDefaultLayout()
      */
     public Layout getDefaultLayout()
     {

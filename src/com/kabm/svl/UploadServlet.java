@@ -1,28 +1,16 @@
 package com.kabm.svl;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-
-import javax.imageio.ImageIO;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.kabm.util.NetworkUtil;
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.ConfigurationException;
+import jdf.framework.core.data.InteractionBean;
+import jdf.framework.core.data.ResourceException;
+import jdf.framework.core.http.WebController;
+import jdf.framework.core.log.Logger;
+import jdf.framework.core.util.DateTime;
+import jdf.framework.core.util.SmartStringArray;
+import jdf.framework.core.util.Utility;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadBase.IOFileUploadException;
 import org.apache.commons.fileupload.FileUploadException;
@@ -36,18 +24,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.kabm.util.NetworkUtil;
-
-import jdf.framework.core.Config;
-import jdf.framework.core.Configuration;
-import jdf.framework.core.ConfigurationException;
-import jdf.framework.core.data.InteractionBean;
-import jdf.framework.core.data.ResourceException;
-import jdf.framework.core.http.WebController;
-import jdf.framework.core.log.Logger;
-import jdf.framework.core.util.DateTime;
-import jdf.framework.core.util.SmartStringArray;
-import jdf.framework.core.util.Utility;
+import javax.imageio.ImageIO;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.*;
 
 public class UploadServlet extends HttpServlet implements Servlet {
     private static final long serialVersionUID = 8662476226643944154L;
@@ -211,7 +198,7 @@ public class UploadServlet extends HttpServlet implements Servlet {
             String absDir = null;
             String currMM = DateTime.getFormatString("yyyyMM");
             String publicUrl = this.publicUrl + "/" + currMM + "/";
-            File _dir = new File(dir + java.io.File.separator + currMM);
+            File _dir = new File(dir + File.separator + currMM);
             if (!_dir.exists()) {
                 _dir.mkdirs();
             }

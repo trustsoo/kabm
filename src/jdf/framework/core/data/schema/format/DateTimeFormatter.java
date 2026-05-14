@@ -42,7 +42,7 @@ public class DateTimeFormatter extends Formatter
 	/**
 	 * 
 	 * 
-	 * @see jdf.framework.core.data.schema.format.Formatter#format(java.lang.Object)
+	 * @see Formatter#format(Object)
 	 */
 	public String format(Object data) throws IllegalArgumentException
 	{

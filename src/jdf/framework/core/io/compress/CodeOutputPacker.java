@@ -2,7 +2,8 @@ package jdf.framework.core.io.compress;
 
 /* "CodeOutputPacker.java" */
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /** Packs N bit codes into destination bytes,
  * either an array or stream.

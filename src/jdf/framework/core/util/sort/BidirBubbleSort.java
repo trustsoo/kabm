@@ -1,6 +1,7 @@
 package jdf.framework.core.util.sort;
 
-import java.util.*;
+import java.util.Comparator;
+
 /**
  * <b><code>BidirBubbleSort</code></b>
  * <p>

@@ -15,12 +15,8 @@ package com.kabm.util;
  ********************************************************************************/
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.InteractionBean;
-import jdf.framework.core.log.Logger;
 
 public class SitePropertyManager
 {

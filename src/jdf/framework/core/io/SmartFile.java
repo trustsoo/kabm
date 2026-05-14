@@ -13,23 +13,10 @@
 
 package jdf.framework.core.io;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Properties;
-
 import jdf.framework.core.util.StringFormater;
+
+import java.io.*;
+import java.util.Properties;
 
 
 /**
@@ -247,7 +234,7 @@ public class SmartFile extends File
 			while (fr.ready()) {
 				String readLn = fr.readLine();
 
-				readLn = jdf.framework.core.util.StringFormater.replaceStr(readLn, from, to);
+				readLn = StringFormater.replaceStr(readLn, from, to);
 
 				fw.write(readLn);
 				fw.write(NEWLINE);

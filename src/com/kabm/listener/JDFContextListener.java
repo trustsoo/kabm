@@ -1,12 +1,7 @@
 package com.kabm.listener;
 
 
-
-import java.sql.SQLException;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-
+import com.kabm.util.SitePropertyManager;
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
@@ -21,12 +16,13 @@ import jdf.framework.core.util.Utility;
 import jdf.framework.logic.spi.management.DeploymentManager;
 import jdf.framework.view.menu.WebPagePublisher;
 import jdf.framework.view.menu.bean.MenuMgrBean;
-import com.kabm.util.SitePropertyManager;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import java.sql.SQLException;
 
 
-
-
-public class JDFContextListener implements javax.servlet.ServletContextListener 
+public class JDFContextListener implements javax.servlet.ServletContextListener
 {
 	private static final String LOG_ID = "<JDFContextListener> ";
 	
@@ -58,7 +54,7 @@ public class JDFContextListener implements javax.servlet.ServletContextListener
 	/**
 	 * context 초기화시 실행
 	 * 
-	 * @see javax.servlet.ServletContextListener#contextInitialized(javax.servlet.ServletContextEvent)
+	 * @see javax.servlet.ServletContextListener#contextInitialized(ServletContextEvent)
 	 */
 	public void contextInitialized(ServletContextEvent sce) {
 
@@ -177,7 +173,7 @@ public class JDFContextListener implements javax.servlet.ServletContextListener
 	/**
 	 * context 종료시 실행
 	 * 
-	 * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
+	 * @see javax.servlet.ServletContextListener#contextDestroyed(ServletContextEvent)
 	 */
 	public void contextDestroyed(ServletContextEvent sce) {
 		String nm = sce.getServletContext().getServletContextName();

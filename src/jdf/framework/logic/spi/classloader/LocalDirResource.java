@@ -42,13 +42,10 @@ package jdf.framework.logic.spi.classloader;
 
 
 // io packages
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileInputStream;
+
+import java.io.*;
 
 // io exceptions
-import java.io.IOException;
-import java.io.FileNotFoundException;
 
 /**
  * <P>A <CODE>Resource</CODE> that is a file on the local machine in 
@@ -57,7 +54,7 @@ import java.io.FileNotFoundException;
  *
  * @author Kristen Pol, Lutris Technologies
  * @version $Revision : 1.1 $
- * @see java.io.File
+ * @see File
  */
 public class LocalDirResource extends Resource {
 

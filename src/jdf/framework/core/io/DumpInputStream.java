@@ -14,15 +14,11 @@
 
 package jdf.framework.core.io;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-
 import jdf.framework.core.log.AsyncLogWriter;
 import jdf.framework.core.log.HexLogFormat;
 import jdf.framework.core.log.LogFormat;
+
+import java.io.*;
 
 
 /**

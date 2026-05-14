@@ -1,16 +1,15 @@
 package jdf.framework.logic.spi.process.compiler;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-
 import jdf.framework.core.Configuration;
 import jdf.framework.core.data.schema.ScriptContext;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.logic.spi.classloader.ReverseClassLoader;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 
 
 /**
@@ -158,7 +157,7 @@ public class Compiler
 	{
 		try {
 			ReverseClassLoader loader = new ReverseClassLoader(
-					jdf.framework.core.Configuration.class.getClassLoader());
+					Configuration.class.getClassLoader());
 
 			loader.setLocalClassPath();
 

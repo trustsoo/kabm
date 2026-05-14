@@ -1,13 +1,12 @@
 package jdf.framework.core.io;
 
+import jdf.framework.core.log.Logger;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
-
-import javax.servlet.http.HttpServletResponse;
-
-import jdf.framework.core.log.Logger;
 
 
 /**
@@ -63,7 +62,7 @@ public class HttpServlerResponseWriter extends Writer
     }
 
     /**
-     * @see java.io.Writer#write(java.lang.String)
+     * @see Writer#write(String)
      */
     public void write(String w) throws IOException
     {

@@ -1,11 +1,5 @@
 package com.kabm.util;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
-
-import javax.servlet.http.HttpServletResponse;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
@@ -13,6 +7,11 @@ import jdf.framework.core.data.schema.IOSchema;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.HtmlFormat;
 import jdf.framework.core.util.StringFormater;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 
 /**

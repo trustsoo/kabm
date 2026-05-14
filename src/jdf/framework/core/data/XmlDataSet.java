@@ -7,7 +7,7 @@
 package jdf.framework.core.data;
 
 
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
 
 /**
  * 

@@ -1,17 +1,6 @@
 package jdf.framework.view.layout.filter;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
@@ -19,6 +8,11 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
 
 
 /**
@@ -43,7 +37,7 @@ public class XSLTFilter implements Filter {
 			this.baos = baos;
 		}
 
-		public void write(int param) throws java.io.IOException {
+		public void write(int param) throws IOException {
 			baos.write(param);
 		}
 
@@ -120,8 +114,8 @@ public class XSLTFilter implements Filter {
 
 	public void doFilter(javax.servlet.ServletRequest servletRequest,
 			javax.servlet.ServletResponse servletResponse,
-			javax.servlet.FilterChain filterChain) throws java.io.IOException,
-			javax.servlet.ServletException {
+			javax.servlet.FilterChain filterChain) throws IOException,
+			ServletException {
 		System.out.println("<START>");
 
 		HttpServletRequest hsr = (HttpServletRequest) servletRequest;

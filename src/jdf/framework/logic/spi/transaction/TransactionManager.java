@@ -1,10 +1,5 @@
 package jdf.framework.logic.spi.transaction;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.ConfigurationException;
@@ -13,6 +8,10 @@ import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.LocalTransaction;
 import jdf.framework.core.log.Logger;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -134,7 +133,7 @@ public class TransactionManager
 	/**
      * commit 한다.
      * 
-     * @see jdf.framework.core.data.cci.LocalTransaction#commitTransaction()
+     * @see LocalTransaction#commitTransaction()
      */
 	public void commit() throws ResourceException
 	{
@@ -163,7 +162,7 @@ public class TransactionManager
 	/**
      * rollback을 한다.
      * 
-     * @see jdf.framework.core.data.cci.LocalTransaction#rollbackTransaction()
+     * @see LocalTransaction#rollbackTransaction()
      */
 	public void rollback()
 	{
@@ -184,7 +183,7 @@ public class TransactionManager
 				try {
 					tx.rollbackTransaction();
 				} catch (Exception e) {
-					jdf.framework.core.log.Logger.err.println("<TransactionManager> rollback err", e);
+					Logger.err.println("<TransactionManager> rollback err", e);
 				}
 
 			}

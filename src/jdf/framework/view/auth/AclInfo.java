@@ -1,11 +1,10 @@
 package jdf.framework.view.auth;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import jdf.framework.core.Configuration;
 import jdf.framework.core.xml.XMLReferer;
 
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**

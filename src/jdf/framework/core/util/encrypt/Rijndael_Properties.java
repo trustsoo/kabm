@@ -11,12 +11,9 @@
  */
 package jdf.framework.core.util.encrypt;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Properties;
 

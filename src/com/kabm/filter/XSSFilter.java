@@ -1,20 +1,13 @@
 package com.kabm.filter;
 
 
-
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class XSSFilter implements Filter 
 {
@@ -47,7 +40,7 @@ public class XSSFilter implements Filter
 		}
 		
 		
-		chain.doFilter(new com.kabm.filter.RequestWrapper(req), response);
+		chain.doFilter(new RequestWrapper(req), response);
 
 	}
 	

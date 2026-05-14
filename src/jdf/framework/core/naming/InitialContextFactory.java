@@ -1,10 +1,8 @@
 package jdf.framework.core.naming;
 
 
-import java.util.Hashtable;
-
 import javax.naming.Context;
-
+import java.util.Hashtable;
 
 
 public class InitialContextFactory implements javax.naming.spi.InitialContextFactory

@@ -6,10 +6,10 @@
  */
 package jdf.framework.view.layout.filter;
 
+import jdf.framework.view.menu.entity.MenuItem;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import jdf.framework.view.menu.entity.MenuItem;
 
 
 /**

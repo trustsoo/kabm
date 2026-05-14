@@ -6,15 +6,6 @@
  */
 package jdf.framework.logic.servlet;
 
-import java.io.IOException;
-import java.util.Enumeration;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import jdf.framework.core.Configuration;
 import jdf.framework.core.data.schema.Block;
 import jdf.framework.core.data.schema.Field;
@@ -27,6 +18,13 @@ import jdf.framework.logic.spi.management.BLContextFactory;
 import jdf.framework.logic.transform.schema.XsdGenerator;
 import jdf.framework.logic.transform.schema.XsdGeneratorFactory;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Enumeration;
 
 
 /**

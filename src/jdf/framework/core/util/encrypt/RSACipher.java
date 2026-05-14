@@ -1,22 +1,15 @@
 package jdf.framework.core.util.encrypt;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.log.Logger;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
-import jdf.framework.core.data.DataSet;
-import jdf.framework.core.log.Logger;
+import java.io.UnsupportedEncodingException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 
 public class RSACipher
 {
@@ -98,7 +91,7 @@ public class RSACipher
 		String decryptedValue = null;;
 		try {
 			cipher = javax.crypto.Cipher.getInstance("RSA");
-			byte[] encryptedBytes = jdf.framework.core.util.encrypt.CipherUtil.stringToHex(encodedTxt);
+			byte[] encryptedBytes = CipherUtil.stringToHex(encodedTxt);
 			cipher.init(javax.crypto.Cipher.DECRYPT_MODE, privateKey);
 			byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
 			decryptedValue = new String(decryptedBytes, "utf-8");

@@ -103,7 +103,7 @@ public class SmartStringArray
 	 */
 	public static String[] split(String token, String string, String skipBlockStr)
 	{
-		string = jdf.framework.core.util.StringFormater.replaceStr(string, (skipBlockStr + skipBlockStr), skipBlockStr);
+		string = StringFormater.replaceStr(string, (skipBlockStr + skipBlockStr), skipBlockStr);
 		
 		if (skipBlockStr == null)
 			return split(token, string);

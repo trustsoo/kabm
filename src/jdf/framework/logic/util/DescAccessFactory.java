@@ -1,11 +1,9 @@
 package jdf.framework.logic.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import jdf.framework.core.Configuration;
 
-
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**

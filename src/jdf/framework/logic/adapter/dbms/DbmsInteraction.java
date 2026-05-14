@@ -1,13 +1,13 @@
 package jdf.framework.logic.adapter.dbms;
 
-import java.sql.SQLException;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ResourceException;
 import jdf.framework.core.data.cci.Interaction;
 import jdf.framework.core.data.schema.IOSchema;
 import jdf.framework.core.log.Logger;
 import jdf.framework.logic.spi.management.BLContextFactory;
+
+import java.sql.SQLException;
 
 
 /*
@@ -40,7 +40,7 @@ import jdf.framework.logic.spi.management.BLContextFactory;
 public class DbmsInteraction implements Interaction
 {
 
-    private jdf.framework.logic.adapter.dbms.ConnectionImpl conn;
+    private ConnectionImpl conn;
 
     private BLContextFactory mgr = BLContextFactory.getInstance();
 
@@ -112,14 +112,14 @@ public class DbmsInteraction implements Interaction
     }
 
     /**
-     * @see jdf.framework.core.data.cci.Interaction#close()
+     * @see Interaction#close()
      */
     public void close() throws ResourceException
     {
     }
 
     /**
-     * @see jdf.framework.core.data.cci.Interaction#getConnection()
+     * @see Interaction#getConnection()
      */
     public jdf.framework.core.data.cci.Connection getConnection()
     {

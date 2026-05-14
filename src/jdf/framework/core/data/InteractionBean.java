@@ -1,13 +1,13 @@
 package jdf.framework.core.data;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.DefaultConnectionFactory;
 import jdf.framework.core.data.cci.Interaction;
 import jdf.framework.core.http.HttpAttributes;
 import jdf.framework.core.log.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 
 /**

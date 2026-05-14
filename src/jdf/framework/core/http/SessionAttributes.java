@@ -1,9 +1,8 @@
 package jdf.framework.core.http;
 
-import java.util.Enumeration;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Enumeration;
 
 /**
  * <p>
@@ -13,7 +12,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author
  * @version 1.0
- * @see jdf.framework.core.http.RequestAttributes
+ * @see RequestAttributes
  */
 
 public final class SessionAttributes extends HttpAttributes

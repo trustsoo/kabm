@@ -6,9 +6,9 @@
  */
 package jdf.framework.core.jsp;
 
-import java.util.Vector;
-
 import jdf.framework.core.data.DataSet;
+
+import java.util.Vector;
 
 public class PageUtil
 {

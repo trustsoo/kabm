@@ -14,11 +14,6 @@
  
 package jdf.framework.core.io.parser;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.io.BytesParser;
@@ -26,6 +21,11 @@ import jdf.framework.core.io.FormatedEntity;
 import jdf.framework.core.io.ParsingException;
 import jdf.framework.core.util.ByteToStringPool;
 import jdf.framework.core.util.ReflectUtil;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -619,7 +619,7 @@ public final class DelimiterBytesParser implements BytesParser
 	{
 		try
 		{
-			jdf.framework.core.io.BytesParser parser = new jdf.framework.core.io.parser.DelimiterBytesParser("\n\r", "|");
+			BytesParser parser = new DelimiterBytesParser("\n\r", "|");
 		
 			FormatedEntity entity = new TestEntity();
 

@@ -1,14 +1,6 @@
 
 package jdf.framework.logic.transform;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ResultSetDataSet;
 import jdf.framework.core.data.schema.Block;
@@ -18,6 +10,13 @@ import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.core.util.StringFormater;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 
 /**
@@ -85,8 +84,8 @@ public class JQGridXMLTransformerImpl implements XmlTransformer
 	 * 
 	 * 
 	 * 
-	 * @see jdf.framework.logic.transform.Transformer#transform(jdf.framework.core.data.DataSet,
-	 *      java.io.Writer)
+	 * @see Transformer#transform(DataSet,
+	 *      Writer)
 	 */
 	public int transform(String rootElementName, DataSet source, Writer writer) throws TransformerException {
 		try {
@@ -183,10 +182,10 @@ public class JQGridXMLTransformerImpl implements XmlTransformer
 				Object x = dataset.get(block.getIterationRefName());
 
 				try {
-					if (x.getClass() == java.lang.String.class)
+					if (x.getClass() == String.class)
 						iterationNum = Integer.parseInt((String) x);
 
-					else if (x.getClass() == java.lang.Integer.class)
+					else if (x.getClass() == Integer.class)
 						iterationNum = ((Integer) x).intValue();
 				} catch (Exception ee) {
 					iterationNum = 0;
@@ -240,7 +239,7 @@ public class JQGridXMLTransformerImpl implements XmlTransformer
 
 					if (val == null) {
 						val = field.getDefaultValue();
-						if (val instanceof java.lang.String) {
+						if (val instanceof String) {
 							String x = val.toString();
 
 							int z = x.indexOf(".count");

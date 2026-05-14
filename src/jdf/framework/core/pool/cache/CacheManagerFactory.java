@@ -6,16 +6,15 @@
  */
 package jdf.framework.core.pool.cache;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.data.schema.CacheInfo;
 import jdf.framework.core.log.Logger;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -88,7 +87,7 @@ public class CacheManagerFactory
             } catch (Exception e)
             {
                 Logger.warn.println("<CacheManagerFactory> set manager class error", e);
-                cacheMgrClass = jdf.framework.core.pool.cache.CacheManagerImpl.class;
+                cacheMgrClass = CacheManagerImpl.class;
             }
 
         }

@@ -1,13 +1,11 @@
 package jdf.framework.core.naming.rmi;
 
 
-
-import java.util.Properties;
-
 import javax.naming.CompoundName;
 import javax.naming.Name;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
+import java.util.Properties;
 
 /**
  *   <description> 

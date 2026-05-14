@@ -13,9 +13,9 @@
  
 package jdf.framework.core.io;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.*;
-
 
 
 /**

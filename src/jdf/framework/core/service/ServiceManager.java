@@ -25,22 +25,23 @@ package jdf.framework.core.service;
  * @author
  */
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NameClassPair;
-import javax.naming.NamingEnumeration;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.log.Logger;
 import jdf.framework.core.util.StringFormater;
 
-/** * <code>Service</code> interface를 구현한 객체를 등록/제거/관리하기 위한 Manager Class */
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NameClassPair;
+import javax.naming.NamingEnumeration;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * <code>Service</code> interface를 구현한 객체를 등록/제거/관리하기 위한 Manager Class
+ */
 public class ServiceManager extends AbstractManager
 {
     
@@ -56,7 +57,7 @@ public class ServiceManager extends AbstractManager
     
     
     // 서비스 등록해서 관리하기 위한 저장소
-    private static javax.naming.Context ctx = null;
+    private static Context ctx = null;
 
 	/**
 	 * 

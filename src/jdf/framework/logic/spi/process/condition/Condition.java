@@ -6,10 +6,14 @@
  */
 package jdf.framework.logic.spi.process.condition;
 
-import java.util.*;
+import jdf.framework.core.data.DataSet;
+import jdf.framework.core.util.SmartStringArray;
+import jdf.framework.core.util.StringFormater;
 
-import jdf.framework.core.data.*;
-import jdf.framework.core.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**

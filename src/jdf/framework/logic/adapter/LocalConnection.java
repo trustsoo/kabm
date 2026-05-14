@@ -2,13 +2,14 @@
 
 package jdf.framework.logic.adapter;
 
-import java.util.*;
-
 import jdf.framework.core.data.ResourceException;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.ConnectionSpec;
 import jdf.framework.core.data.cci.Interaction;
 import jdf.framework.logic.spi.transaction.TransactionManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -76,7 +77,7 @@ public class LocalConnection extends AbstractConnection
 	/**
 	 * Connection 종료
      * 
-	 * @see jdf.framework.core.data.cci.Connection#close()
+	 * @see Connection#close()
 	 */
 	public void close() throws ResourceException
 	{
@@ -111,7 +112,7 @@ public class LocalConnection extends AbstractConnection
 	/**
 	 * Interaction 구현객체 생성
 	 * 
-	 * @see jdf.framework.core.data.cci.Connection#createInteraction()
+	 * @see Connection#createInteraction()
 	 */
 	public Interaction createInteraction() throws ResourceException
 	{
@@ -121,7 +122,7 @@ public class LocalConnection extends AbstractConnection
 	/**
 	 * transaction 시작
      * 
-	 * @see jdf.framework.core.data.cci.Connection#beginTransaction()
+	 * @see Connection#beginTransaction()
 	 */
 	public void beginTransaction() throws ResourceException
 	{
@@ -131,7 +132,7 @@ public class LocalConnection extends AbstractConnection
 	/**
 	 * transaction 완료
      * 
-	 * @see jdf.framework.core.data.cci.Connection#commitTransaction()
+	 * @see Connection#commitTransaction()
 	 */
 	public void commitTransaction() throws ResourceException
 	{
@@ -141,7 +142,7 @@ public class LocalConnection extends AbstractConnection
 	/**
 	 * transaction 실패시 원복
      * 
-	 * @see jdf.framework.core.data.cci.Connection#rollbackTransaction()
+	 * @see Connection#rollbackTransaction()
 	 */
 	public void rollbackTransaction() throws ResourceException
 	{

@@ -1,15 +1,14 @@
 package jdf.framework.view.auth;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import jdf.framework.core.data.DataSet;
+import jdf.framework.view.menu.entity.MenuItem;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import jdf.framework.core.data.DataSet;
-import jdf.framework.view.menu.entity.MenuItem;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -98,7 +97,7 @@ public class User implements Serializable, Permission {
 	 * 이 메쏘드에서 구현해야 작업은 1) 사용자 로그인 가능 여부 확인 2) 가능한 경우 일자척으로 session이나 cookie를
 	 * 이용하여 사용자 session을 유지 3) 사용자의 권한 레벨 정의 4) 로그인 실패시 Exception을 통한 메세지 전달
 	 * 
-	 * @see jdf.framework.view.auth.User#login(HttpServletRequest, HttpServletResponse)
+	 * @see User#login(HttpServletRequest, HttpServletResponse)
 	 */
 	public void login(HttpServletRequest request, HttpServletResponse response)
 			throws PermissionException, Exception {
@@ -141,7 +140,7 @@ public class User implements Serializable, Permission {
 	 * login url로 이동하고, response 객체를 세팅하지 않으면(null), PermissionException 을
 	 * 발생시킨다.
 	 * 
-	 * @see jdf.framework.view.auth.User#checkPrivilege(MenuItem)
+	 * @see User#checkPrivilege(MenuItem)
 	 */
 	public void checkPrivilege(HttpServletRequest request,
 			HttpServletResponse response, MenuItem menu)
@@ -155,7 +154,7 @@ public class User implements Serializable, Permission {
 	 * login url로 이동하고, response 객체를 세팅하지 않으면(null), PermissionException 을
 	 * 발생시킨다.
 	 * 
-	 * @see jdf.framework.view.auth.User#checkPrivilege(MenuItem)
+	 * @see User#checkPrivilege(MenuItem)
 	 */
 	public void checkAdminPrivilege(HttpServletRequest request,
 			HttpServletResponse response, MenuItem menu)
@@ -344,7 +343,7 @@ public class User implements Serializable, Permission {
 	}
 
 	/**
-	 * @see java.lang.Object#toString()
+	 * @see Object#toString()
 	 */
 	public String toString() {
 		if (user != null)

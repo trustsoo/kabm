@@ -1,9 +1,12 @@
 package jdf.framework.logic.transform;
 
-import java.io.*;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.util.Base64;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 
 
 /**
@@ -41,8 +44,8 @@ public class Base64TransformerImpl extends TransformerBase {
 	/**
 	 * 변환 메쏘드
 	 * 
-	 * @see jdf.framework.logic.transform.Transformer#transform(jdf.framework.core.data.DataSet,
-	 *      java.io.Writer)
+	 * @see Transformer#transform(DataSet,
+	 *      Writer)
 	 */
 	public int transform(DataSet source, Writer writer) throws TransformerException {
 		try {

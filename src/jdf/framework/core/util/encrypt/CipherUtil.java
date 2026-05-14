@@ -1,9 +1,9 @@
 package jdf.framework.core.util.encrypt;
 
+import jdf.framework.core.log.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.security.InvalidKeyException;
-
-import jdf.framework.core.log.Logger;
 
 
 public class CipherUtil 

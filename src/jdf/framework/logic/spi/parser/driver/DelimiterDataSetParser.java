@@ -148,10 +148,10 @@ public class DelimiterDataSetParser extends DataSetParser
 				if (x == null)
 					iterationNum = 1;
 
-				else if (x.getClass() == java.lang.String.class)
+				else if (x.getClass() == String.class)
 					iterationNum = Integer.parseInt((String) x);
 
-				else if (x.getClass() == java.lang.Integer.class)
+				else if (x.getClass() == Integer.class)
 					iterationNum = ((Integer) x).intValue();
 			}
 
@@ -167,7 +167,7 @@ public class DelimiterDataSetParser extends DataSetParser
 
 					if (val == null) {
 						val = field.getDefaultValue();
-						if (val instanceof java.lang.String) {
+						if (val instanceof String) {
 							String x = val.toString();
 
 							int z = x.indexOf(".count");
@@ -224,10 +224,10 @@ public class DelimiterDataSetParser extends DataSetParser
 				else {
 					Object x = dataset.get(block.getIterationRefName());
 
-					if (x.getClass() == java.lang.String.class)
+					if (x.getClass() == String.class)
 						iterationNum = Integer.parseInt((String) x);
 
-					else if (x.getClass() == java.lang.Integer.class)
+					else if (x.getClass() == Integer.class)
 						iterationNum = ((Integer) x).intValue();
 				}
 

@@ -1,17 +1,13 @@
 package com.kabm.util;
 
 
-
-import java.util.regex.PatternSyntaxException;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.kabm.filter.auth.DbmsAuthCheckerUser;
+import eu.bitwalker.useragentutils.OperatingSystem;
 import jdf.framework.core.util.SmartStringArray;
 import jdf.framework.view.auth.SessionManager;
 import jdf.framework.view.auth.User;
 
-import eu.bitwalker.useragentutils.OperatingSystem;
+import javax.servlet.http.HttpServletRequest;
+import java.util.regex.PatternSyntaxException;
 
 
 /*http://user-agent-utils.java.net/javadoc/*/

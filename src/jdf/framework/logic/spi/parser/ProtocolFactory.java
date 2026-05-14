@@ -1,12 +1,14 @@
 package jdf.framework.logic.spi.parser;
 
-import java.io.*;
-import java.util.*;
+import jdf.framework.core.Config;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.log.Logger;
+import jdf.framework.core.xml.XMLReferer;
 
-import jdf.framework.core.*;
-import jdf.framework.core.log.*;
-import jdf.framework.core.xml.*;
-
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**

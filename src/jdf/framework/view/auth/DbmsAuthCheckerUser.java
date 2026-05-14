@@ -6,16 +6,16 @@
  */
 package jdf.framework.view.auth;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.cci.Connection;
 import jdf.framework.core.data.cci.DefaultConnectionFactory;
 import jdf.framework.core.data.cci.Interaction;
 import jdf.framework.core.log.Logger;
 import jdf.framework.view.menu.entity.MenuItem;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 
 /**
@@ -39,7 +39,7 @@ public class DbmsAuthCheckerUser extends User
 
     /**
      *
-     * @see jdf.framework.view.auth.User#checkPrivilege(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, jdf.framework.view.menu.entity.MenuItem)
+     * @see User#checkPrivilege(HttpServletRequest, HttpServletResponse, MenuItem)
      */
     public void checkPrivilege(HttpServletRequest req, HttpServletResponse res, MenuItem menu)
         throws PermissionException
@@ -94,7 +94,7 @@ public class DbmsAuthCheckerUser extends User
 
     /**
      * 
-     * @see jdf.framework.view.auth.User#isLogin()
+     * @see User#isLogin()
      */
     public boolean isLogin()
     {
@@ -103,7 +103,7 @@ public class DbmsAuthCheckerUser extends User
 
     /**
      * 
-     * @see jdf.framework.view.auth.User#login(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see User#login(HttpServletRequest, HttpServletResponse)
      */
     public void login(HttpServletRequest arg0, HttpServletResponse arg1) throws PermissionException, Exception
     {
@@ -112,7 +112,7 @@ public class DbmsAuthCheckerUser extends User
 
     /**
      * 
-     * @see jdf.framework.view.auth.User#logout(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     * @see User#logout(HttpServletRequest, HttpServletResponse)
      */
     public void logout(HttpServletRequest arg0, HttpServletResponse arg1)
     {

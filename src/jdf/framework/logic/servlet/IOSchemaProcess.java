@@ -1,19 +1,5 @@
 package jdf.framework.logic.servlet;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Enumeration;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import jdf.framework.core.data.DataSet;
 import jdf.framework.core.data.ResourceException;
 import jdf.framework.core.data.cci.Connection;
@@ -37,6 +23,15 @@ import jdf.framework.logic.spi.management.BusinessLogicContext;
 import jdf.framework.logic.transform.Transformer;
 import jdf.framework.logic.transform.TransformerFactory;
 import jdf.framework.logic.transform.TransformerType;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.util.Enumeration;
 
 
 /**

@@ -1,8 +1,5 @@
 package jdf.framework.view.menu;
 
-import java.util.List;
-import java.util.Map;
-
 import jdf.framework.core.Config;
 import jdf.framework.core.Configuration;
 import jdf.framework.core.http.JDFrameContextListener;
@@ -11,7 +8,8 @@ import jdf.framework.core.io.SmartFile;
 import jdf.framework.core.log.Logger;
 import jdf.framework.view.menu.entity.MenuItem;
 
-
+import java.util.List;
+import java.util.Map;
 
 
 /**

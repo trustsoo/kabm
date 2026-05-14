@@ -23,7 +23,7 @@ public interface ProcessorFactory
      * jdf.framework.core.data.schema.Processor 객체를 얻는 
      * 
      * 
-     * @see jdf.framework.core.data.schema.Processor
+     * @see Processor
      */
     public Processor getProcessor(RADeployDescriptor radd, IOSchemaContext ctx) throws Exception;
 }

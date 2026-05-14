@@ -1,26 +1,9 @@
 package jdf.framework.core.naming;
 
+import javax.naming.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
-
-import javax.naming.Binding;
-import javax.naming.CompositeName;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.InvalidNameException;
-import javax.naming.LinkRef;
-import javax.naming.Name;
-import javax.naming.NameAlreadyBoundException;
-import javax.naming.NameClassPair;
-import javax.naming.NameNotFoundException;
-import javax.naming.NameParser;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.NotContextException;
-import javax.naming.OperationNotSupportedException;
-import javax.naming.RefAddr;
-import javax.naming.Reference;
 
 //import org.objectweb.jonas.common.Trace;
 

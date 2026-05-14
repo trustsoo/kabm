@@ -1,18 +1,18 @@
 package jdf.framework.logic.spi.auth;
 
-import java.io.*;
+import jdf.framework.core.Configuration;
+import jdf.framework.core.log.Logger;
+import jdf.framework.core.xml.DOMWriter;
+import jdf.framework.core.xml.XMLReferer;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import jdf.framework.core.Configuration;
-import jdf.framework.core.log.Logger;
-import jdf.framework.core.xml.*;
-
-
-
 
 
 /**
@@ -125,7 +125,7 @@ public class UserManagerImpl implements UserManager
 
 	/**
      * 
-     * @see  jdf.framework.logic.spi.auth.UserManager#getUserDataSet(java.lang.String)
+     * @see  UserManager#getUserDataSet(String)
      */
 	public User getUser(String userid)
 	{
@@ -136,7 +136,7 @@ public class UserManagerImpl implements UserManager
 
 	/**
      * 
-     * @see  jdf.framework.logic.spi.auth.UserManager#getUserDataSetList()
+     * @see  UserManager#getUserDataSetList()
      */
 	public List getUserList()
 	{
@@ -214,7 +214,7 @@ public class UserManagerImpl implements UserManager
 
 	/**
      * 
-     * @see  jdf.framework.logic.spi.auth.UserManager#deleteUser(java.lang.String)
+     * @see  UserManager#deleteUser(String)
      */
 	public void deleteUser(String userid) throws Exception
 	{
