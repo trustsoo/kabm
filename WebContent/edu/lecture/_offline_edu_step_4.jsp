@@ -90,19 +90,19 @@ function lf_setBuildingInfo(zipcode ,addr)
 	jQuery('#building_addr').removeClass('ui-state-error');
 }
 </script>
-<script src="https://ssl.daumcdn.net/dmaps/map_js_init/postcode.v2.js"></script>
-<script>
-function openPostcode(div) {
-    new daum.Postcode({
-        oncomplete: function(data) {
-			var postcode = data.zonecode;
-			var addr = data.address.replace(/(\s|^)\(.+\)$|\S+~\S+/g, '');
-			lf_setBuildingInfo(postcode, addr);
-        }
-    }).open();
-}
 
-</script>
+	<script src="//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	<script>
+		function openPostcode(div) {
+			new kakao.Postcode({
+				oncomplete: function(data) {
+					var postcode = data.zonecode;
+					var addr = data.address.replace(/(\s|^)\(.+\)$|\S+~\S+/g, '');
+					lf_setBuildingInfo(postcode, addr);
+				}
+			}).open();
+		}
+	</script>
 </head>
 
 <body>
